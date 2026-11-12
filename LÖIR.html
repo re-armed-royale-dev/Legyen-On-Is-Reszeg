@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legyen Ön is Részeg! – Party Kvíz Show</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            background-image: radial-gradient(circle at 50% 0%, #2a1118 0%, #0b0f19 75%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Kaszinó / Kvíz-show arany és piros ragyogások */
+        .gold-glow {
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.25);
+        }
+        .gold-text-shadow {
+            text-shadow: 0 2px 15px rgba(234, 179, 8, 0.5);
+        }
+        .red-cup-shadow {
+            filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.55));
+        }
+
+        /* Válasz kártyák */
+        .answer-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
+            border: 2px solid rgba(234, 179, 8, 0.35);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .answer-card:hover:not(.disabled-card) {
+            border-color: #eab308;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(234, 179, 8, 0.18);
+        }
+        .answer-card.selected-card {
+            border-color: #facc15;
+            background: linear-gradient(135deg, rgba(113, 63, 18, 0.55) 0%, rgba(30, 41, 59, 0.96) 100%);
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.32);
+        }
+        .answer-card.correct-card {
+            border-color: #22c55e !important;
+            background: linear-gradient(135deg, rgba(20, 83, 45, 0.88) 0%, rgba(15, 23, 42, 0.96) 100%) !important;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.45) !important;
+        }
+        .answer-card.wrong-card {
+            border-color: #ef4444 !important;
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.85) 0%, rgba(15, 23, 42, 0.96) 100%) !important;
+            opacity: 0.88;
+        }
+
+        /* Segítség gombok piros X jelölése használat után */
+        .lifeline-used {
+            opacity: 0.48;
+            cursor: not-allowed !important;
+            position: relative;
+        }
+        .lifeline-used::after {
+            content: 'X';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            font-size: 1.85rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.95);
+            pointer-events: none;
+        }
+
+        /* Pohár animáció */
+        @keyframes popIn {
+            0% { transform: scale(0.4) translateY(10px); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .cup-animate {
+            animation: popIn 0.22s ease-out forwards;
+        }
+
+        /* Egyedi görgetősáv */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ca8a04;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between selection:bg-yellow-500 selection:text-slate-900">
+
+    <!-- FELSŐ SÁV: Zene & Beállítások -->
+    <header class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between z-20">
+        <div class="flex items-center gap-2">
+            <span class="inline-block w-3 h-3 rounded-full bg-red-600 animate-pulse"></span>
+            <span class="text-xs sm:text-sm font-bold tracking-wider uppercase text-yellow-400">Legyen Ön is Részeg!</span>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3">
+            <button id="audio-toggle-btn" onclick="toggleAudio()" class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                <span id="audio-icon">🔇</span>
+                <span id="audio-label" class="hidden sm:inline">Zene: KI</span>
+            </button>
+            <button onclick="toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                📜 Szabályok
+            </button>
+            <button onclick="toggleSettingsMenu()" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+                ⚙️ <span class="hidden sm:inline">Beállítások</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- BEÁLLÍTÁSOK DROPDOWN -->
+    <div id="settings-menu" class="hidden fixed top-16 right-4 w-64 bg-slate-900 border-2 border-yellow-500/50 rounded-2xl p-4 shadow-2xl z-50">
+        <h3 class="text-sm font-bold text-yellow-400 uppercase tracking-wider mb-3">Beállítások</h3>
+        <label class="block text-xs text-slate-300 mb-1">Háttérszín testreszabása:</label>
+        <div class="flex gap-2 mb-3">
+            <input type="color" id="palette-color-input" value="#0b0f19" class="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-slate-600">
+            <button onclick="setPaletteColor()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition cursor-pointer">
+                Színpaletta használata
+            </button>
+        </div>
+        <button onclick="resetBackgroundColor()" class="w-full mb-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2 rounded-lg border border-slate-700 transition cursor-pointer">
+            Alapértelmezett háttér
+        </button>
+        <hr class="border-slate-800 my-2">
+        <button onclick="exitToMenu()" class="w-full bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition cursor-pointer">
+            🚪 Kilépés a főmenübe
+        </button>
+    </div>
+
+    <!-- KEZDŐKÉPERNYŐ (START SCREEN) -->
+    <main id="start-screen" class="flex-1 flex flex-col items-center justify-center px-4 py-8 text-center">
+        <div class="max-w-2xl w-full bg-slate-900/85 backdrop-blur-md border-2 border-yellow-500/40 rounded-3xl p-6 sm:p-10 gold-glow relative">
+            <!-- Red Solo Cup SVG Illusztráció -->
+            <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-red-950/60 rounded-full border-2 border-red-500/50 red-cup-shadow">
+                <svg class="w-12 h-12" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 12H50L44 56C43.7 58.2 41.8 60 39.6 60H24.4C22.2 60 20.3 58.2 20 56L14 12Z" fill="#DC2626"/>
+                    <path d="M12 10C12 8.9 12.9 8 14 8H50C51.1 8 52 8.9 52 10V13H12V10Z" fill="#F8FAFC"/>
+                    <path d="M16.5 24H47.5" stroke="#B91C1C" stroke-width="2.5"/>
+                    <path d="M18 36H46" stroke="#B91C1C" stroke-width="2.5"/>
+                    <path d="M20 48H44" stroke="#B91C1C" stroke-width="2.5"/>
+                    <path d="M21 15L24 54" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-red-500 gold-text-shadow mb-2">
+                Legyen Ön is Részeg!
+            </h1>
+            <p class="text-slate-300 text-sm sm:text-base mb-5 max-w-lg mx-auto">
+                Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
+            </p>
+
+            <!-- Aktív kérdéssor jelző és az 5 perces pici visszaszámláló mellette -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-5">
+                <div class="inline-flex items-center gap-2 bg-slate-800/90 border border-yellow-500/30 px-4 py-2 rounded-full text-xs sm:text-sm text-yellow-300">
+                    <span>Aktív csomag:</span>
+                    <strong id="active-set-label" class="text-white">🟢 Könnyű – 1/5. kérdéssor (15 kérdés)</strong>
+                </div>
+                <!-- Pici 5 perces rotációs visszaszámláló -->
+                <div class="inline-flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/50 px-3 py-2 rounded-full text-xs font-bold text-amber-300 shadow-inner" title="Idő a következő kérdéssorra való automatikus váltásig">
+                    <span>⏱️ Váltás:</span>
+                    <span id="set-countdown-timer" class="font-mono text-white">05:00</span>
+                </div>
+            </div>
+
+            <!-- 3 Beépített Nehézségi Szint Gyorsválasztó -->
+            <div class="max-w-xl mx-auto mb-6">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Beépített nehézségi szint:</p>
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <button id="btn-diff-easy" onclick="selectBuiltInDifficulty('easy')" class="bg-emerald-950/75 hover:bg-emerald-900/90 border-2 border-emerald-500/60 text-emerald-300 font-extrabold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition cursor-pointer">
+                        🟢 Könnyű
+                    </button>
+                    <button id="btn-diff-normal" onclick="selectBuiltInDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border-2 border-amber-500/40 text-amber-300 font-extrabold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition cursor-pointer">
+                        🟡 Normál
+                    </button>
+                    <button id="btn-diff-hard" onclick="selectBuiltInDifficulty('hard')" class="bg-red-950/75 hover:bg-red-900/90 border-2 border-red-500/40 text-red-300 font-extrabold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition cursor-pointer">
+                        🔴 Nehéz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Főmenü gombok: Játék, Create, Kérdések Betöltése -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
+                <button onclick="startGame()" class="sm:col-span-2 bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg sm:text-xl py-4 px-8 rounded-2xl shadow-lg shadow-red-600/30 transform hover:scale-[1.02] active:scale-[0.98] transition cursor-pointer">
+                    🍻 Játék
+                </button>
+                <button onclick="openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-3.5 px-4 rounded-2xl transition text-sm cursor-pointer">
+                    ✍️ Create
+                </button>
+                <button onclick="showLoadModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-3.5 px-4 rounded-2xl transition text-sm cursor-pointer">
+                    📂 Kérdések Betöltése
+                </button>
+            </div>
+
+            <div class="mt-8 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
+                <span>225 beépített kvízkérdés (3 szint × 5 csomag)</span>
+                <span class="font-mono font-bold text-yellow-400">v1.7 STABLE!</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- JÁTÉKTÉR (GAME SCREEN) -->
+    <section id="game-screen" class="hidden flex-1 flex flex-col justify-between max-w-5xl w-full mx-auto px-4 pb-6 pt-2">
+        
+        <!-- Felső Státusz & 4 Segítség Gomb -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3 bg-slate-900/85 border border-slate-800 rounded-2xl p-3 mb-4">
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-yellow-500/30">
+                    <span class="text-xs text-slate-400 block">Kérdés</span>
+                    <span id="question-counter" class="text-base sm:text-lg font-black text-yellow-400">1 / 15</span>
+                </div>
+                <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-red-500/30">
+                    <span class="text-xs text-slate-400 block">Megmaradt poharak</span>
+                    <span id="total-glasses-badge" class="text-base sm:text-lg font-black text-red-400">10 db</span>
+                </div>
+            </div>
+
+            <!-- 4 Segítség Gomb -->
+            <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full md:w-auto">
+                <button id="help-5050" onclick="useFiftyFifty(this)" class="bg-amber-600/90 hover:bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-400/50 transition cursor-pointer" title="Két helytelen válasz eltüntetése">
+                    ✂️ Felező
+                </button>
+                <button id="help-audience" onclick="useAudienceHelp(this)" class="bg-amber-600/90 hover:bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-400/50 transition cursor-pointer" title="Közönség százalékos szavazata">
+                    📊 Közönség
+                </button>
+                <button id="help-hulye" onclick="openHulyeVagyok()" class="bg-amber-600/90 hover:bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-400/50 transition cursor-pointer" title="Az aktuális kérdés helyes válaszának lekérése">
+                    🤖 Hülye Vagyok
+                </button>
+                <button id="help-refill" onclick="refillGlasses(this)" class="bg-red-700/90 hover:bg-red-600 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-red-400/50 transition cursor-pointer" title="Csak 2 vagy kevesebb pohárnál használható">
+                    🍷 Poharak Újratöltése
+                </button>
+            </div>
+        </div>
+
+        <!-- Kérdés Kártya -->
+        <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-yellow-500/50 rounded-3xl p-5 sm:p-8 text-center gold-glow mb-4">
+            <h2 id="question-text" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-snug">
+                Kérdés betöltése...
+            </h2>
+            <p id="instruction-hint" class="text-xs sm:text-sm text-yellow-400/90 mt-2">
+                Válassz ki egy választ (vagy használd a + / − gombokat), és helyezd el az összes poharadat!
+            </p>
+        </div>
+
+        <!-- Közönség Szavazás Oszlopdiagram (Rejtve, amíg a Közönség segítséget nem használják) -->
+        <div id="audience-chart-box" class="hidden bg-slate-900/95 border-2 border-amber-400/60 rounded-2xl p-4 mb-4 shadow-xl">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-400">📊 A közönség szavazata:</span>
+                <button onclick="document.getElementById('audience-chart-box').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white font-bold px-2 py-0.5 rounded bg-slate-800 cursor-pointer">Elrejtés</button>
+            </div>
+            <div id="audience-bars" class="grid grid-cols-4 gap-3 items-end h-28 pt-4 px-2 bg-slate-950/80 rounded-xl border border-slate-800">
+                <!-- JS tölti fel -->
+            </div>
+        </div>
+
+        <!-- 4 Válaszlehetőség Rács -->
+        <div id="answers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-5">
+            <!-- JS tölti fel -->
+        </div>
+
+        <!-- Alsó Pohársáv (Cup Tray) & Ellenőrzés / Következő Kérdés Gombok -->
+        <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-4 sm:p-5 shadow-2xl">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-slate-300">Elhelyezésre váró piros poharak:</span>
+                    <span id="unplaced-count" class="bg-red-600 text-white font-black text-sm px-3 py-0.5 rounded-full">10</span>
+                </div>
+                <div class="text-xs text-slate-400">
+                    Kattints egy pohárra a kiválasztott válaszra rakáshoz, vagy a válaszon lévő pohárra a visszavételhez!
+                </div>
+            </div>
+
+            <!-- Készleten lévő piros poharak sora -->
+            <div id="cup-tray" class="min-h-[60px] bg-slate-950/85 border border-slate-800 rounded-2xl p-2.5 flex flex-wrap items-center justify-center gap-2 mb-4">
+                <!-- JS tölti fel -->
+            </div>
+
+            <!-- Akciógombok -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button id="clear-bets-btn" onclick="returnAllCupsToTray()" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-5 rounded-xl border border-slate-600 transition text-sm cursor-pointer">
+                    ↩️ Poharak visszavétele
+                </button>
+                <button id="check-answer-btn" onclick="checkAnswer()" class="w-full sm:w-auto flex-1 max-w-md bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-black text-base sm:text-lg py-3.5 px-8 rounded-xl shadow-lg shadow-emerald-600/25 transition cursor-pointer">
+                    ✅ Ellenőrzés
+                </button>
+                <button id="next-question-btn" onclick="nextQuestion()" class="hidden w-full sm:w-auto flex-1 max-w-md bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 font-black text-base sm:text-lg py-3.5 px-8 rounded-xl shadow-lg shadow-yellow-500/25 transition cursor-pointer">
+                    ➡️ Következő kérdés
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- EREDMÉNY / IVÁS ÉRTESÍTŐ MODAL -->
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border-2 border-yellow-500/60 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl transform transition-all">
+            <div id="feedback-icon" class="text-5xl mb-3">🍻</div>
+            <h3 id="feedback-title" class="text-2xl font-black text-white mb-2">Eredmény</h3>
+            <p id="feedback-message" class="text-slate-300 text-base mb-6 leading-relaxed"></p>
+            <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base transition cursor-pointer">
+                Rendben!
+            </button>
+        </div>
+    </div>
+
+    <!-- JÁTÉKSZABÁLYOK MODAL -->
+    <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-black text-yellow-400">📜 Játékszabályok</h2>
+                <button onclick="toggleModal('rules-modal', false)" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+            <ul class="space-y-3 text-sm sm:text-base text-slate-300">
+                <li class="flex gap-2.5"><span class="text-red-500 font-bold">1.</span> <span>A játékot <strong>10 darab piros pohárral</strong> kezded.</span></li>
+                <li class="flex gap-2.5"><span class="text-red-500 font-bold">2.</span> <span>Minden kérdésnél az <strong>összes megmaradt poharadat</strong> szét kell osztanod a 4 válaszlehetőség között. Ha bizonytalan vagy, megoszthatod őket több válasz között is!</span></li>
+                <li class="flex gap-2.5"><span class="text-red-500 font-bold">3.</span> <span>Az <strong>Ellenőrzés</strong> gomb után a rossz válaszokra tett poharak elvesznek – <strong>annyit kell innod, ahány poharat elveszítettél!</strong></span></li>
+                <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre.</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek (egyszer használhatóak):</strong> Felező (2 rossz választ töröl), Közönség (oszlopdiagramos tipp), Hülye Vagyok (csak az aktuális kérdés válaszát adja meg 10 másodperces visszaszámlálóval), Poharak Újratöltése (ha ≤ 2 poharad maradt, visszatölti 10-re).</span></li>
+            </ul>
+            <button onclick="toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl transition cursor-pointer">
+                Értem, induljon a buli!
+            </button>
+        </div>
+    </div>
+
+    <!-- KÉRDÉSSOR LÉTREHOZÁSA / SZERKESZTÉSE MODAL (CREATE) -->
+    <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl sm:text-2xl font-black text-yellow-400">✍️ Saját kérdéssor szerkesztő</h2>
+                <button onclick="toggleModal('create-modal', false)" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Kérdéssor neve:</label>
+                <input type="text" id="question-set-name" placeholder="Pl.: Szülinapi Party Kvíz" class="w-full bg-slate-800 border border-slate-600 focus:border-yellow-400 rounded-xl px-4 py-2.5 text-white outline-none">
+            </div>
+
+            <div id="questions-container" class="flex-1 overflow-y-auto space-y-4 pr-1 mb-4">
+                <!-- Dinamikus kérdés kártyák -->
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+                <button onclick="addQuestionItem()" class="bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-xl text-sm transition cursor-pointer">
+                    ➕ Új kérdés hozzáadása (max 15)
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="toggleModal('create-modal', false)" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm transition cursor-pointer">
+                        Bezárás
+                    </button>
+                    <button onclick="saveQuestions()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-6 rounded-xl text-sm transition cursor-pointer">
+                        💾 Mentés
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KÉRDÉSEK BETÖLTÉSE MODAL (LOAD) -->
+    <div id="load-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl sm:text-2xl font-black text-yellow-400">📂 Kérdések Betöltése</h2>
+                <button onclick="toggleModal('load-modal', false)" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div id="saved-questions-list" class="flex-1 overflow-y-auto space-y-3 mb-4">
+                <!-- Beépített szintek és mentett saját kérdéssorok -->
+            </div>
+
+            <button onclick="toggleModal('load-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition cursor-pointer">
+                Bezárás
+            </button>
+        </div>
+    </div>
+
+    <!-- "HÜLYE VAGYOK" SEGÍTSÉG MODAL (Csak aktuális kérdés + 10 mp visszaszámláló) -->
+    <div id="hulye-vagyok-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🤖</span>
+                    <h2 class="text-xl font-black text-amber-400">Hülye Vagyok Segítség</h2>
+                </div>
+                <button onclick="closeHulyeVagyokModal()" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Visszaszámláló sáv (aktív lekéréskor jelenik meg) -->
+            <div id="hulye-timer-wrapper" class="hidden mb-3 bg-slate-950 border border-amber-500/40 rounded-2xl p-3">
+                <div class="flex items-center justify-between text-xs font-bold text-amber-300 mb-1.5">
+                    <span>⏳ Automatikus bezárás:</span>
+                    <span id="hulye-timer-text" class="text-sm font-black text-red-400">10 mp</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                    <div id="hulye-timer-bar" class="bg-gradient-to-r from-amber-400 to-red-500 h-full transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Chat tartalom -->
+            <div id="chat-content" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 min-h-[150px] max-h-60 overflow-y-auto space-y-2.5 text-sm mb-4">
+                <!-- JS tölti fel -->
+            </div>
+
+            <!-- Kizárólag az aktuális kérdés sorszámának lekérő gombja + Bezárás -->
+            <div class="flex flex-col gap-2">
+                <button id="ask-current-q-btn" onclick="revealCurrentQuestionAnswer()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-3.5 px-4 rounded-xl shadow-lg transition cursor-pointer">
+                    💡 1. kérdés válaszának lekérése
+                </button>
+                <button onclick="closeHulyeVagyokModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">
+                    Bezárás
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. BEÉPÍTETT KÉRDÉSRENDSZER: 3 SZINT × 5 KÉRDÉSSOR × 15 KÉRDÉS (225 KÉRDÉS)
+           ========================================================================== */
+        const BUILTIN_DIFFICULTIES = {
+            easy: {
+                label: "Könnyű",
+                icon: "🟢",
+                description: "Vidám party kérdések, alapműveltség és közismert tények",
+                sets: [
+                    // KÖNNYŰ - 1. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik országból származik a világhírű Tokaji aszú?", answers: ["Magyarország", "Franciaország", "Olaszország", "Spanyolország"], correct: 0 },
+                        { question: "Hány lapból áll egy hagyományos magyar kártyapakli?", answers: ["32 lapból", "52 lapból", "24 lapból", "36 lapból"], correct: 0 },
+                        { question: "Melyik bolygó a Naprendszer legnagyobb bolygója?", answers: ["Jupiter", "Szaturnusz", "Neptunusz", "Föld"], correct: 0 },
+                        { question: "Mi a klasszikus Mojito koktél alkoholos alapja?", answers: ["Fehér rum", "Vodka", "Tequila", "Whisky"], correct: 0 },
+                        { question: "Melyik városban található a híres Colosseum?", answers: ["Róma", "Athén", "Milánó", "Nápoly"], correct: 0 },
+                        { question: "Hány percig tart egy rendes játékidejű labdarúgó-mérkőzés (hosszabbítás nélkül)?", answers: ["90 perc", "80 perc", "100 perc", "60 perc"], correct: 0 },
+                        { question: "Melyik kontinensen található a Szahara sivatag?", answers: ["Afrika", "Ázsia", "Dél-Amerika", "Ausztrália"], correct: 0 },
+                        { question: "Hány húrja van egy klasszikus akusztikus gitárnak?", answers: ["6", "4", "5", "8"], correct: 0 },
+                        { question: "Melyik magyar város híres a busójárásról?", answers: ["Mohács", "Debrecen", "Sopron", "Eger"], correct: 0 },
+                        { question: "Milyen színű a smaragd drágakő?", answers: ["Zöld", "Kék", "Piros", "Sárga"], correct: 0 },
+                        { question: "Hány napból áll egy szökőév?", answers: ["366 napból", "365 napból", "364 napból", "360 napból"], correct: 0 },
+                        { question: "Melyik állat látható a Ferrari logójában?", answers: ["Ágaskodó ló", "Bika", "Oroszlán", "Sas"], correct: 0 },
+                        { question: "Mi Japán fővárosa?", answers: ["Tokió", "Kiotó", "Oszaka", "Szöul"], correct: 0 },
+                        { question: "Melyik gyümölcsből készül hagyományosan a valódi cider?", answers: ["Alma", "Szőlő", "Szilva", "Barack"], correct: 0 },
+                        { question: "Hány színe van a szivárványnak a hagyományos felosztás szerint?", answers: ["7", "5", "6", "8"], correct: 0 }
+                    ],
+                    // KÖNNYŰ - 2. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik ország fővárosa Párizs?", answers: ["Franciaország", "Belgium", "Svájc", "Hollandia"], correct: 0 },
+                        { question: "Hány lába van egy póknak?", answers: ["8", "6", "10", "12"], correct: 0 },
+                        { question: "Melyik évszak következik a tavasz után?", answers: ["Nyár", "Ősz", "Tél", "Tavasz"], correct: 0 },
+                        { question: "Miből készül a popcorn (pattogatott kukorica)?", answers: ["Kukoricából", "Búzából", "Rizsből", "Burgonyából"], correct: 0 },
+                        { question: "Melyik magyar tó Közép-Európa legnagyobb édesvizű tava?", answers: ["Balaton", "Velencei-tó", "Fertő tó", "Tisza-tó"], correct: 0 },
+                        { question: "Ki írta a János vitéz című elbeszélő költeményt?", answers: ["Petőfi Sándor", "Arany János", "József Attila", "Ady Endre"], correct: 0 },
+                        { question: "Melyik ital készül árpából, komlóból, vízből és élesztőből?", answers: ["Sör", "Bor", "Pálinka", "Pezsgő"], correct: 0 },
+                        { question: "Hány órából áll egy teljes földi nap?", answers: ["24 órából", "12 órából", "48 órából", "36 órából"], correct: 0 },
+                        { question: "Melyik szuperhős valódi neve Bruce Wayne?", answers: ["Batman", "Superman", "Pókember", "Vasember"], correct: 0 },
+                        { question: "Milyen színű a magyar zászló három sávja fentről lefelé?", answers: ["Piros-fehér-zöld", "Zöld-fehér-piros", "Piros-zöld-fehér", "Fehér-piros-zöld"], correct: 0 },
+                        { question: "Melyik hangszeren játszott Wolfgang Amadeus Mozart már gyermekkorában virtuóz módon?", answers: ["Zongora (csembaló)", "Dob", "Trombita", "Szaxofon"], correct: 0 },
+                        { question: "Melyik országból származik a pizza és a spagetti?", answers: ["Olaszország", "Görögország", "Törökország", "Portugália"], correct: 0 },
+                        { question: "Hány játékos van egyszerre a pályán egy kosárlabdacsapatban?", answers: ["5", "6", "7", "11"], correct: 0 },
+                        { question: "Mi a víz vegyjele?", answers: ["H2O", "CO2", "O2", "NaCl"], correct: 0 },
+                        { question: "Melyik hónapban ünnepeljük a szilvesztert?", answers: ["December", "Január", "November", "Október"], correct: 0 }
+                    ],
+                    // KÖNNYŰ - 3. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik állat a dzsungel királya a mesékben?", answers: ["Oroszlán", "Tigris", "Elefánt", "Zebra"], correct: 0 },
+                        { question: "Hány foga van egy felnőtt embernek normál esetben?", answers: ["32", "28", "36", "24"], correct: 0 },
+                        { question: "Melyik városban áll az Eiffel-torony?", answers: ["Párizs", "London", "Berlin", "Madrid"], correct: 0 },
+                        { question: "Melyik növényből készül a hagyományos mexikói tequila?", answers: ["Kék agávé", "Kaktuszfüge", "Ananász", "Kókuszdió"], correct: 0 },
+                        { question: "Hány nullát írunk az egymillió számjegybe?", answers: ["6", "5", "7", "9"], correct: 0 },
+                        { question: "Melyik híres rajzfilmfigura lakik egy ananászban a tenger mélyén?", answers: ["SpongyaBob Kockanadrág", "Némó", "Ariel", "Popeye"], correct: 0 },
+                        { question: "Melyik magyar folyó szeli ketté Budapestet?", answers: ["Duna", "Tisza", "Dráva", "Rába"], correct: 0 },
+                        { question: "Milyen színű lesz a kék és a sárga festék összekeveréséből?", answers: ["Zöld", "Lila", "Narancssárga", "Barna"], correct: 0 },
+                        { question: "Melyik ország fővárosa London?", answers: ["Egyesült Királyság", "Írország", "Kanada", "Ausztrália"], correct: 0 },
+                        { question: "Hány bábuval kezd egy játékos egy sakkpartit?", answers: ["16", "12", "20", "8"], correct: 0 },
+                        { question: "Melyik édesség fő alapanyaga a kakaóbab?", answers: ["Csokoládé", "Marcipán", "Karamell", "Nugát"], correct: 0 },
+                        { question: "Melyik bolygó van legközelebb a Naphoz?", answers: ["Merkúr", "Vénusz", "Mars", "Föld"], correct: 0 },
+                        { question: "Hány hétből áll egy esztendő?", answers: ["52 hétből", "48 hétből", "50 hétből", "54 hétből"], correct: 0 },
+                        { question: "Melyik sportágban használnak ütőt és tollaslabdát?", answers: ["Tollaslabda", "Tenisz", "Squash", "Asztalitenisz"], correct: 0 },
+                        { question: "Ki volt a magyarok első királya?", answers: ["Szent István", "Mátyás király", "Szent László", "IV. Béla"], correct: 0 }
+                    ],
+                    // KÖNNYŰ - 4. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik zöldségből készül a hagyományos magyar lecsó egyik fő alapja a paradicsom mellett?", answers: ["Paprika", "Uborka", "Cukkini", "Spenót"], correct: 0 },
+                        { question: "Hány keréken gurul egy hagyományos személyautó?", answers: ["4", "2", "3", "6"], correct: 0 },
+                        { question: "Melyik kontinensen élnek vadon a kenguruk?", answers: ["Ausztrália", "Afrika", "Dél-Amerika", "Európa"], correct: 0 },
+                        { question: "Milyen italt keverünk a Cuba Libre koktélban a rumhoz és lime-hoz?", answers: ["Kólát", "Tonikot", "Narancslevet", "Szódavizet"], correct: 0 },
+                        { question: "Hány napos a február egy nem szökőévben?", answers: ["28", "29", "30", "31"], correct: 0 },
+                        { question: "Melyik mesében szerepel Hófehérke mellett hét apró bányász?", answers: ["Hófehérke és a hét törpe", "Csipkerózsika", "Hamupipőke", "Aranyhaj"], correct: 0 },
+                        { question: "Melyik irányba kel fel a Nap?", answers: ["Kelet", "Nyugat", "Észak", "Dél"], correct: 0 },
+                        { question: "Melyik magyar város beceneve a 'Napfény városa'?", answers: ["Szeged", "Pécs", "Győr", "Miskolc"], correct: 0 },
+                        { question: "Hány másodperc van egy percben?", answers: ["60", "100", "30", "90"], correct: 0 },
+                        { question: "Melyik állat adja a tejet, amiből a legtöbb sajtot készítik?", answers: ["Szarvasmarha (tehén)", "Ló", "Sertés", "Tyúk"], correct: 0 },
+                        { question: "Melyik híres hajó süllyedt el 1912-ben egy jéghegynek ütközve?", answers: ["Titanic", "Britannic", "Lusitania", "Santa Maria"], correct: 0 },
+                        { question: "Melyik ország zászlajában látható egy piros juharlevél?", answers: ["Kanada", "USA", "Svájc", "Ausztria"], correct: 0 },
+                        { question: "Hány érzékszervünk van a klasszikus felosztás szerint?", answers: ["5", "4", "6", "7"], correct: 0 },
+                        { question: "Milyen színű a taxi New Yorkban hagyományosan?", answers: ["Sárga", "Fekete", "Fehér", "Kék"], correct: 0 },
+                        { question: "Melyik híres magyar feltaláló nevéhez fűződik a bűvös kocka?", answers: ["Rubik Ernő", "Bíró László", "Jedlik Ányos", "Puskás Tivadar"], correct: 0 }
+                    ],
+                    // KÖNNYŰ - 5. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik ünnepen díszítünk fenyőfát?", answers: ["Karácsony", "Húsvét", "Pünkösd", "Halloween"], correct: 0 },
+                        { question: "Hány oldala van egy szabályos hatszögnek?", answers: ["6", "5", "7", "8"], correct: 0 },
+                        { question: "Melyik város a világ egyik leghíresebb kaszinóvárosa Nevadában?", answers: ["Las Vegas", "Miami", "Chicago", "Seattle"], correct: 0 },
+                        { question: "Miből főzik a klasszikus magyar gulyáslevest?", answers: ["Marhahúsból", "Csirkemellből", "Halból", "Sertésmájból"], correct: 0 },
+                        { question: "Hány betűből áll az angol ábécé?", answers: ["26", "44", "24", "30"], correct: 0 },
+                        { question: "Melyik állat alszik téli álmot a barlangjában?", answers: ["Barna medve", "Farkas", "Szarvas", "Vaddisznó"], correct: 0 },
+                        { question: "Melyik tenger mossa Horvátország partjait?", answers: ["Adriai-tenger", "Északi-tenger", "Balti-tenger", "Fekete-tenger"], correct: 0 },
+                        { question: "Ki énekelte a 'Thriller' című világhírű slágert?", answers: ["Michael Jackson", "Elvis Presley", "Prince", "Freddie Mercury"], correct: 0 },
+                        { question: "Hány perc egy félidő a labdarúgásban?", answers: ["45 perc", "30 perc", "40 perc", "50 perc"], correct: 0 },
+                        { question: "Melyik ital készül erjesztett szőlőléből?", answers: ["Bor", "Sör", "Whisky", "Gin"], correct: 0 },
+                        { question: "Melyik bolygót hívják Vörös Bolygónak?", answers: ["Mars", "Vénusz", "Jupiter", "Szaturnusz"], correct: 0 },
+                        { question: "Milyen hangszer a Stradivari?", answers: ["Hegedű", "Zongora", "Fuvola", "Hárfa"], correct: 0 },
+                        { question: "Melyik ország fővárosa Bécs?", answers: ["Ausztria", "Németország", "Csehország", "Szlovákia"], correct: 0 },
+                        { question: "Hány darab ász van egy francia kártyapakliban?", answers: ["4", "2", "6", "8"], correct: 0 },
+                        { question: "Melyik mesebeli karakternek nőtt meg az orra, ha hazudott?", answers: ["Pinokkió", "Pán Péter", "Aladdin", "Shrek"], correct: 0 }
+                    ]
+                ]
+            },
+            normal: {
+                label: "Normál",
+                icon: "🟡",
+                description: "Közepes nehézségű kvízkérdések filmekről, történelemről és tudományról",
+                sets: [
+                    // NORMÁL - 1. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik kémiai elem vegyjele az 'Au'?", answers: ["Arany", "Ezüst", "Alumínium", "Réz"], correct: 0 },
+                        { question: "Melyik sörfőzési eljárásra jellemző az alsóerjesztés?", answers: ["Lager", "Ale", "Stout", "Weissbier"], correct: 0 },
+                        { question: "Melyik filmben hangzik el a híres mondat: 'Én vagyok az apád'?", answers: ["Star Wars: A Birodalom visszavág", "A Gyűrűk Ura", "Mátrix", "Indiana Jones"], correct: 0 },
+                        { question: "Hány százalékos alkoholtartalom felett nevezünk egy italt klasszikusan tömény szesznek?", answers: ["15–20% felett", "5% felett", "50% felett", "80% felett"], correct: 0 },
+                        { question: "Melyik évben tört ki a magyar forradalom és szabadságharc a Habsburgok ellen a 19. században?", answers: ["1848", "1867", "1956", "1849"], correct: 0 },
+                        { question: "Ki festette a híres 'Mona Lisa' című portrét?", answers: ["Leonardo da Vinci", "Michelangelo", "Raffaello", "Vincent van Gogh"], correct: 0 },
+                        { question: "Melyik ország nemzeti itala a szaké?", answers: ["Japán", "Kína", "Dél-Korea", "Thaiföld"], correct: 0 },
+                        { question: "Hány csontból áll nagyjából egy felnőtt emberi csontváz?", answers: ["206", "154", "256", "312"], correct: 0 },
+                        { question: "Melyik együttes frontembere volt Freddie Mercury?", answers: ["Queen", "The Beatles", "Led Zeppelin", "Pink Floyd"], correct: 0 },
+                        { question: "Melyik magyar borvidékről származik az Egri Bikavér?", answers: ["Egri borvidék", "Villányi borvidék", "Szekszárdi borvidék", "Badacsonyi borvidék"], correct: 0 },
+                        { question: "Melyik világvárosban található a Big Ben harangtorony?", answers: ["London", "New York", "Dublin", "Edinburgh"], correct: 0 },
+                        { question: "Milyen állat a dingo?", answers: ["Vadon élő kutya Ausztráliában", "Dél-amerikai macskaféle", "Afrikai antilop", "Ázsiai majomfaj"], correct: 0 },
+                        { question: "Melyik évben lépett ember először a Holdra?", answers: ["1969", "1965", "1972", "1959"], correct: 0 },
+                        { question: "Mi a golyóstoll magyar feltalálójának a neve?", answers: ["Bíró László József", "Jedlik Ányos", "Irinyi János", "Teller Ede"], correct: 0 },
+                        { question: "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?", answers: ["Úszás", "Atlétika", "Torna", "Evezés"], correct: 0 }
+                    ],
+                    // NORMÁL - 2. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik ország fővárosa Reykjavík?", answers: ["Izland", "Norvégia", "Finnország", "Dánia"], correct: 0 },
+                        { question: "Melyik növényből készül a gin jellegzetes fűszerezése?", answers: ["Borókabogyó", "Ánizs", "Fahéj", "Kardamom"], correct: 0 },
+                        { question: "Ki rendezte a 'Ponyvaregény' (Pulp Fiction) című kultfilmet?", answers: ["Quentin Tarantino", "Martin Scorsese", "Steven Spielberg", "Christopher Nolan"], correct: 0 },
+                        { question: "Melyik magyar király alapította a híres Bibliotheca Corviniana könyvtárat?", answers: ["Hunyadi Mátyás", "Szent István", "Nagy Lajos", "Zsigmond király"], correct: 0 },
+                        { question: "Mi a Föld legmagasabb hegycsúcsa a tengerszint felett mérve?", answers: ["Mount Everest (Csomolungma)", "K2", "Kilimandzsáró", "Mont Blanc"], correct: 0 },
+                        { question: "Melyik gáz teszi ki a Föld légkörének legnagyobb részét (kb. 78%)?", answers: ["Nitrogén", "Oxigén", "Szén-dioxid", "Argon"], correct: 0 },
+                        { question: "Melyik város adott otthont a 2024-es nyári olimpiai játékoknak?", answers: ["Párizs", "Tokió", "Los Angeles", "London"], correct: 0 },
+                        { question: "Melyik olasz desszert jelentése szó szerint: 'dobj fel' / 'élénkíts fel'?", answers: ["Tiramisu", "Panna cotta", "Cannoli", "Gelato"], correct: 0 },
+                        { question: "Ki írta 'Az ember tragédiája' című drámai költeményt?", answers: ["Madách Imre", "Vörösmarty Mihály", "Katona József", "Arany János"], correct: 0 },
+                        { question: "Melyik ország pénzneme a jen (yen)?", answers: ["Japán", "Kína", "Dél-Korea", "Vietnám"], correct: 0 },
+                        { question: "Hány billentyűje van egy szabványos modern hangversenyzongorának?", answers: ["88", "76", "64", "96"], correct: 0 },
+                        { question: "Hol torkollik a Tisza a Dunába?", answers: ["Szerbiában (Titel közelében)", "Szegednél", "Mohácsnál", "Bajánál"], correct: 0 },
+                        { question: "Melyik vitamin termelődik az emberi bőrben a napfény hatására?", answers: ["D-vitamin", "C-vitamin", "A-vitamin", "B12-vitamin"], correct: 0 },
+                        { question: "Melyik rockzenekar leghíresebb albuma a 'The Dark Side of the Moon'?", answers: ["Pink Floyd", "The Rolling Stones", "Deep Purple", "AC/DC"], correct: 0 },
+                        { question: "Melyik országból származik a feta sajt?", answers: ["Görögország", "Olaszország", "Spanyolország", "Franciaország"], correct: 0 }
+                    ],
+                    // NORMÁL - 3. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik évben csatlakozott Magyarország az Európai Unióhoz?", answers: ["2004", "1999", "2007", "2001"], correct: 0 },
+                        { question: "Melyik szervünk termeli az inzulint?", answers: ["Hasnyálmirigy", "Máj", "Vese", "Lép"], correct: 0 },
+                        { question: "Ki játszotta Jack Sparrow kapitányt A Karib-tenger kalózai filmekben?", answers: ["Johnny Depp", "Orlando Bloom", "Brad Pitt", "Tom Cruise"], correct: 0 },
+                        { question: "Melyik országban található a Machu Picchu inka romváros?", answers: ["Peru", "Mexikó", "Chile", "Kolumbia"], correct: 0 },
+                        { question: "Melyik növény az Abszint hagyományos fő fűszere?", answers: ["Fehér üröm", "Komló", "Boróka", "Köménymag"], correct: 0 },
+                        { question: "Hány gyűrű látható az olimpiai zászlón?", answers: ["5", "4", "6", "7"], correct: 0 },
+                        { question: "Melyik fizikus fogalmazta meg a relativitáselméletet?", answers: ["Albert Einstein", "Isaac Newton", "Nikola Tesla", "Galileo Galilei"], correct: 0 },
+                        { question: "Melyik magyar városban található a híres Zsolnay Kulturális Negyed?", answers: ["Pécs", "Győr", "Székesfehérvár", "Kecskemét"], correct: 0 },
+                        { question: "Melyik kontinens legnépesebb országa Brazília?", answers: ["Dél-Amerika", "Észak-Amerika", "Afrika", "Ázsia"], correct: 0 },
+                        { question: "Melyik sakkfigura léphet kizárólag átlósan?", answers: ["Futó", "Bástya", "Huszár", "Gyalog"], correct: 0 },
+                        { question: "Ki szerezte a 'Négy évszak' című hegedűverseny-sorozatot?", answers: ["Antonio Vivaldi", "Johann Sebastian Bach", "Ludwig van Beethoven", "Joseph Haydn"], correct: 0 },
+                        { question: "Melyik elemnek a vegyjele a 'Fe'?", answers: ["Vas", "Foszfor", "Fluor", "Fermium"], correct: 0 },
+                        { question: "Melyik film nyerte a legtöbb (11) Oscar-díjat a Titanic és a Ben-Hur mellett?", answers: ["A Gyűrűk Ura: A király visszatér", "Avatar", "Gladiátor", "A Keresztapa"], correct: 0 },
+                        { question: "Melyik tenger választja el Európát Afrikától?", answers: ["Földközi-tenger", "Vörös-tenger", "Fekete-tenger", "Kaszpi-tenger"], correct: 0 },
+                        { question: "Melyik magyar feltaláló alkotta meg a zajtalan, biztonságos gyufát?", answers: ["Irinyi János", "Bánki Donát", "Kandó Kálmán", "Eötvös Loránd"], correct: 0 }
+                    ],
+                    // NORMÁL - 4. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik ország fővárosa Canberra?", answers: ["Ausztrália", "Új-Zéland", "Kanada", "Dél-afrikai Köztársaság"], correct: 0 },
+                        { question: "Hány fokon forr a tiszta víz normál légköri nyomáson?", answers: ["100 °C", "90 °C", "110 °C", "80 °C"], correct: 0 },
+                        { question: "Ki írta a Harry Potter-könyvsorozatot?", answers: ["J. K. Rowling", "J. R. R. Tolkien", "George R. R. Martin", "Stephen King"], correct: 0 },
+                        { question: "Melyik híres magyar focista volt az Aranycsapat csapatkapitánya?", answers: ["Puskás Ferenc", "Hidegkuti Nándor", "Kocsis Sándor", "Bozsik József"], correct: 0 },
+                        { question: "Melyik országból származik a világhírű Guinness sör?", answers: ["Írország", "Skócia", "Anglia", "Németország"], correct: 0 },
+                        { question: "Hány bolygó kering a Nap körül a Naprendszerben a jelenlegi besorolás szerint?", answers: ["8", "9", "7", "10"], correct: 0 },
+                        { question: "Melyik festő vágta le saját fülének egy részét?", answers: ["Vincent van Gogh", "Pablo Picasso", "Salvador Dalí", "Claude Monet"], correct: 0 },
+                        { question: "Melyik magyar nemzeti park volt az első, amelyet 1973-ban alapítottak?", answers: ["Hortobágyi Nemzeti Park", "Bükki Nemzeti Park", "Kiskunsági Nemzeti Park", "Aggteleki Nemzeti Park"], correct: 0 },
+                        { question: "Melyik hangszer a tuba rézfúvós rokona?", answers: ["Harsona / Kürt", "Klarinét", "Oboa", "Fagott"], correct: 0 },
+                        { question: "Mi a Föld leghosszabb folyója (a legelfogadottabb mérések szerint)?", answers: ["Nílus", "Amazonas", "Jangce", "Mississippi"], correct: 0 },
+                        { question: "Melyik országban található a híres Oktoberfest sörfesztivál központja, München?", answers: ["Németország", "Ausztria", "Svájc", "Csehország"], correct: 0 },
+                        { question: "Melyik emberi vércsoport számít általános donornak (vörösvértest tekintetében)?", answers: ["0 negatív", "AB pozitív", "A pozitív", "B negatív"], correct: 0 },
+                        { question: "Melyik évben omlott le a berlini fal?", answers: ["1989", "1991", "1985", "1990"], correct: 0 },
+                        { question: "Melyik gyümölcsöt szárítják meg, hogy mazsolát kapjanak?", answers: ["Szőlő", "Szilva", "Áfonya", "Füge"], correct: 0 },
+                        { question: "Ki alakította a Terminátort az 1984-es sci-fi akciófilmben?", answers: ["Arnold Schwarzenegger", "Sylvester Stallone", "Bruce Willis", "Jean-Claude Van Damme"], correct: 0 }
+                    ],
+                    // NORMÁL - 5. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik ország fővárosa Buenos Aires?", answers: ["Argentína", "Brazília", "Chile", "Uruguay"], correct: 0 },
+                        { question: "Melyik magyar író műve az 'Egri csillagok'?", answers: ["Gárdonyi Géza", "Jókai Mór", "Mikszáth Kálmán", "Móricz Zsigmond"], correct: 0 },
+                        { question: "Mi a konyhasó kémiai neve?", answers: ["Nátrium-klorid", "Kálium-klorid", "Nátrium-hidrogén-karbonát", "Kalcium-karbonát"], correct: 0 },
+                        { question: "Melyik tenisztornát játsszák hagyományosan füves borításon?", answers: ["Wimbledon", "Roland Garros", "US Open", "Australian Open"], correct: 0 },
+                        { question: "Melyik koktél összetevői: vodka, paradicsomlé, citromlé, Worcestershire-szósz és Tabasco?", answers: ["Bloody Mary", "Cosmopolitan", "Screwdriver", "Moscow Mule"], correct: 0 },
+                        { question: "Hány üregből áll az emberi szív (pitvarok és kamrák összesen)?", answers: ["4 üregből (2 pitvar, 2 kamra)", "2 üregből", "3 üregből", "6 üregből"], correct: 0 },
+                        { question: "Melyik ország állami zászlaja az egyetlen nem négyszögletű zászló a világon?", answers: ["Nepál", "Bhután", "Svájc", "Vatikán"], correct: 0 },
+                        { question: "Ki szerezte 'A kékszakállú herceg vára' című operát?", answers: ["Bartók Béla", "Kodály Zoltán", "Liszt Ferenc", "Erkel Ferenc"], correct: 0 },
+                        { question: "Melyik évben zajlott a mohácsi csata?", answers: ["1526", "1541", "1456", "1686"], correct: 0 },
+                        { question: "Melyik bolygónak van a leglátványosabb gyűrűrendszere?", answers: ["Szaturnusz", "Uránusz", "Neptunusz", "Jupiter"], correct: 0 },
+                        { question: "Melyik országból származik az IKEA bútoráruházlánc?", answers: ["Svédország", "Dánia", "Norvégia", "Finnország"], correct: 0 },
+                        { question: "Melyik állat a leggyorsabb szárazföldi emlős rövid távon?", answers: ["Gepárd", "Oroszlán", "Villásszarvú antilop", "Strucc"], correct: 0 },
+                        { question: "Milyen fémből készül a bronz ötvözet a réz mellett?", answers: ["Ón", "Cink", "Vas", "Nikkel"], correct: 0 },
+                        { question: "Melyik városban található a híres Sagrada Família bazilika?", answers: ["Barcelona", "Madrid", "Sevilla", "Valencia"], correct: 0 },
+                        { question: "Hány darab csillag látható az Európai Unió zászlaján?", answers: ["12", "15", "27", "10"], correct: 0 }
+                    ]
+                ]
+            },
+            hard: {
+                label: "Nehéz",
+                icon: "🔴",
+                description: "Komoly lexikális tudást igénylő kvízkérdések igazi profiknak",
+                sets: [
+                    // NEHÉZ - 1. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik kémiai elem rendszáma a 79-es a periódusos rendszerben?", answers: ["Arany (Au)", "Platina (Pt)", "Higany (Hg)", "Ezüst (Ag)"], correct: 0 },
+                        { question: "Melyik évben adták ki az Aranybullát II. András király uralkodása idején?", answers: ["1222", "1241", "1301", "1196"], correct: 0 },
+                        { question: "Mi a Föld legmélyebb ismert óceáni pontja a Mariana-árokban?", answers: ["Challenger-szakadék", "Puerto Rico-árok", "Jáva-árok", "Kermadec-árok"], correct: 0 },
+                        { question: "Ki írta a 'Bűn és bűnhődés' című világirodalmi klasszikust?", answers: ["Fjodor Mihajlovics Dosztojevszkij", "Lev Nyikolajevics Tolsztoj", "Anton Pavlovics Csehov", "Nyikolaj Vasziljevics Gogol"], correct: 0 },
+                        { question: "Melyik skót whiskyrégió híres a legerősebben tőzeges, füstös single malt whiskykéről?", answers: ["Islay", "Speyside", "Lowland", "Campbeltown"], correct: 0 },
+                        { question: "Hány holdja van a Mars bolygónak?", answers: ["2 (Phobos és Deimos)", "0", "1", "4"], correct: 0 },
+                        { question: "Melyik magyar tudós kapta meg elsőként a fizikai Nobel-díjat 1905-ben?", answers: ["Lénárd Fülöp", "Wigner Jenő", "Gábor Dénes", "Krausz Ferenc"], correct: 0 },
+                        { question: "Mi Bhután fővárosa?", answers: ["Timpu (Thimphu)", "Katmandu", "Vientián", "Phnompen"], correct: 0 },
+                        { question: "Melyik zeneszerző utolsó, befejezetlen műve a d-moll Requiem (K. 626)?", answers: ["Wolfgang Amadeus Mozart", "Ludwig van Beethoven", "Franz Schubert", "Johannes Brahms"], correct: 0 },
+                        { question: "Melyik görög istennő volt a bölcsesség, a jog és a mesterségek istennője?", answers: ["Pallasz Athéné", "Héra", "Artemisz", "Aphrodité"], correct: 0 },
+                        { question: "Milyen mértékegységgel mérjük az elektromos ellenállást az SI-rendszerben?", answers: ["Ohm (Ω)", "Amper (A)", "Volt (V)", "Farad (F)"], correct: 0 },
+                        { question: "Melyik évben ért véget a százéves háború Anglia és Franciaország között?", answers: ["1453", "1337", "1415", "1492"], correct: 0 },
+                        { question: "Melyik ország szigete Szocotra, amely különleges sárkányvérfáiról híres?", answers: ["Jemen", "Omán", "Szomália", "Madagaszkár"], correct: 0 },
+                        { question: "Ki festette a 'Guernica' című monumentális háborúellenes festményt 1937-ben?", answers: ["Pablo Picasso", "Salvador Dalí", "Joan Miró", "Francisco Goya"], correct: 0 },
+                        { question: "Mi az emberi test legkisebb csontja, amely a középfülben található?", answers: ["Kengyel (stapes)", "Üllő (incus)", "Kalapács (malleus)", "Ekecsont (vomer)"], correct: 0 }
+                    ],
+                    // NEHÉZ - 2. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik évben zajlott a nándorfehérvári diadal Hunyadi János vezetésével?", answers: ["1456", "1444", "1490", "1514"], correct: 0 },
+                        { question: "Melyik kémiai elem vegyjele a 'W'?", answers: ["Volfrám", "Vanádium", "Bizmut", "Bárium"], correct: 0 },
+                        { question: "Mi a fény terjedési sebessége vákuumban (kereken km/s-ban)?", answers: ["299 792 km/s", "150 000 km/s", "340 000 km/s", "1 080 000 km/s"], correct: 0 },
+                        { question: "Ki volt a Római Birodalom első császára?", answers: ["Augustus (Octavianus)", "Julius Caesar", "Nero", "Tiberius"], correct: 0 },
+                        { question: "Melyik két dél-amerikai ország vitatott nemzeti itala a Pisco, amelyből a Pisco Sour készül?", answers: ["Peru és Chile", "Brazília és Argentína", "Mexikó és Kuba", "Kolumbia és Venezuela"], correct: 0 },
+                        { question: "Melyik szoros választja el Ázsiát Észak-Amerikától?", answers: ["Bering-szoros", "Gibraltári-szoros", "Malakka-szoros", "Boszporusz"], correct: 0 },
+                        { question: "Melyik magyar író nyerte el az irodalmi Nobel-díjat 2002-ben?", answers: ["Kertész Imre", "Nádas Péter", "Esterházy Péter", "Krasznahorkai László"], correct: 0 },
+                        { question: "Hány szimfóniát komponált Ludwig van Beethoven?", answers: ["9", "7", "12", "41"], correct: 0 },
+                        { question: "Mi az a 'scoville-egység' (SHU)?", answers: ["A paprikák csípősségének mértékegysége", "A borok cukortartalmának mérőszáma", "A földrengések erőssége", "A gyémántok tisztasága"], correct: 0 },
+                        { question: "Melyik bolygó forog a tengelye körül a többi bolygóval ellentétes (retrográd) irányban?", answers: ["Vénusz", "Merkúr", "Mars", "Neptunusz"], correct: 0 },
+                        { question: "Melyik európai ország fővárosa Vaduz?", answers: ["Liechtenstein", "Luxemburg", "Andorra", "San Marino"], correct: 0 },
+                        { question: "Ki írta az 'Isteni színjáték' című eposzt?", answers: ["Dante Alighieri", "Giovanni Boccaccio", "Francesco Petrarca", "Niccolò Machiavelli"], correct: 0 },
+                        { question: "Melyik magyar fizikus nevéhez fűződik a torziós inga megalkotása?", answers: ["Eötvös Loránd", "Szilárd Leó", "Neumann János", "Bay Zoltán"], correct: 0 },
+                        { question: "Melyik ókori világcsoda állt Alexandria kikötőjében?", answers: ["A pharoszi világítótorony", "A rodoszi kolosszus", "Zeusz olümpiai szobra", "Szemiramisz függőkertje"], correct: 0 },
+                        { question: "Milyen anyagból készül hagyományosan a valódi konyak (Cognac) érlelőhordója?", answers: ["Francia tölgyfából (Limousin / Tronçais)", "Cseresznyefából", "Bükkfából", "Akácfából"], correct: 0 }
+                    ],
+                    // NEHÉZ - 3. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik napon kötötték meg a trianoni békeszerződést?", answers: ["1920. június 4.", "1918. november 11.", "1919. március 21.", "1921. október 13."], correct: 0 },
+                        { question: "Mi a Naprendszer legmagasabb ismert vulkánja a Marson?", answers: ["Olympus Mons", "Mauna Kea", "Elysium Mons", "Maxwell Montes"], correct: 0 },
+                        { question: "Melyik elemnek a legmagasabb az olvadáspontja az összes tiszta fém közül?", answers: ["Volfrám", "Titán", "Platina", "Ozmium"], correct: 0 },
+                        { question: "Ki szerezte a 'Boléro' című híres zenekari művet?", answers: ["Maurice Ravel", "Claude Debussy", "Camille Saint-Saëns", "Hector Berlioz"], correct: 0 },
+                        { question: "Melyik tengerbe torkollik a Volga folyó?", answers: ["Kaszpi-tenger", "Fekete-tenger", "Azovi-tenger", "Aral-tó"], correct: 0 },
+                        { question: "Ki fedezte fel a penicillint 1928-ban?", answers: ["Alexander Fleming", "Louis Pasteur", "Robert Koch", "Edward Jenner"], correct: 0 },
+                        { question: "Melyik magyar költő írta a 'Tiszta szívvel' című verset?", answers: ["József Attila", "Radnóti Miklós", "Babits Mihály", "Kosztolányi Dezső"], correct: 0 },
+                        { question: "Melyik ország pénzneme a Baht?", answers: ["Thaiföld", "Malajzia", "Indonézia", "Fülöp-szigetek"], correct: 0 },
+                        { question: "Hány kromoszómapár található egy egészséges emberi testi sejtben?", answers: ["23 pár (46 db)", "22 pár (44 db)", "24 pár (48 db)", "21 pár (42 db)"], correct: 0 },
+                        { question: "Melyik görög filozófus volt Nagy Sándor nevelője?", answers: ["Arisztotelész", "Platón", "Szókratész", "Epikurosz"], correct: 0 },
+                        { question: "Milyen szőlőfajtából készül kizárólag a francia Chablis bor?", answers: ["Chardonnay", "Sauvignon Blanc", "Riesling", "Pinot Gris"], correct: 0 },
+                        { question: "Melyik évben süllyedt el a Vasa svéd hadihajó első útján Stockholmban?", answers: ["1628", "1588", "1709", "1666"], correct: 0 },
+                        { question: "Mi Kazahsztán fővárosa?", answers: ["Asztana", "Almati", "Taskent", "Biskek"], correct: 0 },
+                        { question: "Ki festette az 'Éjjeli őrjárat' című festményt?", answers: ["Rembrandt van Rijn", "Johannes Vermeer", "Peter Paul Rubens", "Frans Hals"], correct: 0 },
+                        { question: "Melyik fizikai törvény mondja ki, hogy minden hatással szemben ugyanakkora, de ellentétes irányú ellenhatás lép fel?", answers: ["Newton III. törvénye (hatás-ellenhatás)", "Newton I. törvénye", "Archimédesz törvénye", "Ohm törvénye"], correct: 0 }
+                    ],
+                    // NEHÉZ - 4. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik napon történt a csernobili atomerőmű-baleset?", answers: ["1986. április 26.", "1984. december 3.", "1989. november 9.", "1979. március 28."], correct: 0 },
+                        { question: "Melyik kémiai elem az egyetlen fém, amely szobahőmérsékleten folyékony halmazállapotú?", answers: ["Higany (Hg)", "Gallium (Ga)", "Bróm (Br)", "Cézium (Cs)"], correct: 0 },
+                        { question: "Ki írta a 'Száz év magány' című mágikus realista regényt?", answers: ["Gabriel García Márquez", "Jorge Luis Borges", "Isabel Allende", "Mario Vargas Llosa"], correct: 0 },
+                        { question: "Melyik afrikai ország őrizte meg függetlenségét a gyarmatosítás korában (leszámítva a rövid olasz megszállást 1936–1941 között)?", answers: ["Etiópia", "Kenya", "Nigéria", "Ghána"], correct: 0 },
+                        { question: "Mi az a 'Botrytis cinerea' a borászatban?", answers: ["Nemespenész (aszúsodást okozó gomba)", "Egy tölgyfahordó-típus", "A pezsgő másodlagos erjesztése", "A szőlőtőke gyökérbetegsége"], correct: 0 },
+                        { question: "Melyik magyar matematikus volt a nemeuklideszi geometria egyik megalkotója?", answers: ["Bolyai János", "Erdős Pál", "Pólya György", "Riesz Frigyes"], correct: 0 },
+                        { question: "Melyik operában hangzik el a híres 'Nessun dorma' ária?", answers: ["Turandot (Giacomo Puccini)", "Aida (Giuseppe Verdi)", "Carmen (Georges Bizet)", "Tosca (Giacomo Puccini)"], correct: 0 },
+                        { question: "Melyik szigetország fővárosa Antananarivo?", answers: ["Madagaszkár", "Mauritius", "Srí Lanka", "Seychelle-szigetek"], correct: 0 },
+                        { question: "Hány karja van egy közönséges polipnak?", answers: ["8", "6", "10", "12"], correct: 0 },
+                        { question: "Melyik évben alapították a Magyar Tudományos Akadémiát Széchenyi István felajánlásával?", answers: ["1825", "1848", "1830", "1867"], correct: 0 },
+                        { question: "Mi az emberi szervezet legnagyobb belső szerve (és legnagyobb mirigye)?", answers: ["Máj", "Tüdő", "Agy", "Vékonybél"], correct: 0 },
+                        { question: "Melyik csillagképben található a Sarkcsillag (Polaris)?", answers: ["Kis Medve (Ursa Minor)", "Nagy Medve (Ursa Major)", "Orion", "Kassziopeia"], correct: 0 },
+                        { question: "Ki rendezte a '2001: Űrodüsszeia' című 1968-as sci-fi klasszikust?", answers: ["Stanley Kubrick", "Ridley Scott", "George Lucas", "Francis Ford Coppola"], correct: 0 },
+                        { question: "Melyik kémiai kötés tartja össze a vízmolekulában az oxigén- és hidrogénatomokat?", answers: ["Kovalens kötés", "Ionos kötés", "Fémes kötés", "Van der Waals-kötés"], correct: 0 },
+                        { question: "Melyik ország területén fekszik az Atacama-sivatag nagy része?", answers: ["Chile", "Argentína", "Bolívia", "Peru"], correct: 0 }
+                    ],
+                    // NEHÉZ - 5. kérdéssor (15 kérdés)
+                    [
+                        { question: "Melyik évben koronázták meg I. (Szent) Istvánt magyar királlyá?", answers: ["1000 (vagy 1001. január 1.)", "997", "1038", "895"], correct: 0 },
+                        { question: "Melyik elemnek a vegyjele a 'Sn'?", answers: ["Ón", "Ólom", "Antimon", "Szelén"], correct: 0 },
+                        { question: "Mi a Föld legkisebb területű független állama?", answers: ["Vatikánváros", "Monaco", "Nauru", "San Marino"], correct: 0 },
+                        { question: "Ki komponálta 'A hattyúk tava' című balettet?", answers: ["Pjotr Iljics Csajkovszkij", "Igor Stravinsky", "Szergej Prokofjev", "Nyikolaj Rimszkij-Korszakov"], correct: 0 },
+                        { question: "Melyik mexikói párlat készül füstölt agávészívekből, a tequila rokonaként?", answers: ["Mezcal", "Cachaça", "Sotol", "Raicilla"], correct: 0 },
+                        { question: "Melyik magyar orvos kapta meg az 'anyák megmentője' címet a gyermekágyi láz okának felfedezéséért?", answers: ["Semmelweis Ignác", "Szent-Györgyi Albert", "Korányi Frigyes", "Békésy György"], correct: 0 },
+                        { question: "Melyik bolygó tengelyferdesége közel 98 fokos, így szinte 'oldalán fekve' kering a Nap körül?", answers: ["Uránusz", "Neptunusz", "Szaturnusz", "Merkúr"], correct: 0 },
+                        { question: "Ki írta az '1984' és az 'Állatfarm' című disztópikus regényeket?", answers: ["George Orwell", "Aldous Huxley", "Ray Bradbury", "Jevgenyij Zamjatyin"], correct: 0 },
+                        { question: "Melyik hegység választja el Európát Ázsiától Oroszország területén?", answers: ["Urál-hegység", "Kaukázus", "Altaj", "Kárpátok"], correct: 0 },
+                        { question: "Milyen színű a tiszta folyékony oxigén?", answers: ["Halványkék", "Színtelen", "Sárgászöld", "Vöröses"], correct: 0 },
+                        { question: "Melyik ókori egyiptomi fáraó sírját tárta fel Howard Carter 1922-ben szinte érintetlenül?", answers: ["Tutanhamon", "II. Ramszesz", "Ehnaton", "Kheopsz"], correct: 0 },
+                        { question: "Melyik magyar zeneszerző gyűjtötte a népdalokat Bartók Bélával együtt és alkotta meg a szolmizációs módszert?", answers: ["Kodály Zoltán", "Weiner Leó", "Dohnányi Ernő", "Lajtha László"], correct: 0 },
+                        { question: "Hány darab csigolyából áll az emberi nyaki gerincszakasz?", answers: ["7", "5", "12", "9"], correct: 0 },
+                        { question: "Melyik ország fővárosa Ottawa?", answers: ["Kanada", "Ausztrália", "Új-Zéland", "Dél-Afrika"], correct: 0 },
+                        { question: "Melyik híres holland festő alkotta a 'Leány gyöngy fülbevalóval' című művet?", answers: ["Johannes Vermeer", "Rembrandt van Rijn", "Hieronymus Bosch", "Pieter Bruegel"], correct: 0 }
+                    ]
+                ]
+            }
+        };
+
+        /* ==========================================================================
+           2. ROTÁCIÓ ÉS JÁTÉKÁLLAPOT (VALAMINT 5 PERCES IDŐZÍTŐ)
+           ========================================================================== */
+        function getRotationState() {
+            try {
+                return JSON.parse(localStorage.getItem('BuiltInRotationState')) || { easy: 0, normal: 0, hard: 0 };
+            } catch (e) {
+                return { easy: 0, normal: 0, hard: 0 };
+            }
+        }
+
+        function saveRotationState(state) {
+            localStorage.setItem('BuiltInRotationState', JSON.stringify(state));
+        }
+
+        let currentDifficultyKey = 'easy';
+        let activeSetName = "";
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let totalGlasses = 10;
+        let answerBets = [0, 0, 0, 0];
+        let displayedAnswers = [];
+        let selectedAnswerSlot = 0;
+        let isRoundChecked = false;
+
+        // Segítségek állapota
+        let lifelines = {
+            fiftyFifty: false,
+            audience: false,
+            hulyeVagyok: false,
+            refill: false
+        };
+
+        // "Hülye Vagyok" visszaszámláló időzítő
+        let hulyeTimerInterval = null;
+        let hulyeSecondsLeft = 10;
+
+        // Feedback modal visszahívó
+        let onFeedbackCloseCallback = null;
+
+        // 5 Perces (300 másodperces) Csomag Váltó Időzítő
+        let setTimerInterval = null;
+        let setSecondsLeft = 300; // 5 perc = 300 másodperc
+
+        function startSetCountdownTimer(resetTime = false) {
+            // Ha már fut időzítő ÉS nem kérünk explicit újrakezdést (resetTime = false), 
+            // akkor NEM indítjuk újra a számlálót, hanem hagyjuk futni a háttérben!
+            if (setTimerInterval && !resetTime) {
+                return;
+            }
+
+            if (setTimerInterval) {
+                clearInterval(setTimerInterval);
+            }
+
+            if (resetTime) {
+                setSecondsLeft = 300; // Csak akkor reseteljük 5 percre, ha az időzítő magától lejár vagy friss indítás történik
+            }
+            updateSetTimerDisplay();
+
+            setTimerInterval = setInterval(() => {
+                setSecondsLeft--;
+                updateSetTimerDisplay();
+
+                if (setSecondsLeft <= 0) {
+                    clearInterval(setTimerInterval);
+                    setTimerInterval = null;
+                    // Idő letelt -> Automatikus váltás a következő kérdéssorra a háttérben (modal NÉLKÜL!)
+                    autoRotateToNextSet();
+                }
+            }, 1000);
+        }
+
+        function updateSetTimerDisplay() {
+            const timerEl = document.getElementById('set-countdown-timer');
+            if (!timerEl) return;
+            const mins = Math.floor(setSecondsLeft / 60);
+            const secs = setSecondsLeft % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function autoRotateToNextSet() {
+            if (currentDifficultyKey === 'custom') {
+                startSetCountdownTimer(true);
+                return;
+            }
+
+            // Automatikusan váltja a kérdéssort felugró ablak nélkül
+            loadBuiltInDifficultySet(currentDifficultyKey, false, true);
+            startSetCountdownTimer(true); // Automatikus lejáratkor újraindul 5 percről
+        }
+
+        /**
+         * Kiválasztja és betölti a megadott nehézségi szint soron következő (1..5) kérdéssorát.
+         * Ha a felhasználó kattint (isManualClick = true), a meglévő 5 perces időzítő NEM indul újra, 
+         * hanem a háttérben ketyeg tovább onnan, ahol tartott.
+         */
+        function loadBuiltInDifficultySet(diffKey, isManualClick = false, isAutoRotation = false) {
+            const diffObj = BUILTIN_DIFFICULTIES[diffKey];
+            if (!diffObj) return;
+
+            const rotation = getRotationState();
+
+            if (isManualClick) {
+                currentDifficultyKey = diffKey;
+            }
+
+            const setIndex = (rotation[currentDifficultyKey] || 0) % diffObj.sets.length;
+
+            if (!isManualClick && isAutoRotation) {
+                // Automatikus váltáskor léptetjük a rotációs indexet a következőre
+                rotation[currentDifficultyKey] = (setIndex + 1) % diffObj.sets.length;
+                saveRotationState(rotation);
+            } else if (isManualClick) {
+                // Ha manuálisan vált nehézségi szintet a felhasználó, opcionálisan frissíthetjük az indexet is, 
+                // de a rotációs memóriát megőrizzük.
+            }
+
+            const targetDiff = currentDifficultyKey;
+            const targetDiffObj = BUILTIN_DIFFICULTIES[targetDiff];
+            const activeIndex = (rotation[targetDiff] || 0) % targetDiffObj.sets.length;
+
+            questions = JSON.parse(JSON.stringify(targetDiffObj.sets[activeIndex]));
+            activeSetName = `${targetDiffObj.icon} ${targetDiffObj.label} – ${activeIndex + 1}/5. kérdéssor`;
+
+            const labelEl = document.getElementById('active-set-label');
+            if (labelEl) {
+                labelEl.textContent = `${activeSetName} (${questions.length} kérdés)`;
+            }
+
+            // Kezdőképernyő szintválasztó gombok vizuális kiemelése
+            ['easy', 'normal', 'hard'].forEach(key => {
+                const btn = document.getElementById(`btn-diff-${key}`);
+                if (!btn) return;
+                if (key === targetDiff) {
+                    btn.classList.add('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                }
+            });
+
+            // Időzítő indítása: ha manuális kattintás történt, a resetTime = false miatt a számláló nem indul újra 5 percről!
+            startSetCountdownTimer(isAutoRotation);
+        }
+
+        function selectBuiltInDifficulty(diffKey) {
+            currentDifficultyKey = diffKey;
+            loadBuiltInDifficultySet(diffKey, true, false);
+            playTone(587.33, 'sine', 0.14, 0.12);
+        }
+
+        /* ==========================================================================
+           3. WEB AUDIO API HANGGENERÁTOR (Háttérzene és hangeffektek)
+           ========================================================================== */
+        let audioCtx = null;
+        let isAudioEnabled = false;
+        let bgMusicInterval = null;
+        let bgBeatStep = 0;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleAudio() {
+            initAudioContext();
+            isAudioEnabled = !isAudioEnabled;
+            const icon = document.getElementById('audio-icon');
+            const label = document.getElementById('audio-label');
+
+            if (isAudioEnabled) {
+                icon.textContent = '🔊';
+                label.textContent = 'Zene: BE';
+                startBackgroundMusic();
+                playTone(523.25, 'sine', 0.12, 0.15);
+            } else {
+                icon.textContent = '🔇';
+                label.textContent = 'Zene: KI';
+                stopBackgroundMusic();
+            }
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.15, volume = 0.12, delay = 0) {
+            if (!isAudioEnabled) return;
+            try {
+                initAudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {
+                // Hanglejátszási kivétel kezelése
+            }
+        }
+
+        function startBackgroundMusic() {
+            stopBackgroundMusic();
+            const bassNotes = [146.83, 146.83, 174.61, 146.83, 220.00, 196.00, 174.61, 164.81];
+            bgMusicInterval = setInterval(() => {
+                if (!isAudioEnabled) return;
+                const note = bassNotes[bgBeatStep % bassNotes.length];
+                playTone(note, 'triangle', 0.22, 0.05);
+                if (bgBeatStep % 2 === 0) {
+                    playTone(note * 2, 'sine', 0.1, 0.02);
+                }
+                bgBeatStep++;
+            }, 420);
+        }
+
+        function stopBackgroundMusic() {
+            if (bgMusicInterval) {
+                clearInterval(bgMusicInterval);
+                bgMusicInterval = null;
+            }
+        }
+
+        function playCupSound(isAdd = true) {
+            if (isAdd) {
+                playTone(440, 'sine', 0.08, 0.12);
+                playTone(587.33, 'sine', 0.1, 0.12, 0.05);
+            } else {
+                playTone(440, 'sine', 0.08, 0.1);
+                playTone(329.63, 'sine', 0.1, 0.1, 0.05);
+            }
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'triangle', 0.15, 0.18, 0);
+            playTone(659.25, 'triangle', 0.15, 0.18, 0.1);
+            playTone(783.99, 'triangle', 0.2, 0.18, 0.2);
+            playTone(1046.50, 'triangle', 0.4, 0.2, 0.3);
+        }
+
+        function playDrinkSound() {
+            playTone(311.13, 'sawtooth', 0.22, 0.14, 0);
+            playTone(277.18, 'sawtooth', 0.22, 0.14, 0.18);
+            playTone(233.08, 'sawtooth', 0.45, 0.16, 0.36);
+        }
+
+        /* ==========================================================================
+           4. PIROS POHÁR SVG GENERÁTOR
+           ========================================================================== */
+        function getRedCupSVG(sizeClass = "w-7 h-7 sm:w-8 sm:h-8") {
+            return `
+                <svg class="${sizeClass} red-cup-shadow cup-animate inline-block" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 12H50L44 56C43.7 58.2 41.8 60 39.6 60H24.4C22.2 60 20.3 58.2 20 56L14 12Z" fill="#DC2626"/>
+                    <path d="M12 10C12 8.9 12.9 8 14 8H50C51.1 8 52 8.9 52 10V13H12V10Z" fill="#F8FAFC"/>
+                    <path d="M16.5 24H47.5" stroke="#991B1B" stroke-width="2.5"/>
+                    <path d="M18 36H46" stroke="#991B1B" stroke-width="2.5"/>
+                    <path d="M20 48H44" stroke="#991B1B" stroke-width="2.5"/>
+                    <path d="M21 15L24 54" stroke="#FCA5A5" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+                </svg>
+            `;
+        }
+
+        /* ==========================================================================
+           5. MODAL ÉS ÉRTESÍTÉS KEZELÉS
+           ========================================================================== */
+        function toggleModal(modalId, show) {
+            const el = document.getElementById(modalId);
+            if (!el) return;
+            if (show) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function showFeedback(title, message, icon = "🍻", callback = null) {
+            document.getElementById('feedback-title').textContent = title;
+            document.getElementById('feedback-message').innerHTML = message;
+            document.getElementById('feedback-icon').textContent = icon;
+            onFeedbackCloseCallback = callback;
+            toggleModal('feedback-modal', true);
+        }
+
+        function closeFeedbackModal() {
+            toggleModal('feedback-modal', false);
+            if (typeof onFeedbackCloseCallback === 'function') {
+                const cb = onFeedbackCloseCallback;
+                onFeedbackCloseCallback = null;
+                cb();
+            }
+        }
+
+        /* ==========================================================================
+           6. JÁTÉK INDÍTÁSA ÉS KÉRDÉSEK RENDERELÉSE
+           ========================================================================== */
+        function startGame() {
+            if (!questions || questions.length === 0) {
+                showFeedback("Nincs kérdés!", "Először tölts be vagy hozz létre egy kérdéssort!", "⚠️");
+                return;
+            }
+
+            currentQuestionIndex = 0;
+            totalGlasses = 10;
+            lifelines = { fiftyFifty: false, audience: false, hulyeVagyok: false, refill: false };
+
+            ['help-5050', 'help-audience', 'help-hulye', 'help-refill'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.classList.remove('lifeline-used');
+                btn.disabled = false;
+            });
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            prepareQuestion();
+        }
+
+        function prepareQuestion() {
+            isRoundChecked = false;
+            answerBets = [0, 0, 0, 0];
+            selectedAnswerSlot = 0;
+
+            // Közönség diagram elrejtése új kérdésnél
+            document.getElementById('audience-chart-box').classList.add('hidden');
+
+            const currentQ = questions[currentQuestionIndex];
+            const mapped = currentQ.answers.map((ansText, idx) => ({
+                text: ansText,
+                isCorrect: idx === currentQ.correct,
+                hidden: false,
+                audiencePct: null
+            }));
+
+            // Fisher-Yates keverés
+            for (let i = mapped.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
+            }
+            displayedAnswers = mapped;
+
+            document.getElementById('check-answer-btn').classList.remove('hidden');
+            document.getElementById('clear-bets-btn').classList.remove('hidden');
+            document.getElementById('next-question-btn').classList.add('hidden');
+
+            renderGameUI();
+        }
+
+        function renderGameUI() {
+            const currentQ = questions[currentQuestionIndex];
+            document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+            document.getElementById('total-glasses-badge').textContent = `${totalGlasses} db`;
+            document.getElementById('question-text').textContent = currentQ.question;
+
+            const placedTotal = answerBets.reduce((a, b) => a + b, 0);
+            const unplaced = totalGlasses - placedTotal;
+            document.getElementById('unplaced-count').textContent = unplaced;
+
+            // Alsó pohársáv kirajzolása (Cup Tray)
+            const cupTray = document.getElementById('cup-tray');
+            if (unplaced > 0) {
+                let trayHTML = '';
+                for (let i = 0; i < unplaced; i++) {
+                    trayHTML += `
+                        <button onclick="addCupToSelected()" title="Pohár elhelyezése a kiválasztott válaszra" class="p-1 rounded-xl hover:bg-red-500/20 transform hover:scale-110 transition cursor-pointer">
+                            ${getRedCupSVG("w-8 h-8 sm:w-9 sm:h-9")}
+                        </button>
+                    `;
+                }
+                cupTray.innerHTML = trayHTML;
+            } else {
+                cupTray.innerHTML = `<span class="text-emerald-400 text-xs sm:text-sm font-bold">✅ Minden pohár elhelyezve! Kattints az Ellenőrzés gombra!</span>`;
+            }
+
+            // 4 Válaszlehetőség kirajzolása
+            const letters = ['A', 'B', 'C', 'D'];
+            const answersGrid = document.getElementById('answers-grid');
+            answersGrid.innerHTML = '';
+
+            let hasSelectedCard = false;
+            displayedAnswers.forEach((ans, index) => {
+                if (selectedAnswerSlot === index && !ans.hidden) {
+                    hasSelectedCard = true;
+                }
+            });
+            if (!hasSelectedCard) {
+                const firstVisible = displayedAnswers.findIndex(a => !a.hidden);
+                if (firstVisible !== -1) selectedAnswerSlot = firstVisible;
+            }
+
+            displayedAnswers.forEach((ans, index) => {
+                if (ans.hidden) {
+                    answersGrid.innerHTML += `
+                        <div class="rounded-2xl border-2 border-slate-800/60 bg-slate-950/40 p-4 flex items-center justify-center opacity-35 min-h-[120px]">
+                            <span class="text-slate-500 font-bold text-sm uppercase tracking-widest">Felezővel törölve</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let cardStateClass = '';
+                if (isRoundChecked) {
+                    cardStateClass = ans.isCorrect ? 'correct-card disabled-card' : 'wrong-card disabled-card';
+                } else if (selectedAnswerSlot === index) {
+                    cardStateClass = 'selected-card';
+                }
+
+                let placedCupsHTML = '';
+                for (let c = 0; c < answerBets[index]; c++) {
+                    placedCupsHTML += `
+                        <span onclick="event.stopPropagation(); removeCupFromAnswer(${index})" title="Pohár visszavétele" class="cursor-pointer hover:scale-110 transition">
+                            ${getRedCupSVG("w-6 h-6 sm:w-7 sm:h-7")}
+                        </span>
+                    `;
+                }
+
+                const audienceBadge = ans.audiencePct !== null
+                    ? `<span class="ml-2 bg-amber-500/20 border border-amber-400 text-amber-300 text-xs font-black px-2 py-0.5 rounded-lg">${ans.audiencePct}%</span>`
+                    : '';
+
+                const card = document.createElement('div');
+                card.className = `answer-card ${cardStateClass} rounded-2xl p-4 flex flex-col justify-between min-h-[125px] cursor-pointer select-none`;
+                card.onclick = () => handleAnswerCardClick(index);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-black flex items-center justify-center shrink-0">
+                                ${letters[index]}
+                            </span>
+                            <span class="font-bold text-base sm:text-lg text-white leading-snug">
+                                ${ans.text} ${audienceBadge}
+                            </span>
+                        </div>
+                        ${!isRoundChecked ? `
+                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+                            <button onclick="removeCupFromAnswer(${index})" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-600 text-white font-black flex items-center justify-center border border-slate-600 transition cursor-pointer" title="Pohár elvétele">−</button>
+                            <span class="w-6 text-center font-black text-yellow-400 text-sm">${answerBets[index]}</span>
+                            <button onclick="addCupToAnswer(${index})" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 text-white font-black flex items-center justify-center border border-slate-600 transition cursor-pointer" title="Pohár hozzáadása">+</button>
+                        </div>
+                        ` : `
+                        <span class="text-xs font-black px-2.5 py-1 rounded-lg ${ans.isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}">
+                            ${answerBets[index]} pohár
+                        </span>
+                        `}
+                    </div>
+
+                    <div class="min-h-[36px] bg-slate-950/60 border border-slate-800/80 rounded-xl px-3 py-1.5 flex flex-wrap items-center gap-1.5">
+                        ${placedCupsHTML || '<span class="text-xs text-slate-500">Kattints ide pohár elhelyezéséhez...</span>'}
+                    </div>
+                `;
+
+                answersGrid.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           7. POHÁR ELHELYEZÉSI MECHANIKA ÉS FIGYELMEZTETÉS
+           ========================================================================== */
+        function handleAnswerCardClick(index) {
+            if (isRoundChecked || displayedAnswers[index].hidden) return;
+
+            const placedTotal = answerBets.reduce((a, b) => a + b, 0);
+
+            if (placedTotal === totalGlasses && answerBets[index] === 0) {
+                let targetAnswerName = "egy másik válaszra";
+                displayedAnswers.forEach((ans, idx) => {
+                    if (answerBets[idx] > 0) {
+                        targetAnswerName = ans.text;
+                    }
+                });
+                showFeedback(
+                    "Már elhelyezted az összes poharad!",
+                    `Már felhelyezted erre a kérdésre: <strong>${targetAnswerName}</strong> az összes poharadat.`,
+                    "⚠️"
+                );
+                return;
+            }
+
+            selectedAnswerSlot = index;
+            addCupToAnswer(index);
+        }
+
+        function addCupToSelected() {
+            if (isRoundChecked) return;
+            if (displayedAnswers[selectedAnswerSlot]?.hidden) {
+                selectedAnswerSlot = displayedAnswers.findIndex(a => !a.hidden);
+            }
+            addCupToAnswer(selectedAnswerSlot);
+        }
+
+        function addCupToAnswer(index) {
+            if (isRoundChecked || displayedAnswers[index].hidden) return;
+            
+            const placedTotal = answerBets.reduce((a, b) => a + b, 0);
+            if (placedTotal === totalGlasses && answerBets[index] === 0) {
+                let targetAnswerName = "egy másik válaszra";
+                displayedAnswers.forEach((ans, idx) => {
+                    if (answerBets[idx] > 0) {
+                        targetAnswerName = ans.text;
+                    }
+                });
+                showFeedback(
+                    "Már elhelyezted az összes poharad!",
+                    `Már felhelyezted erre a kérdésre: <strong>${targetAnswerName}</strong> az összes poharadat.`,
+                    "⚠️"
+                );
+                return;
+            }
+
+            selectedAnswerSlot = index;
+            if (placedTotal < totalGlasses) {
+                answerBets[index]++;
+                playCupSound(true);
+            }
+            renderGameUI();
+        }
+
+        function removeCupFromAnswer(index) {
+            if (isRoundChecked) return;
+            if (answerBets[index] > 0) {
+                answerBets[index]--;
+                playCupSound(false);
+                renderGameUI();
+            }
+        }
+
+        function returnAllCupsToTray() {
+            if (isRoundChecked) return;
+            answerBets = [0, 0, 0, 0];
+            playCupSound(false);
+            renderGameUI();
+        }
+
+        /* ==========================================================================
+           8. ELLENŐRZÉS ÉS KÖVETKEZŐ KÉRDÉS
+           ========================================================================== */
+        function checkAnswer() {
+            if (isRoundChecked) return;
+
+            const placedTotal = answerBets.reduce((a, b) => a + b, 0);
+            if (placedTotal < totalGlasses) {
+                showFeedback(
+                    "Még maradt poharad!",
+                    `Fel kell helyezned az összes (<strong>${totalGlasses} db</strong>) poharadat a válaszlehetőségekre az ellenőrzés előtt!`,
+                    "🍷"
+                );
+                return;
+            }
+
+            isRoundChecked = true;
+            let survivedGlasses = 0;
+            let lostGlasses = 0;
+
+            displayedAnswers.forEach((ans, idx) => {
+                if (ans.isCorrect) {
+                    survivedGlasses += answerBets[idx];
+                } else {
+                    lostGlasses += answerBets[idx];
+                }
+            });
+
+            totalGlasses = survivedGlasses;
+            renderGameUI();
+
+            document.getElementById('check-answer-btn').classList.add('hidden');
+            document.getElementById('clear-bets-btn').classList.add('hidden');
+            document.getElementById('next-question-btn').classList.remove('hidden');
+
+            if (totalGlasses === 0) {
+                playDrinkSound();
+                showFeedback(
+                    "ELVESZÍTETTED AZ ÖSSZES POHARAD!",
+                    `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került! Meg kell innod őket!`,
+                    "💀"
+                );
+                document.getElementById('next-question-btn').textContent = "🏁 Játék befejezése";
+            } else if (lostGlasses > 0) {
+                playDrinkSound();
+                showFeedback(
+                    `${lostGlasses} poharat veszítettél!`,
+                    `Elveszítettél <strong>${lostGlasses} poharat</strong> – meg kell innod!<br><br>Továbbviszel <strong>${survivedGlasses} poharat</strong> a következő kérdésre.`,
+                    "🍺"
+                );
+                document.getElementById('next-question-btn').textContent =
+                    currentQuestionIndex < questions.length - 1 ? "➡️ Következő kérdés" : "🏆 Eredményhirdetés";
+            } else {
+                playSuccessSound();
+                showFeedback(
+                    "Nem hibáztál!",
+                    `A játékos ebben a kérdésben nem hibázott! Nem kell innia! Mind a(z) <strong>${survivedGlasses} pohár</strong> megmaradt.`,
+                    "🎉"
+                );
+                document.getElementById('next-question-btn').textContent =
+                    currentQuestionIndex < questions.length - 1 ? "➡️ Következő kérdés" : "🏆 Eredményhirdetés";
+            }
+        }
+
+        function nextQuestion() {
+            if (totalGlasses <= 0) {
+                showFeedback(
+                    "Játék vége!",
+                    "Elfogyott az összes poharad! Köszönjük, hogy játsszottál!",
+                    "🍻",
+                    () => exitToMenu()
+                );
+                return;
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                prepareQuestion();
+            } else {
+                playSuccessSound();
+                showFeedback(
+                    "Játék vége! Gratulálunk!",
+                    `Végigjátszottad a(z) <strong>${activeSetName}</strong> kérdéssort, és még maradt <strong>${totalGlasses} poharad</strong>!`,
+                    "🏆",
+                    () => exitToMenu()
+                );
+            }
+        }
+
+        /* ==========================================================================
+           9. SEGÍTSÉGEK (Felező, Közönség, Hülye Vagyok 10 mp, Poharak Újratöltése)
+           ========================================================================== */
+        // 1. Felező
+        function useFiftyFifty(btn) {
+            if (lifelines.fiftyFifty || isRoundChecked) return;
+
+            const wrongIndices = displayedAnswers
+                .map((ans, idx) => (!ans.isCorrect ? idx : -1))
+                .filter(idx => idx !== -1);
+
+            for (let i = wrongIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [wrongIndices[i], wrongIndices[j]] = [wrongIndices[j], wrongIndices[i]];
+            }
+            const toHide = wrongIndices.slice(0, 2);
+
+            toHide.forEach(idx => {
+                displayedAnswers[idx].hidden = true;
+                answerBets[idx] = 0;
+            });
+
+            if (displayedAnswers[selectedAnswerSlot].hidden) {
+                selectedAnswerSlot = displayedAnswers.findIndex(a => !a.hidden);
+            }
+
+            lifelines.fiftyFifty = true;
+            btn.classList.add('lifeline-used');
+            playTone(660, 'sine', 0.2, 0.15);
+            renderGameUI();
+        }
+
+        // 2. Közönség (oszlopdiagram + válasz kártya badge)
+        function useAudienceHelp(btn) {
+            if (lifelines.audience || isRoundChecked) return;
+
+            const visibleIndices = displayedAnswers
+                .map((a, idx) => (!a.hidden ? idx : -1))
+                .filter(idx => idx !== -1);
+
+            const correctPct = Math.floor(Math.random() * 23) + 52; // 52% - 74%
+            let remainder = 100 - correctPct;
+
+            const wrongVisible = visibleIndices.filter(idx => !displayedAnswers[idx].isCorrect);
+            wrongVisible.forEach((idx, i) => {
+                if (i === wrongVisible.length - 1) {
+                    displayedAnswers[idx].audiencePct = remainder;
+                } else {
+                    const share = Math.floor(Math.random() * (remainder + 1));
+                    displayedAnswers[idx].audiencePct = share;
+                    remainder -= share;
+                }
+            });
+
+            const correctIdx = visibleIndices.find(idx => displayedAnswers[idx].isCorrect);
+            if (correctIdx !== undefined) {
+                displayedAnswers[correctIdx].audiencePct = correctPct;
+            }
+
+            // Oszlopdiagram kirajzolása
+            const letters = ['A', 'B', 'C', 'D'];
+            const barsContainer = document.getElementById('audience-bars');
+            barsContainer.innerHTML = '';
+
+            displayedAnswers.forEach((ans, idx) => {
+                const pct = ans.hidden ? 0 : (ans.audiencePct || 0);
+                barsContainer.innerHTML += `
+                    <div class="flex flex-col items-center justify-end h-full">
+                        <span class="text-xs font-black text-amber-300 mb-1">${ans.hidden ? '–' : pct + '%'}</span>
+                        <div class="w-10 sm:w-12 bg-slate-800 rounded-t-lg flex items-end h-16 overflow-hidden border border-slate-700">
+                            <div class="w-full bg-gradient-to-t from-amber-600 to-yellow-400 transition-all duration-500" style="height: ${pct}%;"></div>
+                        </div>
+                        <span class="text-xs font-extrabold text-slate-300 mt-1">${letters[idx]}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('audience-chart-box').classList.remove('hidden');
+
+            lifelines.audience = true;
+            btn.classList.add('lifeline-used');
+            playTone(740, 'sine', 0.2, 0.15);
+            renderGameUI();
+        }
+
+        // 3. Hülye Vagyok (Csak az aktuális kérdés sorszáma + 10 mp visszaszámláló)
+        function openHulyeVagyok() {
+            if (lifelines.hulyeVagyok) {
+                showFeedback("Már felhasználtad!", "Ezt a segítséget játékonként csak egyszer használhatod.", "🤖");
+                return;
+            }
+
+            stopHulyeTimer();
+            const qNum = currentQuestionIndex + 1;
+
+            document.getElementById('hulye-timer-wrapper').classList.add('hidden');
+            document.getElementById('chat-content').innerHTML = `
+                <div class="bg-slate-800 text-amber-200 p-3.5 rounded-2xl rounded-tl-none leading-relaxed">
+                    <strong>Hülye Vagyok Bot:</strong> Jelenleg a(z) <strong>${qNum}. kérdésnél</strong> jársz. Kizárólag erre az aktuális kérdésre kérheted le a választ!
+                </div>
+            `;
+
+            const askBtn = document.getElementById('ask-current-q-btn');
+            askBtn.classList.remove('hidden');
+            askBtn.disabled = false;
+            askBtn.textContent = `💡 ${qNum}. kérdés válaszának lekérése`;
+
+            toggleModal('hulye-vagyok-modal', true);
+        }
+
+        function revealCurrentQuestionAnswer() {
+            if (lifelines.hulyeVagyok) return;
+
+            const qNum = currentQuestionIndex + 1;
+            const currentQ = questions[currentQuestionIndex];
+            const correctAns = currentQ.answers[currentQ.correct];
+            const chatContent = document.getElementById('chat-content');
+
+            chatContent.innerHTML += `
+                <div class="bg-yellow-500/20 border border-yellow-500/40 text-white p-2.5 rounded-2xl rounded-tr-none ml-auto max-w-[85%] text-right">
+                    Kérem a(z) <strong>${qNum}. kérdés</strong> helyes válaszát!
+                </div>
+                <div class="bg-emerald-950/85 border border-emerald-500/50 text-emerald-200 p-3.5 rounded-2xl rounded-tl-none leading-relaxed">
+                    <strong>Hülye Vagyok Bot:</strong> A(z) ${qNum}. kérdésre (<em>"${currentQ.question}"</em>) a helyes válasz:<br>
+                    <span class="inline-block mt-1.5 text-base font-black text-yellow-300 underline">${correctAns}</span>
+                </div>
+            `;
+            chatContent.scrollTop = chatContent.scrollHeight;
+
+            lifelines.hulyeVagyok = true;
+            document.getElementById('help-hulye').classList.add('lifeline-used');
+            document.getElementById('ask-current-q-btn').classList.add('hidden');
+            playSuccessSound();
+
+            startHulyeTimer(10);
+        }
+
+        function startHulyeTimer(seconds) {
+            stopHulyeTimer();
+            hulyeSecondsLeft = seconds;
+
+            const wrapper = document.getElementById('hulye-timer-wrapper');
+            const timerText = document.getElementById('hulye-timer-text');
+            const timerBar = document.getElementById('hulye-timer-bar');
+
+            wrapper.classList.remove('hidden');
+            timerText.textContent = `${hulyeSecondsLeft} mp`;
+            timerBar.style.transition = 'none';
+            timerBar.style.width = '100%';
+
+            void timerBar.offsetWidth;
+            timerBar.style.transition = `width ${seconds}s linear`;
+            timerBar.style.width = '0%';
+
+            hulyeTimerInterval = setInterval(() => {
+                hulyeSecondsLeft--;
+                if (hulyeSecondsLeft > 0) {
+                    timerText.textContent = `${hulyeSecondsLeft} mp`;
+                    playTone(880, 'sine', 0.04, 0.04);
+                } else {
+                    timerText.textContent = '0 mp';
+                    closeHulyeVagyokModal();
+                }
+            }, 1000);
+        }
+
+        function stopHulyeTimer() {
+            if (hulyeTimerInterval) {
+                clearInterval(hulyeTimerInterval);
+                hulyeTimerInterval = null;
+            }
+        }
+
+        function closeHulyeVagyokModal() {
+            stopHulyeTimer();
+            toggleModal('hulye-vagyok-modal', false);
+        }
+
+        // 4. Poharak Újratöltése (ha <= 2 pohár maradt)
+        function refillGlasses(btn) {
+            if (lifelines.refill) {
+                showFeedback("Már felhasználtad!", "A poharak újratöltése már felhasználásra került.", "🍷");
+                return;
+            }
+
+            if (totalGlasses <= 2) {
+                totalGlasses = 10;
+                lifelines.refill = true;
+                btn.classList.add('lifeline-used');
+                playSuccessSound();
+
+                if (isRoundChecked && currentQuestionIndex < questions.length - 1) {
+                    document.getElementById('next-question-btn').textContent = "➡️ Következő kérdés";
+                }
+
+                renderGameUI();
+                showFeedback("Poharak újratöltve!", "A készleted újra <strong>10 darab piros pohár</strong>! Sok sikert!", "🍷");
+            } else {
+                showFeedback(
+                    "Nem használható még!",
+                    `A poharak újratöltése csak akkor lehetséges, ha már csak <strong>2 vagy kevesebb</strong> pohár van (jelenleg ${totalGlasses} db maradt)!`,
+                    "⚠️"
+                );
+            }
+        }
+
+        /* ==========================================================================
+           10. CREATE ÉS KÉRDÉSEK BETÖLTÉSE MODÁLOK (localStorage)
+           ========================================================================== */
+        function openCreateModal(editName = null) {
+            const container = document.getElementById('questions-container');
+            const nameInput = document.getElementById('question-set-name');
+            container.innerHTML = '';
+
+            if (editName) {
+                const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+                const set = saved[editName];
+                if (set) {
+                    nameInput.value = editName;
+                    set.forEach(q => addQuestionItem(q));
+                }
+            } else {
+                nameInput.value = '';
+                addQuestionItem();
+            }
+
+            toggleModal('create-modal', true);
+        }
+
+        function addQuestionItem(prefill = null) {
+            const container = document.getElementById('questions-container');
+            const count = container.getElementsByClassName('question-item').length;
+
+            if (count >= 15) {
+                showFeedback("Maximum elérve", "Maximum 15 kérdést lehet hozzáadni egy kérdéssorhoz.", "⚠️");
+                return;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'question-item bg-slate-800/80 border border-slate-700 rounded-2xl p-4 relative';
+            const correctVal = prefill ? prefill.correct + 1 : 1;
+
+            div.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-black uppercase text-yellow-400">Kérdés #${count + 1}</span>
+                    ${count > 0 ? `<button onclick="this.closest('.question-item').remove()" class="text-xs text-red-400 hover:text-red-300 font-bold cursor-pointer">Törlés</button>` : ''}
+                </div>
+                <input type="text" class="q-text w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white mb-2.5" placeholder="Kérdés" value="${prefill ? prefill.question.replace(/"/g, '&quot;') : ''}">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
+                    <input type="text" class="q-ans-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 1" value="${prefill ? prefill.answers[0].replace(/"/g, '&quot;') : ''}">
+                    <input type="text" class="q-ans-2 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 2" value="${prefill ? prefill.answers[1].replace(/"/g, '&quot;') : ''}">
+                    <input type="text" class="q-ans-3 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 3" value="${prefill ? prefill.answers[2].replace(/"/g, '&quot;') : ''}">
+                    <input type="text" class="q-ans-4 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 4" value="${prefill ? prefill.answers[3].replace(/"/g, '&quot;') : ''}">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs text-slate-300 font-semibold">Helyes válasz száma (1-4):</label>
+                    <select class="q-correct bg-slate-900 border border-yellow-500/50 rounded-lg px-3 py-1 text-sm text-yellow-300 font-bold">
+                        <option value="1" ${correctVal === 1 ? 'selected' : ''}>1</option>
+                        <option value="2" ${correctVal === 2 ? 'selected' : ''}>2</option>
+                        <option value="3" ${correctVal === 3 ? 'selected' : ''}>3</option>
+                        <option value="4" ${correctVal === 4 ? 'selected' : ''}>4</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function saveQuestions() {
+            const setName = document.getElementById('question-set-name').value.trim();
+            if (!setName) {
+                showFeedback("Hiányzó név", "Kérlek, adj meg egy nevet a kérdéssornak!", "⚠️");
+                return;
+            }
+
+            const items = document.getElementById('questions-container').getElementsByClassName('question-item');
+            const parsedQuestions = [];
+
+            for (let i = 0; i < items.length; i++) {
+                const qText = items[i].querySelector('.q-text').value.trim();
+                const a1 = items[i].querySelector('.q-ans-1').value.trim();
+                const a2 = items[i].querySelector('.q-ans-2').value.trim();
+                const a3 = items[i].querySelector('.q-ans-3').value.trim();
+                const a4 = items[i].querySelector('.q-ans-4').value.trim();
+                const correctIdx = parseInt(items[i].querySelector('.q-correct').value, 10) - 1;
+
+                if (!qText || !a1 || !a2 || !a3 || !a4) {
+                    showFeedback("Hiányos adatok", `A(z) ${i + 1}. kérdésnél minden mezőt ki kell tölteni!`, "⚠️");
+                    return;
+                }
+
+                parsedQuestions.push({
+                    question: qText,
+                    answers: [a1, a2, a3, a4],
+                    correct: correctIdx
+                });
+            }
+
+            if (parsedQuestions.length === 0) {
+                showFeedback("Nincs kérdés", "Legalább egy kérdést adj meg!", "⚠️");
+                return;
+            }
+
+            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            saved[setName] = parsedQuestions;
+            localStorage.setItem('SavedQuestions', JSON.stringify(saved));
+
+            currentDifficultyKey = 'custom';
+            activeSetName = setName;
+            questions = parsedQuestions;
+            document.getElementById('active-set-label').textContent = `${setName} (${questions.length} kérdés)`;
+
+            ['easy', 'normal', 'hard'].forEach(key => {
+                document.getElementById(`btn-diff-${key}`)?.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+            });
+
+            toggleModal('create-modal', false);
+            showFeedback("Mentve!", `A(z) <strong>"${setName}"</strong> kérdéssor elmentve és kiválasztva!`, "✅");
+        }
+
+        function showLoadModal() {
+            const listEl = document.getElementById('saved-questions-list');
+            listEl.innerHTML = '';
+
+            const rotation = getRotationState();
+
+            listEl.innerHTML += `<p class="text-xs font-bold uppercase tracking-wider text-yellow-400/90 mb-1">Beépített nehézségi szintek (5×15 kérdés / szint):</p>`;
+
+            ['easy', 'normal', 'hard'].forEach(diffKey => {
+                const diffObj = BUILTIN_DIFFICULTIES[diffKey];
+                const nextNum = ((rotation[diffKey] || 0) % diffObj.sets.length) + 1;
+
+                listEl.innerHTML += `
+                    <div class="bg-slate-800/90 border border-yellow-500/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold uppercase text-yellow-400">Beépített szint</span>
+                                <span class="text-[11px] bg-slate-900 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full">Következő: ${nextNum}/5. sor</span>
+                            </div>
+                            <h4 class="font-extrabold text-white text-base mt-0.5">${diffObj.icon} ${diffObj.label} fokozat (15 kérdés)</h4>
+                            <p class="text-xs text-slate-400">${diffObj.description}</p>
+                        </div>
+                        <button onclick="loadBuiltInFromModal('${diffKey}')" class="shrink-0 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer">
+                            Betöltés (${nextNum}/5)
+                        </button>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML += `<p class="text-xs font-bold uppercase tracking-wider text-slate-400 pt-2 mb-1">Saját mentett kérdéssorok:</p>`;
+
+            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const names = Object.keys(saved);
+
+            if (names.length === 0) {
+                listEl.innerHTML += `<p class="text-center text-slate-500 text-xs py-3">Még nincs saját mentett kérdéssorod.</p>`;
+            } else {
+                names.forEach(name => {
+                    const count = saved[name].length;
+                    const safeName = name.replace(/'/g, "\\'");
+                    listEl.innerHTML += `
+                        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <h4 class="font-bold text-white">${name}</h4>
+                                <span class="text-xs text-slate-400">${count} kérdés</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="loadCustomSet('${safeName}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                                    Betöltés
+                                </button>
+                                <button onclick="toggleModal('load-modal', false); openCreateModal('${safeName}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                                    Szerkesztés
+                                </button>
+                                <button onclick="deleteCustomSet('${safeName}')" class="bg-red-600/80 hover:bg-red-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                                    Törlés
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            toggleModal('load-modal', true);
+        }
+
+        function loadBuiltInFromModal(diffKey) {
+            toggleModal('load-modal', false);
+            currentDifficultyKey = diffKey;
+            loadBuiltInDifficultySet(diffKey, true, false);
+        }
+
+        function loadCustomSet(name) {
+            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            if (saved[name]) {
+                currentDifficultyKey = 'custom';
+                activeSetName = name;
+                questions = saved[name];
+                document.getElementById('active-set-label').textContent = `${name} (${questions.length} kérdés)`;
+                ['easy', 'normal', 'hard'].forEach(key => {
+                    document.getElementById(`btn-diff-${key}`)?.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                });
+                toggleModal('load-modal', false);
+                startSetCountdownTimer(true);
+                showFeedback("Kérdéssor betöltve!", `A(z) <strong>"${name}"</strong> kérdéssor aktív!`, "✅");
+            }
+        }
+
+        function deleteCustomSet(name) {
+            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            delete saved[name];
+            localStorage.setItem('SavedQuestions', JSON.stringify(saved));
+            if (activeSetName === name) {
+                loadBuiltInDifficultySet('easy', true, false);
+            }
+            showLoadModal();
+        }
+
+        /* ==========================================================================
+           11. BEÁLLÍTÁSOK ÉS TÉMA TESTRESZABÁS
+           ========================================================================== */
+        function toggleSettingsMenu() {
+            const menu = document.getElementById('settings-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function setPaletteColor() {
+            const color = document.getElementById('palette-color-input').value;
+            document.body.style.backgroundImage = 'none';
+            document.body.style.backgroundColor = color;
+            localStorage.setItem('backgroundColor', color);
+            toggleSettingsMenu();
+        }
+
+        function resetBackgroundColor() {
+            localStorage.removeItem('backgroundColor');
+            document.body.style.backgroundColor = '#0b0f19';
+            document.body.style.backgroundImage = 'radial-gradient(circle at 50% 0%, #2a1118 0%, #0b0f19 75%)';
+            toggleSettingsMenu();
+        }
+
+        function exitToMenu() {
+            stopHulyeTimer();
+            document.getElementById('settings-menu').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        // Inicializálás
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBuiltInDifficultySet('easy', true, true);
+
+            const savedColor = localStorage.getItem('backgroundColor');
+            if (savedColor) {
+                document.body.style.backgroundImage = 'none';
+                document.body.style.backgroundColor = savedColor;
+                document.getElementById('palette-color-input').value = savedColor;
+            }
+        });
+    </script>
+</body>
+</html>
