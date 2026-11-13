@@ -183,7 +183,7 @@
             <div class="flex flex-wrap items-center justify-center gap-2 mb-5">
                 <div class="inline-flex items-center gap-2 bg-slate-800/90 border border-yellow-500/30 px-4 py-2 rounded-full text-xs sm:text-sm text-yellow-300">
                     <span>Aktív szint:</span>
-                    <strong id="active-set-label" class="text-white">🟢 Könnyű (75 kérdés)</strong>
+                    <strong id="active-set-label" class="text-white">🟢 Könnyű (15 kérdés)</strong>
                 </div>
                 <!-- 5 perces visszaszámláló az automatikus újrakeverésig -->
                 <div class="inline-flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/50 px-3 py-2 rounded-full text-xs font-bold text-amber-300 shadow-inner" title="Idő a kérdések automatikus újrakeveréséig">
@@ -222,8 +222,8 @@
             </div>
 
             <div class="mt-8 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
-                <span>225 beépített kérdés (5 percenkénti automatikus újrakeveréssel)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.2 PERSISTENT SETTINGS</span>
+                <span>15 kérdéses paklik (5 percenkénti automatikus újrakeveréssel)</span>
+                <span class="font-mono font-bold text-yellow-400">v2.3 HOTFIX</span>
             </div>
         </div>
     </main>
@@ -236,7 +236,7 @@
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-yellow-500/30">
                     <span class="text-xs text-slate-400 block">Kérdés</span>
-                    <span id="question-counter" class="text-base sm:text-lg font-black text-yellow-400">1 / 75</span>
+                    <span id="question-counter" class="text-base sm:text-lg font-black text-yellow-400">1 / 15</span>
                 </div>
                 <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-red-500/30">
                     <span class="text-xs text-slate-400 block">Megmaradt poharak</span>
@@ -325,9 +325,13 @@
             <div id="feedback-icon" class="text-5xl mb-3">🍻</div>
             <h3 id="feedback-title" class="text-2xl font-black text-white mb-2">Eredmény</h3>
             <p id="feedback-message" class="text-slate-300 text-base mb-6 leading-relaxed"></p>
-            <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base transition cursor-pointer">
-                Rendben!
-            </button>
+            
+            <!-- Dinamikus gombok konténer a Modalban (ha elfogy a pohár és van újratöltés) -->
+            <div id="feedback-actions" class="flex flex-col gap-2.5">
+                <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base transition cursor-pointer">
+                    Rendben!
+                </button>
+            </div>
         </div>
     </div>
 
@@ -343,7 +347,7 @@
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">2.</span> <span>Minden kérdésnél az <strong>összes megmaradt poharadat</strong> szét kell osztanod a 4 válaszlehetőség között.</span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">3.</span> <span>Az <strong>Ellenőrzés</strong> után a rossz válaszra tett poharak elvesznek – <strong>annyit kell innod, ahány poharat elveszítettél!</strong></span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre.</span></li>
-                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (≤ 2 pohárnál).</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (egyszer használható).</span></li>
             </ul>
             <button onclick="toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl transition cursor-pointer">
                 Értem, induljon a buli!
@@ -418,7 +422,7 @@
 
     <script>
         /* ==========================================================================
-           1. EGYSÉGESÍTETT BEÉPÍTETT KÉRDÉSDATABÁZIS (Minden nehézség 1 nagy tömb)
+           1. EGYSÉGESÍTETT BEÉPÍTETT KÉRDÉSDATABÁZIS (15 kérdésre szűkítve)
            ========================================================================== */
         const ALL_BUILTIN_QUESTIONS = {
             easy: [
@@ -436,67 +440,7 @@
                 { question: "Melyik állat látható a Ferrari logójában?", answers: ["Ágaskodó ló", "Bika", "Oroszlán", "Sas"], correct: 0 },
                 { question: "Mi Japán fővárosa?", answers: ["Tokió", "Kiotó", "Oszaka", "Szöul"], correct: 0 },
                 { question: "Melyik gyümölcsből készül hagyományosan a valódi cider?", answers: ["Alma", "Szőlő", "Szilva", "Barack"], correct: 0 },
-                { question: "Hány színe van a szivárványnak a hagyományos felosztás szerint?", answers: ["7", "5", "6", "8"], correct: 0 },
-                { question: "Melyik ország fővárosa Párizs?", answers: ["Franciaország", "Belgium", "Svájc", "Hollandia"], correct: 0 },
-                { question: "Hány lába van egy póknak?", answers: ["8", "6", "10", "12"], correct: 0 },
-                { question: "Melyik évszak következik a tavasz után?", answers: ["Nyár", "Ősz", "Tél", "Tavasz"], correct: 0 },
-                { question: "Miből készül a popcorn (pattogatott kukorica)?", answers: ["Kukoricából", "Búzából", "Rizsből", "Burgonyából"], correct: 0 },
-                { question: "Melyik magyar tó Közép-Európa legnagyobb édesvizű tava?", answers: ["Balaton", "Velencei-tó", "Fertő tó", "Tisza-tó"], correct: 0 },
-                { question: "Ki írta a János vitéz című elbeszélő költeményt?", answers: ["Petőfi Sándor", "Arany János", "József Attila", "Ady Endre"], correct: 0 },
-                { question: "Melyik ital készül árpából, komlóból, vízből és élesztőből?", answers: ["Sör", "Bor", "Pálinka", "Pezsgő"], correct: 0 },
-                { question: "Hány órából áll egy teljes földi nap?", answers: ["24 órából", "12 órából", "48 órából", "36 órából"], correct: 0 },
-                { question: "Melyik szuperhős valódi neve Bruce Wayne?", answers: ["Batman", "Superman", "Pókember", "Vasember"], correct: 0 },
-                { question: "Milyen színű a magyar zászló három sávja fentről lefelé?", answers: ["Piros-fehér-zöld", "Zöld-fehér-piros", "Piros-zöld-fehér", "Fehér-piros-zöld"], correct: 0 },
-                { question: "Melyik hangszeren játszott Wolfgang Amadeus Mozart már gyermekkorában?", answers: ["Zongora (csembaló)", "Dob", "Trombita", "Szaxofon"], correct: 0 },
-                { question: "Melyik országból származik a pizza és a spagetti?", answers: ["Olaszország", "Görögország", "Törökország", "Portugália"], correct: 0 },
-                { question: "Hány játékos van egyszerre a pályán egy kosárlabdacsapatban?", answers: ["5", "6", "7", "11"], correct: 0 },
-                { question: "Mi a víz vegyjele?", answers: ["H2O", "CO2", "O2", "NaCl"], correct: 0 },
-                { question: "Melyik hónapban ünnepeljük a szilvesztert?", answers: ["December", "Január", "November", "Október"], correct: 0 },
-                { question: "Melyik állat a dzsungel királya a mesékben?", answers: ["Oroszlán", "Tigris", "Elefánt", "Zebra"], correct: 0 },
-                { question: "Hány foga van egy felnőtt embernek normál esetben?", answers: ["32", "28", "36", "24"], correct: 0 },
-                { question: "Melyik városban áll az Eiffel-torony?", answers: ["Párizs", "London", "Berlin", "Madrid"], correct: 0 },
-                { question: "Melyik növényből készül a hagyományos mexikói tequila?", answers: ["Kék agávé", "Kaktuszfüge", "Ananász", "Kókuszdió"], correct: 0 },
-                { question: "Hány nullát írunk az egymillió számjegybe?", answers: ["6", "5", "7", "9"], correct: 0 },
-                { question: "Melyik híres rajzfilmfigura lakik egy ananászban a tenger mélyén?", answers: ["SpongyaBob Kockanadrág", "Némó", "Ariel", "Popeye"], correct: 0 },
-                { question: "Melyik magyar folyó szeli ketté Budapestet?", answers: ["Duna", "Tisza", "Dráva", "Rába"], correct: 0 },
-                { question: "Milyen színű lesz a kék és a sárga festék összekeveréséből?", answers: ["Zöld", "Lila", "Narancssárga", "Barna"], correct: 0 },
-                { question: "Melyik ország fővárosa London?", answers: ["Egyesült Királyság", "Írország", "Kanada", "Ausztrália"], correct: 0 },
-                { question: "Hány bábuval kezd egy játékos egy sakkpartit?", answers: ["16", "12", "20", "8"], correct: 0 },
-                { question: "Melyik édesség fő alapanyaga a kakaóbab?", answers: ["Csokoládé", "Marcipán", "Karamell", "Nugát"], correct: 0 },
-                { question: "Melyik bolygó van legközelebb a Naphoz?", answers: ["Merkúr", "Vénusz", "Mars", "Föld"], correct: 0 },
-                { question: "Hány hétből áll egy esztendő?", answers: ["52 hétből", "48 hétből", "50 hétből", "54 hétből"], correct: 0 },
-                { question: "Melyik sportágban használnak ütőt és tollaslabdát?", answers: ["Tollaslabda", "Tenisz", "Squash", "Asztalitenisz"], correct: 0 },
-                { question: "Ki volt a magyarok első királya?", answers: ["Szent István", "Mátyás király", "Szent László", "IV. Béla"], correct: 0 },
-                { question: "Melyik zöldségből készül a hagyományos magyar lecsó egyik fő alapja?", answers: ["Paprika", "Uborka", "Cukkini", "Spenót"], correct: 0 },
-                { question: "Hány keréken gurul egy hagyományos személyautó?", answers: ["4", "2", "3", "6"], correct: 0 },
-                { question: "Melyik kontinensen élnek vadon a kenguruk?", answers: ["Ausztrália", "Afrika", "Dél-Amerika", "Európa"], correct: 0 },
-                { question: "Milyen italt keverünk a Cuba Libre koktélban a rumhoz és lime-hoz?", answers: ["Kólát", "Tonikot", "Narancslevet", "Szódavizet"], correct: 0 },
-                { question: "Hány napos a február egy nem szökőévben?", answers: ["28", "29", "30", "31"], correct: 0 },
-                { question: "Melyik mesében szerepel Hófehérke mellett hét apró bányász?", answers: ["Hófehérke és a hét törpe", "Csipkerózsika", "Hamupipőke", "Aranyhaj"], correct: 0 },
-                { question: "Melyik irányba kel fel a Nap?", answers: ["Kelet", "Nyugat", "Észak", "Dél"], correct: 0 },
-                { question: "Melyik magyar város beceneve a 'Napfény városa'?", answers: ["Szeged", "Pécs", "Győr", "Miskolc"], correct: 0 },
-                { question: "Hány másodperc van egy percben?", answers: ["60", "100", "30", "90"], correct: 0 },
-                { question: "Melyik állat adja a tejet, amiből a legtöbb sajtot készítik?", answers: ["Szarvasmarha (tehén)", "Ló", "Sertés", "Tyúk"], correct: 0 },
-                { question: "Melyik híres hajó süllyedt el 1912-ben egy jéghegynek ütközve?", answers: ["Titanic", "Britannic", "Lusitania", "Santa Maria"], correct: 0 },
-                { question: "Melyik ország zászlajában látható egy piros juharlevél?", answers: ["Kanada", "USA", "Svájc", "Ausztria"], correct: 0 },
-                { question: "Hány érzékszervünk van a klasszikus felosztás szerint?", answers: ["5", "4", "6", "7"], correct: 0 },
-                { question: "Milyen színű a taxi New Yorkban hagyományosan?", answers: ["Sárga", "Fekete", "Fehér", "Kék"], correct: 0 },
-                { question: "Melyik híres magyar feltaláló nevéhez fűződik a bűvös kocka?", answers: ["Rubik Ernő", "Bíró László", "Jedlik Ányos", "Puskás Tivadar"], correct: 0 },
-                { question: "Melyik ünnepen díszítünk fenyőfát?", answers: ["Karácsony", "Húsvét", "Pünkösd", "Halloween"], correct: 0 },
-                { question: "Hány oldala van egy szabályos hatszögnek?", answers: ["6", "5", "7", "8"], correct: 0 },
-                { question: "Melyik város a világ egyik leghíresebb kaszinóvárosa Nevadában?", answers: ["Las Vegas", "Miami", "Chicago", "Seattle"], correct: 0 },
-                { question: "Miből főzik a klasszikus magyar gulyáslevest?", answers: ["Marhahúsból", "Csirkemellből", "Halból", "Sertésmájból"], correct: 0 },
-                { question: "Hány betűből áll az angol ábécé?", answers: ["26", "44", "24", "30"], correct: 0 },
-                { question: "Melyik állat alszik téli álmot a barlangjában?", answers: ["Barna medve", "Farkas", "Szarvas", "Vaddisznó"], correct: 0 },
-                { question: "Melyik tenger mossa Horvátország partjait?", answers: ["Adriai-tenger", "Északi-tenger", "Balti-tenger", "Fekete-tenger"], correct: 0 },
-                { question: "Ki énekelte a 'Thriller' című világhírű slágert?", answers: ["Michael Jackson", "Elvis Presley", "Prince", "Freddie Mercury"], correct: 0 },
-                { question: "Hány perc egy félidő a labdarúgásban?", answers: ["45 perc", "30 perc", "40 perc", "50 perc"], correct: 0 },
-                { question: "Melyik ital készül erjesztett szőlőléből?", answers: ["Bor", "Sör", "Whisky", "Gin"], correct: 0 },
-                { question: "Melyik bolygót hívják Vörös Bolygónak?", answers: ["Mars", "Vénusz", "Jupiter", "Szaturnusz"], correct: 0 },
-                { question: "Milyen hangszer a Stradivari?", answers: ["Hegedű", "Zongora", "Fuvola", "Hárfa"], correct: 0 },
-                { question: "Melyik ország fővárosa Bécs?", answers: ["Ausztria", "Németország", "Csehország", "Szlovákia"], correct: 0 },
-                { question: "Hány darab ász van egy francia kártyapakliban?", answers: ["4", "2", "6", "8"], correct: 0 },
-                { question: "Melyik mesebeli karakternek nőtt meg az orra, ha hazudott?", answers: ["Pinokkió", "Pán Péter", "Aladdin", "Shrek"], correct: 0 }
+                { question: "Hány színe van a szivárványnak a hagyományos felosztás szerint?", answers: ["7", "5", "6", "8"], correct: 0 }
             ],
             normal: [
                 { question: "Melyik kémiai elem vegyjele az 'Au'?", answers: ["Arany", "Ezüst", "Alumínium", "Réz"], correct: 0 },
@@ -513,67 +457,7 @@
                 { question: "Milyen állat a dingo?", answers: ["Vadon élő kutya Ausztráliában", "Dél-amerikai macskaféle", "Afrikai antilop", "Ázsiai majomfaj"], correct: 0 },
                 { question: "Melyik évben lépett ember először a Holdra?", answers: ["1969", "1965", "1972", "1959"], correct: 0 },
                 { question: "Mi a golyóstoll magyar feltalálójának a neve?", answers: ["Bíró László József", "Jedlik Ányos", "Irinyi János", "Teller Ede"], correct: 0 },
-                { question: "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?", answers: ["Úszás", "Atlétika", "Torna", "Evezés"], correct: 0 },
-                { question: "Melyik ország fővárosa Reykjavík?", answers: ["Izland", "Norvégia", "Finnország", "Dánia"], correct: 0 },
-                { question: "Melyik növényből készül a gin jellegzetes fűszerezése?", answers: ["Borókabogyó", "Ánizs", "Fahéj", "Kardamom"], correct: 0 },
-                { question: "Ki rendezte a 'Ponyvaregény' (Pulp Fiction) című kultfilmet?", answers: ["Quentin Tarantino", "Martin Scorsese", "Steven Spielberg", "Christopher Nolan"], correct: 0 },
-                { question: "Melyik magyar király alapította a híres Bibliotheca Corviniana könyvtárat?", answers: ["Hunyadi Mátyás", "Szent István", "Nagy Lajos", "Zsigmond király"], correct: 0 },
-                { question: "Mi a Föld legmagasabb hegycsúcsa a tengerszint felett mérve?", answers: ["Mount Everest (Csomolungma)", "K2", "Kilimandzsáró", "Mont Blanc"], correct: 0 },
-                { question: "Melyik gáz teszi ki a Föld légkörének legnagyobb részét (kb. 78%)?", answers: ["Nitrogén", "Oxigén", "Szén-dioxid", "Argon"], correct: 0 },
-                { question: "Melyik város adott otthont a 2024-es nyári olimpiai játékoknak?", answers: ["Párizs", "Tokió", "Los Angeles", "London"], correct: 0 },
-                { question: "Melyik olasz desszert jelentése szó szerint: 'dobj fel' / 'élénkíts fel'?", answers: ["Tiramisu", "Panna cotta", "Cannoli", "Gelato"], correct: 0 },
-                { question: "Ki írta 'Az ember tragédiája' című drámai költeményt?", answers: ["Madách Imre", "Vörösmarty Mihály", "Katona József", "Arany János"], correct: 0 },
-                { question: "Melyik ország pénzneme a jen (yen)?", answers: ["Japán", "Kína", "Dél-Korea", "Vietnám"], correct: 0 },
-                { question: "Hány billentyűje van egy szabványos modern hangversenyzongorának?", answers: ["88", "76", "64", "96"], correct: 0 },
-                { question: "Hol torkollik a Tisza a Dunába?", answers: ["Szerbiában (Titel közelében)", "Szegednél", "Mohácsnál", "Bajánál"], correct: 0 },
-                { question: "Melyik vitamin termelődik az emberi bőrben a napfény hatására?", answers: ["D-vitamin", "C-vitamin", "A-vitamin", "B12-vitamin"], correct: 0 },
-                { question: "Melyik rockzenekar leghíresebb albuma a 'The Dark Side of the Moon'?", answers: ["Pink Floyd", "The Rolling Stones", "Deep Purple", "AC/DC"], correct: 0 },
-                { question: "Melyik országból származik a feta sajt?", answers: ["Görögország", "Olaszország", "Spanyolország", "Franciaország"], correct: 0 },
-                { question: "Melyik évben csatlakozott Magyarország az Európai Unióhoz?", answers: ["2004", "1999", "2007", "2001"], correct: 0 },
-                { question: "Melyik szervünk termeli az inzulint?", answers: ["Hasnyálmirigy", "Máj", "Vese", "Lép"], correct: 0 },
-                { question: "Ki játszotta Jack Sparrow kapitányt A Karib-tenger kalózai filmekben?", answers: ["Johnny Depp", "Orlando Bloom", "Brad Pitt", "Tom Cruise"], correct: 0 },
-                { question: "Melyik országban található a Machu Picchu inka romváros?", answers: ["Peru", "Mexikó", "Chile", "Kolumbia"], correct: 0 },
-                { question: "Melyik növény az Abszint hagyományos fő fűszere?", answers: ["Fehér üröm", "Komló", "Boróka", "Köménymag"], correct: 0 },
-                { question: "Hány gyűrű látható az olimpiai zászlón?", answers: ["5", "4", "6", "7"], correct: 0 },
-                { question: "Melyik fizikus fogalmazta meg a relativitáselméletet?", answers: ["Albert Einstein", "Isaac Newton", "Nikola Tesla", "Galileo Galilei"], correct: 0 },
-                { question: "Melyik magyar városban található a híres Zsolnay Kulturális Negyed?", answers: ["Pécs", "Győr", "Székesfehérvár", "Kecskemét"], correct: 0 },
-                { question: "Melyik kontinens legnépesebb országa Brazília?", answers: ["Dél-Amerika", "Észak-Amerika", "Afrika", "Ázsia"], correct: 0 },
-                { question: "Melyik sakkfigura léphet kizárólag átlósan?", answers: ["Futó", "Bástya", "Huszár", "Gyalog"], correct: 0 },
-                { question: "Ki szerezte a 'Négy évszak' című hegedűverseny-sorozatot?", answers: ["Antonio Vivaldi", "Johann Sebastian Bach", "Ludwig van Beethoven", "Joseph Haydn"], correct: 0 },
-                { question: "Melyik elemnek a vegyjele a 'Fe'?", answers: ["Vas", "Foszfor", "Fluor", "Fermium"], correct: 0 },
-                { question: "Melyik film nyerte a legtöbb Oscar-díjat a Titanic és a Ben-Hur mellett?", answers: ["A Gyűrűk Ura: A király visszatér", "Avatar", "Gladiátor", "A Keresztapa"], correct: 0 },
-                { question: "Melyik tenger választja el Európát Afrikától?", answers: ["Földközi-tenger", "Vörös-tenger", "Fekete-tenger", "Kaszpi-tenger"], correct: 0 },
-                { question: "Melyik magyar feltaláló alkotta meg a zajtalan, biztonságos gyufát?", answers: ["Irinyi János", "Bánki Donát", "Kandó Kálmán", "Eötvös Loránd"], correct: 0 },
-                { question: "Melyik ország fővárosa Canberra?", answers: ["Ausztrália", "Új-Zéland", "Kanada", "Dél-afrikai Köztársaság"], correct: 0 },
-                { question: "Hány fokon forr a tiszta víz normál légköri nyomáson?", answers: ["100 °C", "90 °C", "110 °C", "80 °C"], correct: 0 },
-                { question: "Ki írta a Harry Potter-könyvsorozatot?", answers: ["J. K. Rowling", "J. R. R. Tolkien", "George R. R. Martin", "Stephen King"], correct: 0 },
-                { question: "Melyik híres magyar focista volt az Aranycsapat csapatkapitánya?", answers: ["Puskás Ferenc", "Hidegkuti Nándor", "Kocsis Sándor", "Bozsik József"], correct: 0 },
-                { question: "Melyik országból származik a világhírű Guinness sör?", answers: ["Írország", "Skócia", "Anglia", "Németország"], correct: 0 },
-                { question: "Hány bolygó kering a Nap körül a Naprendszerben a jelenlegi besorolás szerint?", answers: ["8", "9", "7", "10"], correct: 0 },
-                { question: "Melyik festő vágta le saját fülének egy részét?", answers: ["Vincent van Gogh", "Pablo Picasso", "Salvador Dalí", "Claude Monet"], correct: 0 },
-                { question: "Melyik magyar nemzeti park volt az első, amelyet 1973-ban alapítottak?", answers: ["Hortobágyi Nemzeti Park", "Bükki Nemzeti Park", "Kiskunsági Nemzeti Park", "Aggteleki Nemzeti Park"], correct: 0 },
-                { question: "Melyik hangszer a tuba rézfúvós rokona?", answers: ["Harsona / Kürt", "Klarinét", "Oboa", "Fagott"], correct: 0 },
-                { question: "Mi a Föld leghosszabb folyója a legelfogadottabb mérések szerint?", answers: ["Nílus", "Amazonas", "Jangce", "Mississippi"], correct: 0 },
-                { question: "Melyik országban található a híres Oktoberfest sörfesztivál központja, München?", answers: ["Németország", "Ausztria", "Svájc", "Csehország"], correct: 0 },
-                { question: "Melyik emberi vércsoport számít általános donornak?", answers: ["0 negatív", "AB pozitív", "A pozitív", "B negatív"], correct: 0 },
-                { question: "Melyik évben omlott le a berlini fal?", answers: ["1989", "1991", "1985", "1990"], correct: 0 },
-                { question: "Melyik gyümölcsöt szárítják meg, hogy mazsolát kapjanak?", answers: ["Szőlő", "Szilva", "Áfonya", "Füge"], correct: 0 },
-                { question: "Ki alakította a Terminátort az 1984-es sci-fi akciófilmben?", answers: ["Arnold Schwarzenegger", "Sylvester Stallone", "Bruce Willis", "Jean-Claude Van Damme"], correct: 0 },
-                { question: "Melyik ország fővárosa Buenos Aires?", answers: ["Argentína", "Brazília", "Chile", "Uruguay"], correct: 0 },
-                { question: "Melyik magyar író műve az 'Egri csillagok'?", answers: ["Gárdonyi Géza", "Jókai Mór", "Mikszáth Kálmán", "Móricz Zsigmond"], correct: 0 },
-                { question: "Mi a konyhasó kémiai neve?", answers: ["Nátrium-klorid", "Kálium-klorid", "Nátrium-hidrogén-karbonát", "Kalcium-karbonát"], correct: 0 },
-                { question: "Melyik tenisztornát játsszák hagyományosan füves borításon?", answers: ["Wimbledon", "Roland Garros", "US Open", "Australian Open"], correct: 0 },
-                { question: "Melyik koktél összetevői: vodka, paradicsomlé, citromlé, Worcestershire-szósz és Tabasco?", answers: ["Bloody Mary", "Cosmopolitan", "Screwdriver", "Moscow Mule"], correct: 0 },
-                { question: "Hány üregből áll az emberi szív?", answers: ["4 üregből (2 pitvar, 2 kamra)", "2 üregből", "3 üregből", "6 üregből"], correct: 0 },
-                { question: "Melyik ország állami zászlaja az egyetlen nem négyszögletű zászló a világon?", answers: ["Nepál", "Bhután", "Svájc", "Vatikán"], correct: 0 },
-                { question: "Ki szerezte 'A kékszakállú herceg vára' című operát?", answers: ["Bartók Béla", "Kodály Zoltán", "Liszt Ferenc", "Erkel Ferenc"], correct: 0 },
-                { question: "Melyik évben zajlott a mohácsi csata?", answers: ["1526", "1541", "1456", "1686"], correct: 0 },
-                { question: "Melyik bolygónak van a leglátványosabb gyűrűrendszere?", answers: ["Szaturnusz", "Uránusz", "Neptunusz", "Jupiter"], correct: 0 },
-                { question: "Melyik országból származik az IKEA bútoráruházlánc?", answers: ["Svédország", "Dánia", "Norvégia", "Finnország"], correct: 0 },
-                { question: "Melyik állat a leggyorsabb szárazföldi emlős rövid távon?", answers: ["Gepárd", "Oroszlán", "Villásszarvú antilop", "Strucc"], correct: 0 },
-                { question: "Milyen fémből készül a bronz ötvözet a réz mellett?", answers: ["Ón", "Cink", "Vas", "Nikkel"], correct: 0 },
-                { question: "Melyik városban található a híres Sagrada Família bazilika?", answers: ["Barcelona", "Madrid", "Sevilla", "Valencia"], correct: 0 },
-                { question: "Hány darab csillag látható az Európai Unió zászlaján?", answers: ["12", "15", "27", "10"], correct: 0 }
+                { question: "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?", answers: ["Úszás", "Atlétika", "Torna", "Evezés"], correct: 0 }
             ],
             hard: [
                 { question: "Melyik kémiai elem rendszáma a 79-es a periódusos rendszerben?", answers: ["Arany (Au)", "Platina (Pt)", "Higany (Hg)", "Ezüst (Ag)"], correct: 0 },
@@ -590,67 +474,7 @@
                 { question: "Melyik évben ért véget a százéves háború Anglia és Franciaország között?", answers: ["1453", "1337", "1415", "1492"], correct: 0 },
                 { question: "Melyik ország szigete Szocotra, amely különleges sárkányvérfáiról híres?", answers: ["Jemen", "Omán", "Szomália", "Madagaszkár"], correct: 0 },
                 { question: "Ki festette a 'Guernica' című monumentális háborúellenes festményt 1937-ben?", answers: ["Pablo Picasso", "Salvador Dalí", "Joan Miró", "Francisco Goya"], correct: 0 },
-                { question: "Mi az emberi test legkisebb csontja, amely a középfülben található?", answers: ["Kengyel (stapes)", "Üllő (incus)", "Kalapács (malleus)", "Ekecsont (vomer)"], correct: 0 },
-                { question: "Melyik évben zajlott a nándorfehérvári diadal Hunyadi János vezetésével?", answers: ["1456", "1444", "1490", "1514"], correct: 0 },
-                { question: "Melyik kémiai elem vegyjele a 'W'?", answers: ["Volfrám", "Vanádium", "Bizmut", "Bárium"], correct: 0 },
-                { question: "Mi a fény terjedési sebessége vákuumban (kereken km/s-ban)?", answers: ["299 792 km/s", "150 000 km/s", "340 000 km/s", "1 080 000 km/s"], correct: 0 },
-                { question: "Ki volt a Római Birodalom első császára?", answers: ["Augustus (Octavianus)", "Julius Caesar", "Nero", "Tiberius"], correct: 0 },
-                { question: "Melyik két dél-amerikai ország vitatott nemzeti itala a Pisco?", answers: ["Peru és Chile", "Brazília és Argentína", "Mexikó és Kuba", "Kolumbia és Venezuela"], correct: 0 },
-                { question: "Melyik szoros választja el Ázsiát Észak-Amerikától?", answers: ["Bering-szoros", "Gibraltári-szoros", "Malakka-szoros", "Boszporusz"], correct: 0 },
-                { question: "Melyik magyar író nyerte el az irodalmi Nobel-díjat 2002-ben?", answers: ["Kertész Imre", "Nádas Péter", "Esterházy Péter", "Krasznahorkai László"], correct: 0 },
-                { question: "Hány szimfóniát komponált Ludwig van Beethoven?", answers: ["9", "7", "12", "41"], correct: 0 },
-                { question: "Mi az a 'scoville-egység' (SHU)?", answers: ["A paprikák csípősségének mértékegysége", "A borok cukortartalmának mérőszáma", "A földrengések erőssége", "A gyémántok tisztasága"], correct: 0 },
-                { question: "Melyik bolygó forog a tengelye körül a többi bolygóval ellentétes irányban?", answers: ["Vénusz", "Merkúr", "Mars", "Neptunusz"], correct: 0 },
-                { question: "Melyik európai ország fővárosa Vaduz?", answers: ["Liechtenstein", "Luxemburg", "Andorra", "San Marino"], correct: 0 },
-                { question: "Ki írta az 'Isteni színjáték' című eposzt?", answers: ["Dante Alighieri", "Giovanni Boccaccio", "Francesco Petrarca", "Niccolò Machiavelli"], correct: 0 },
-                { question: "Melyik magyar fizikus nevéhez fűződik a torziós inga megalkotása?", answers: ["Eötvös Loránd", "Szilárd Leó", "Neumann János", "Bay Zoltán"], correct: 0 },
-                { question: "Melyik ókori világcsoda állt Alexandria kikötőjében?", answers: ["A pharoszi világítótorony", "A rodoszi kolosszus", "Zeusz olümpiai szobra", "Szemiramisz függőkertje"], correct: 0 },
-                { question: "Milyen anyagból készül hagyományosan a valódi konyak érlelőhordója?", answers: ["Francia tölgyfából (Limousin / Tronçais)", "Cseresznyefából", "Bükkfából", "Akácfából"], correct: 0 },
-                { question: "Melyik napon kötötték meg a trianoni békeszerződést?", answers: ["1920. június 4.", "1918. november 11.", "1919. március 21.", "1921. október 13."], correct: 0 },
-                { question: "Mi a Naprendszer legmagasabb ismert vulkánja a Marson?", answers: ["Olympus Mons", "Mauna Kea", "Elysium Mons", "Maxwell Montes"], correct: 0 },
-                { question: "Melyik elemnek a legmagasabb az olvadáspontja az összes tiszta fém közül?", answers: ["Volfrám", "Titán", "Platina", "Ozmium"], correct: 0 },
-                { question: "Ki szerezte a 'Boléro' című híres zenekari művet?", answers: ["Maurice Ravel", "Claude Debussy", "Camille Saint-Saëns", "Hector Berlioz"], correct: 0 },
-                { question: "Melyik tengerbe torkollik a Volga folyó?", answers: ["Kaszpi-tenger", "Fekete-tenger", "Azovi-tenger", "Aral-tó"], correct: 0 },
-                { question: "Ki fedezte fel a penicillint 1928-ban?", answers: ["Alexander Fleming", "Louis Pasteur", "Robert Koch", "Edward Jenner"], correct: 0 },
-                { question: "Melyik magyar költő írta a 'Tiszta szívvel' című verset?", answers: ["József Attila", "Radnóti Miklós", "Babits Mihály", "Kosztolányi Dezső"], correct: 0 },
-                { question: "Melyik ország pénzneme a Baht?", answers: ["Thaiföld", "Malajzia", "Indonézia", "Fülöp-szigetek"], correct: 0 },
-                { question: "Hány kromoszómapár található egy egészséges emberi testi sejtben?", answers: ["23 pár (46 db)", "22 pár (44 db)", "24 pár (48 db)", "21 pár (42 db)"], correct: 0 },
-                { question: "Melyik görög filozófus volt Nagy Sándor nevelője?", answers: ["Arisztotelész", "Platón", "Szókratész", "Epikurosz"], correct: 0 },
-                { question: "Milyen szőlőfajtából készül kizárólag a francia Chablis bor?", answers: ["Chardonnay", "Sauvignon Blanc", "Riesling", "Pinot Gris"], correct: 0 },
-                { question: "Melyik évben süllyedt el a Vasa svéd hadihajó első útján Stockholmban?", answers: ["1628", "1588", "1709", "1666"], correct: 0 },
-                { question: "Mi Kazahsztán fővárosa?", answers: ["Asztana", "Almati", "Taskent", "Biskek"], correct: 0 },
-                { question: "Ki festette az 'Éjjeli őrjárat' című festményt?", answers: ["Rembrandt van Rijn", "Johannes Vermeer", "Peter Paul Rubens", "Frans Hals"], correct: 0 },
-                { question: "Melyik fizikai törvény mondja ki, hogy minden hatással szemben ellenhatás lép fel?", answers: ["Newton III. törvénye (hatás-ellenhatás)", "Newton I. törvénye", "Archimédesz törvénye", "Ohm törvénye"], correct: 0 },
-                { question: "Melyik napon történt a csernobili atomerőmű-baleset?", answers: ["1986. április 26.", "1984. december 3.", "1989. november 9.", "1979. március 28."], correct: 0 },
-                { question: "Melyik kémiai elem az egyetlen fém, amely szobahőmérsékleten folyékony?", answers: ["Higany (Hg)", "Gallium (Ga)", "Bróm (Br)", "Cézium (Cs)"], correct: 0 },
-                { question: "Ki írta a 'Száz év magány' című regényt?", answers: ["Gabriel García Márquez", "Jorge Luis Borges", "Isabel Allende", "Mario Vargas Llosa"], correct: 0 },
-                { question: "Melyik afrikai ország őrizte meg függetlenségét a gyarmatosítás korában?", answers: ["Etiópia", "Kenya", "Nigéria", "Ghána"], correct: 0 },
-                { question: "Mi az a 'Botrytis cinerea' a borászatban?", answers: ["Nemespenész (aszúsodást okozó gomba)", "Egy tölgyfahordó-típus", "A pezsgő másodlagos erjesztése", "A szőlőtőke gyökérbetegsége"], correct: 0 },
-                { question: "Melyik magyar matematikus volt a nemeuklideszi geometria megalkotója?", answers: ["Bolyai János", "Erdős Pál", "Pólya György", "Riesz Frigyes"], correct: 0 },
-                { question: "Melyik operában hangzik el a híres 'Nessun dorma' ária?", answers: ["Turandot (Giacomo Puccini)", "Aida (Giuseppe Verdi)", "Carmen (Georges Bizet)", "Tosca (Giacomo Puccini)"], correct: 0 },
-                { question: "Melyik szigetország fővárosa Antananarivo?", answers: ["Madagaszkár", "Mauritius", "Srí Lanka", "Seychelle-szigetek"], correct: 0 },
-                { question: "Hány karja van egy közönséges polipnak?", answers: ["8", "6", "10", "12"], correct: 0 },
-                { question: "Melyik évben alapították a Magyar Tudományos Akadémiát?", answers: ["1825", "1848", "1830", "1867"], correct: 0 },
-                { question: "Mi az emberi szervezet legnagyobb belső szerve?", answers: ["Máj", "Tüdő", "Agy", "Vékonybél"], correct: 0 },
-                { question: "Melyik csillagképben található a Sarkcsillag (Polaris)?", answers: ["Kis Medve (Ursa Minor)", "Nagy Medve (Ursa Major)", "Orion", "Kassziopeia"], correct: 0 },
-                { question: "Ki rendezte a '2001: Űrodüsszeia' című 1968-as sci-fi klasszikust?", answers: ["Stanley Kubrick", "Ridley Scott", "George Lucas", "Francis Ford Coppola"], correct: 0 },
-                { question: "Melyik kémiai kötés tartja össze a vízmolekulában az atomokat?", answers: ["Kovalens kötés", "Ionos kötés", "Fémes kötés", "Van der Waals-kötés"], correct: 0 },
-                { question: "Melyik ország területén fekszik az Atacama-sivatag nagy része?", answers: ["Chile", "Argentína", "Bolívia", "Peru"], correct: 0 },
-                { question: "Melyik évben koronázták meg I. (Szent) Istvánt magyar királlyá?", answers: ["1000 (vagy 1001. január 1.)", "997", "1038", "895"], correct: 0 },
-                { question: "Melyik elemnek a vegyjele a 'Sn'?", answers: ["Ón", "Ólom", "Antimon", "Szelén"], correct: 0 },
-                { question: "Mi a Föld legkisebb területű független állama?", answers: ["Vatikánváros", "Monaco", "Nauru", "San Marino"], correct: 0 },
-                { question: "Ki komponálta 'A hattyúk tava' című balettet?", answers: ["Pjotr Iljics Csajkovszkij", "Igor Stravinsky", "Szergej Prokofjev", "Nyikolaj Rimszkij-Korszakov"], correct: 0 },
-                { question: "Melyik mexikói párlat készül füstölt agávészívekből?", answers: ["Mezcal", "Cachaça", "Sotol", "Raicilla"], correct: 0 },
-                { question: "Melyik magyar orvos kapta meg az 'anyák megmentője' címet?", answers: ["Semmelweis Ignác", "Szent-Györgyi Albert", "Korányi Frigyes", "Békésy György"], correct: 0 },
-                { question: "Melyik bolygó tengelyferdesége közel 98 fokos?", answers: ["Uránusz", "Neptunusz", "Szaturnusz", "Merkúr"], correct: 0 },
-                { question: "Ki írta az '1984' és az 'Állatfarm' című disztópikus regényeket?", answers: ["George Orwell", "Aldous Huxley", "Ray Bradbury", "Jevgenyij Zamjatyin"], correct: 0 },
-                { question: "Melyik hegység választja el Európát Ázsiától Oroszország területén?", answers: ["Urál-hegység", "Kaukázus", "Altaj", "Kárpátok"], correct: 0 },
-                { question: "Milyen színű a tiszta folyékony oxigén?", answers: ["Halványkék", "Színtelen", "Sárgászöld", "Vöröses"], correct: 0 },
-                { question: "Melyik ókori egyiptomi fáraó sírját tárta fel Howard Carter 1922-ben?", answers: ["Tutanhamon", "II. Ramszesz", "Ehnaton", "Kheopsz"], correct: 0 },
-                { question: "Melyik magyar zeneszerző alkotta meg a szolmizációs módszert?", answers: ["Kodály Zoltán", "Weiner Leó", "Dohnányi Ernő", "Lajtha László"], correct: 0 },
-                { question: "Hány darab csigolyából áll az emberi nyaki gerincszakasz?", answers: ["7", "5", "12", "9"], correct: 0 },
-                { question: "Melyik ország fővárosa Ottawa?", answers: ["Kanada", "Ausztrália", "Új-Zéland", "Dél-Afrika"], correct: 0 },
-                { question: "Melyik híres holland festő alkotta a 'Leány gyöngy fülbevalóval' című művet?", answers: ["Johannes Vermeer", "Rembrandt van Rijn", "Hieronymus Bosch", "Pieter Bruegel"], correct: 0 }
+                { question: "Mi az emberi test legkisebb csontja, amely a középfülben található?", answers: ["Kengyel (stapes)", "Üllő (incus)", "Kalapács (malleus)", "Ekecsont (vomer)"], correct: 0 }
             ]
         };
 
@@ -774,7 +598,7 @@
            ========================================================================== */
         let audioCtx = null;
         let isMusicEnabled = localStorage.getItem('isMusicEnabled') === 'true';
-        let isSfxEnabled = localStorage.getItem('isSfxEnabled') !== 'false'; // Alapértelmezésben BE
+        let isSfxEnabled = localStorage.getItem('isSfxEnabled') !== 'false';
         let musicVolume = parseFloat(localStorage.getItem('musicVolume') ?? '0.2');
         let sfxVolume = parseFloat(localStorage.getItem('sfxVolume') ?? '0.5');
 
@@ -782,7 +606,6 @@
         let bgBeatStep = 0;
 
         function initAudioSettingsUI() {
-            // Zene UI betöltése mentett állapotból
             const musicBtn = document.getElementById('music-toggle-btn');
             const musicSlider = document.getElementById('music-volume');
             if (musicSlider) musicSlider.value = musicVolume;
@@ -797,7 +620,6 @@
                 }
             }
 
-            // SFX UI betöltése mentett állapotból
             const sfxBtn = document.getElementById('sfx-toggle-btn');
             const sfxSlider = document.getElementById('sfx-volume');
             if (sfxSlider) sfxSlider.value = sfxVolume;
@@ -948,11 +770,22 @@
             else el.classList.add('hidden');
         }
 
-        function showFeedback(title, message, icon = "🍻", callback = null) {
+        function showFeedback(title, message, icon = "🍻", callback = null, customActionsHTML = null) {
             document.getElementById('feedback-title').textContent = title;
             document.getElementById('feedback-message').innerHTML = message;
             document.getElementById('feedback-icon').textContent = icon;
             onFeedbackCloseCallback = callback;
+
+            const actionsContainer = document.getElementById('feedback-actions');
+            if (customActionsHTML) {
+                actionsContainer.innerHTML = customActionsHTML;
+            } else {
+                actionsContainer.innerHTML = `
+                    <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base transition cursor-pointer">
+                        Rendben!
+                    </button>
+                `;
+            }
             toggleModal('feedback-modal', true);
         }
 
@@ -1191,8 +1024,25 @@
 
             if (totalGlasses === 0) {
                 playDrinkSound();
-                showFeedback("ELVESZÍTETTED AZ ÖSSZES POHARAD!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került! Meg kell innod!`, "💀");
-                document.getElementById('next-question-btn').textContent = "🏁 Játék befejezése";
+                
+                // Ellenőrizzük, hogy a poharak újratöltése segítség fel lett-e már használva
+                if (!lifelines.refill) {
+                    // Ha még nem lett felhasználva, felkínáljuk a modálban az újratöltést
+                    const refillActionsHTML = `
+                        <button onclick="executeModalRefillAndContinue()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base transition cursor-pointer mb-2">
+                            🍷 Poharak Újratöltése (10 db)
+                        </button>
+                        <button onclick="closeFeedbackModal(); exitToMenu()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">
+                            Kilépés a főmenübe
+                        </button>
+                    `;
+                    showFeedback("ELFOGYTAK A POHARAID!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került!<br><br>Mivel még nem használtad az újratöltést, most azonnal pótolhatod őket!`, "🍷", null, refillActionsHTML);
+                    document.getElementById('next-question-btn').textContent = "Quiz folytatására";
+                } else {
+                    // Ha már felhasználták korábban, vége a játéknak
+                    showFeedback("ELVESZÍTETTED AZ ÖSSZES POHARAD!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került és az újratöltés is elfogyott!`, "💀");
+                    document.getElementById('next-question-btn').textContent = "🏁 Játék befejezése";
+                }
             } else if (lostGlasses > 0) {
                 playDrinkSound();
                 showFeedback(`${lostGlasses} poharat veszítettél!`, `Elveszítettél <strong>${lostGlasses} poharat</strong> – meg kell innod!<br><br>Továbbviszel <strong>${survivedGlasses} poharat</strong>.`, "🍺");
@@ -1204,11 +1054,28 @@
             }
         }
 
+        function executeModalRefillAndContinue() {
+            totalGlasses = 10;
+            lifelines.refill = true;
+            const refillBtn = document.getElementById('help-refill');
+            if (refillBtn) refillBtn.classList.add('lifeline-used');
+            playSuccessSound();
+            renderGameUI();
+            closeFeedbackModal();
+            document.getElementById('next-question-btn').textContent = "Quiz folytatása";
+        }
+
         function nextQuestion() {
-            if (totalGlasses <= 0) {
+            if (totalGlasses <= 0 && lifelines.refill) {
                 showFeedback("Játék vége!", "Elfogyott az összes poharad!", "🍻", () => exitToMenu());
                 return;
             }
+            if (totalGlasses <= 0 && !lifelines.refill) {
+                // Ha valaki valahogy rákattintana, de még nem töltötte újra
+                refillGlasses(document.getElementById('help-refill'));
+                return;
+            }
+
             if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
                 prepareQuestion();
@@ -1367,13 +1234,22 @@
                 showFeedback("Már felhasználtad!", "A poharak újratöltése már felhasználásra került.", "🍷");
                 return;
             }
-            if (totalGlasses <= 2) {
+            if (totalGlasses <= 2 || totalGlasses === 0) {
                 totalGlasses = 10;
                 lifelines.refill = true;
-                btn.classList.add('lifeline-used');
+                if (btn) btn.classList.add('lifeline-used');
+                const refillBtnMain = document.getElementById('help-refill');
+                if (refillBtnMain) refillBtnMain.classList.add('lifeline-used');
+
                 playSuccessSound();
                 renderGameUI();
                 showFeedback("Poharak újratöltve!", "A készleted újra <strong>10 darab piros pohár</strong>!", "🍷");
+                
+                // Ha a fő képernyőn a gomb a Quiz folytatására váltott, visszaállítjuk
+                const nextBtn = document.getElementById('next-question-btn');
+                if (nextBtn && nextBtn.textContent.includes("Quiz folytatás")) {
+                    nextBtn.textContent = currentQuestionIndex < questions.length - 1 ? "➡️ Következő kérdés" : "🏆 Eredményhirdetés";
+                }
             } else {
                 showFeedback("Nem használható még!", `Csak akkor, ha ≤ 2 poharad maradt (most ${totalGlasses} db van).`, "⚠️");
             }
