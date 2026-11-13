@@ -205,7 +205,7 @@
 
             <div class="mt-8 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>225 beépített kvízkérdés (3 szint × 5 csomag)</span>
-                <span class="font-mono font-bold text-yellow-400">v1.7 STABLE!</span>
+                <span class="font-mono font-bold text-yellow-400">v1.8 BACKGROUND TIMER!</span>
             </div>
         </div>
     </main>
@@ -722,7 +722,7 @@
         };
 
         /* ==========================================================================
-           2. ROTÁCIÓ ÉS JÁTÉKÁLLAPOT (VALAMINT 5 PERCES IDŐZÍTŐ)
+           2. ROTÁCIÓ ÉS HÁTTÉRBEN FUTÓ VALÓS IDŐS IDŐZÍTŐ
            ========================================================================== */
         function getRotationState() {
             try {
@@ -761,64 +761,79 @@
         // Feedback modal visszahívó
         let onFeedbackCloseCallback = null;
 
-        // 5 Perces (300 másodperces) Csomag Váltó Időzítő
+        // 5 Perces (300 másodperces) Háttéridőzítő (localStorage alapú)
         let setTimerInterval = null;
-        let setSecondsLeft = 300; // 5 perc = 300 másodperc
+        const TIMER_DURATION = 300; // 5 perc = 300 másodperc
 
-        function startSetCountdownTimer(resetTime = false) {
-            // Ha már fut időzítő ÉS nem kérünk explicit újrakezdést (resetTime = false), 
-            // akkor NEM indítjuk újra a számlálót, hanem hagyjuk futni a háttérben!
-            if (setTimerInterval && !resetTime) {
-                return;
+        function initBackgroundTimer() {
+            let expiryTime = localStorage.getItem('setTimerExpiry');
+            const now = Math.floor(Date.now() / 1000);
+
+            // Ha még nincs lejárati idő, vagy az idő már lejárt, beállítunk egy újat 5 percre
+            if (!expiryTime || parseInt(expiryTime, 10) <= now) {
+                expiryTime = now + TIMER_DURATION;
+                localStorage.setItem('setTimerExpiry', expiryTime);
             }
 
             if (setTimerInterval) {
                 clearInterval(setTimerInterval);
             }
 
-            if (resetTime) {
-                setSecondsLeft = 300; // Csak akkor reseteljük 5 percre, ha az időzítő magától lejár vagy friss indítás történik
-            }
-            updateSetTimerDisplay();
-
             setTimerInterval = setInterval(() => {
-                setSecondsLeft--;
-                updateSetTimerDisplay();
+                const currentTime = Math.floor(Date.now() / 1000);
+                const targetExpiry = parseInt(localStorage.getItem('setTimerExpiry') || (currentTime + TIMER_DURATION), 10);
+                let secondsLeft = targetExpiry - currentTime;
 
-                if (setSecondsLeft <= 0) {
-                    clearInterval(setTimerInterval);
-                    setTimerInterval = null;
-                    // Idő letelt -> Automatikus váltás a következő kérdéssorra a háttérben (modal NÉLKÜL!)
-                    autoRotateToNextSet();
+                if (secondsLeft <= 0) {
+                    // Idő letelt -> Minden egyes nehézségi szintre kiterjedően leptetjük a kérdéssort!
+                    autoRotateAllDifficulties();
+                    
+                    // Újabb 5 perc beállítása
+                    const newExpiry = Math.floor(Date.now() / 1000) + TIMER_DURATION;
+                    localStorage.setItem('setTimerExpiry', newExpiry);
+                    secondsLeft = TIMER_DURATION;
                 }
+
+                updateSetTimerDisplay(secondsLeft);
             }, 1000);
+
+            // Azonnali kijelzés frissítés betöltéskor
+            const currentLeft = parseInt(localStorage.getItem('setTimerExpiry'), 10) - now;
+            updateSetTimerDisplay(currentLeft > 0 ? currentLeft : 0);
         }
 
-        function updateSetTimerDisplay() {
+        function updateSetTimerDisplay(secondsLeft) {
             const timerEl = document.getElementById('set-countdown-timer');
             if (!timerEl) return;
-            const mins = Math.floor(setSecondsLeft / 60);
-            const secs = setSecondsLeft % 60;
+            const mins = Math.floor(secondsLeft / 60);
+            const secs = secondsLeft % 60;
             timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function autoRotateToNextSet() {
-            if (currentDifficultyKey === 'custom') {
-                startSetCountdownTimer(true);
-                return;
-            }
+        /**
+         * Automatikusan váltja a kérdéssort MINDEN beépített nehézségi szinten,
+         * amikor lejár az 5 perc (akár meg volt nyitva a weboldal, akár nem).
+         */
+        function autoRotateAllDifficulties() {
+            const rotation = getRotationState();
 
-            // Automatikusan váltja a kérdéssort felugró ablak nélkül
-            loadBuiltInDifficultySet(currentDifficultyKey, false, true);
-            startSetCountdownTimer(true); // Automatikus lejáratkor újraindul 5 percről
+            ['easy', 'normal', 'hard'].forEach(diffKey => {
+                const diffObj = BUILTIN_DIFFICULTIES[diffKey];
+                if (diffObj && diffObj.sets) {
+                    const currentIndex = rotation[diffKey] || 0;
+                    rotation[diffKey] = (currentIndex + 1) % diffObj.sets.length;
+                }
+            });
+
+            saveRotationState(rotation);
+
+            // Ha a felhasználó épp az aktív nehézségi szinten játszik, frissítjük a képernyőn a kérdéseket/címkét
+            if (currentDifficultyKey !== 'custom') {
+                loadBuiltInDifficultySet(currentDifficultyKey, false);
+            }
         }
 
-        /**
-         * Kiválasztja és betölti a megadott nehézségi szint soron következő (1..5) kérdéssorát.
-         * Ha a felhasználó kattint (isManualClick = true), a meglévő 5 perces időzítő NEM indul újra, 
-         * hanem a háttérben ketyeg tovább onnan, ahol tartott.
-         */
-        function loadBuiltInDifficultySet(diffKey, isManualClick = false, isAutoRotation = false) {
+        function loadBuiltInDifficultySet(diffKey, isManualClick = false) {
             const diffObj = BUILTIN_DIFFICULTIES[diffKey];
             if (!diffObj) return;
 
@@ -826,17 +841,6 @@
 
             if (isManualClick) {
                 currentDifficultyKey = diffKey;
-            }
-
-            const setIndex = (rotation[currentDifficultyKey] || 0) % diffObj.sets.length;
-
-            if (!isManualClick && isAutoRotation) {
-                // Automatikus váltáskor léptetjük a rotációs indexet a következőre
-                rotation[currentDifficultyKey] = (setIndex + 1) % diffObj.sets.length;
-                saveRotationState(rotation);
-            } else if (isManualClick) {
-                // Ha manuálisan vált nehézségi szintet a felhasználó, opcionálisan frissíthetjük az indexet is, 
-                // de a rotációs memóriát megőrizzük.
             }
 
             const targetDiff = currentDifficultyKey;
@@ -861,14 +865,11 @@
                     btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
                 }
             });
-
-            // Időzítő indítása: ha manuális kattintás történt, a resetTime = false miatt a számláló nem indul újra 5 percről!
-            startSetCountdownTimer(isAutoRotation);
         }
 
         function selectBuiltInDifficulty(diffKey) {
             currentDifficultyKey = diffKey;
-            loadBuiltInDifficultySet(diffKey, true, false);
+            loadBuiltInDifficultySet(diffKey, true);
             playTone(587.33, 'sine', 0.14, 0.12);
         }
 
@@ -1737,7 +1738,7 @@
         function loadBuiltInFromModal(diffKey) {
             toggleModal('load-modal', false);
             currentDifficultyKey = diffKey;
-            loadBuiltInDifficultySet(diffKey, true, false);
+            loadBuiltInDifficultySet(diffKey, true);
         }
 
         function loadCustomSet(name) {
@@ -1751,7 +1752,6 @@
                     document.getElementById(`btn-diff-${key}`)?.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
                 });
                 toggleModal('load-modal', false);
-                startSetCountdownTimer(true);
                 showFeedback("Kérdéssor betöltve!", `A(z) <strong>"${name}"</strong> kérdéssor aktív!`, "✅");
             }
         }
@@ -1761,7 +1761,7 @@
             delete saved[name];
             localStorage.setItem('SavedQuestions', JSON.stringify(saved));
             if (activeSetName === name) {
-                loadBuiltInDifficultySet('easy', true, false);
+                loadBuiltInDifficultySet('easy', true);
             }
             showLoadModal();
         }
@@ -1798,7 +1798,8 @@
 
         // Inicializálás
         document.addEventListener('DOMContentLoaded', () => {
-            loadBuiltInDifficultySet('easy', true, true);
+            loadBuiltInDifficultySet('easy', true);
+            initBackgroundTimer(); // Háttéridőzítő indítása
 
             const savedColor = localStorage.getItem('backgroundColor');
             if (savedColor) {
