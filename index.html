@@ -28,6 +28,30 @@
             filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.55));
         }
 
+        /* RGB Ragyogás animáció a főcímhez */
+        @keyframes titleRgbCycle {
+            0% { color: rgb(255, 153, 255); text-shadow: 0 0 25px rgba(255, 153, 255, 0.5); }
+            33% { color: rgb(255, 255, 153); text-shadow: 0 0 25px rgba(255, 255, 153, 0.5); }
+            66% { color: rgb(153, 255, 102); text-shadow: 0 0 25px rgba(153, 255, 102, 0.5); }
+            100% { color: rgb(255, 153, 255); text-shadow: 0 0 25px rgba(255, 153, 255, 0.5); }
+        }
+        .rgb-title {
+            animation: titleRgbCycle 6s infinite ease-in-out;
+        }
+
+        /* All-in gomb pulzáló ragyogás */
+        @keyframes allinGlow {
+            0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), 0 0 25px rgba(239, 68, 68, 0.7); }
+            100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4); }
+        }
+        .all-in-btn {
+            animation: allinGlow 1.5s infinite ease-in-out;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #ffffff;
+            border: 1px solid #fca5a5;
+        }
+
         /* Válasz kártyák */
         .answer-card {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
@@ -98,7 +122,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col justify-between selection:bg-yellow-500 selection:text-slate-900">
+<body class="flex flex-col justify-between selection:bg-yellow-500 selection:text-slate-900" onclick="handleOutsideClick(event)">
 
     <!-- FELSŐ SÁV: Szabályok & Beállítások -->
     <header class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between z-20">
@@ -107,26 +131,36 @@
             <span class="text-xs sm:text-sm font-bold tracking-wider uppercase text-yellow-400">Legyen Ön is Részeg!</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
-            <button onclick="toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+            <button onclick="event.stopPropagation(); toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
                 📜 Szabályok
             </button>
-            <button onclick="toggleSettingsMenu()" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
+            <button id="settings-toggle-btn" onclick="event.stopPropagation(); toggleSettingsMenu()" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer">
                 ⚙️ <span class="hidden sm:inline">Beállítások</span>
             </button>
         </div>
     </header>
 
     <!-- BEÁLLÍTÁSOK DROPDOWN (AUDIO & HÁTTÉR) -->
-    <div id="settings-menu" class="hidden fixed top-16 right-4 w-72 bg-slate-900 border-2 border-yellow-500/50 rounded-2xl p-4 shadow-2xl z-50">
-        <h3 class="text-sm font-bold text-yellow-400 uppercase tracking-wider mb-3">Beállítások</h3>
+    <div id="settings-menu" onclick="event.stopPropagation()" class="hidden fixed top-16 right-4 w-80 bg-slate-900 border-2 border-yellow-500/50 rounded-2xl p-4 shadow-2xl z-50">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-yellow-400 uppercase tracking-wider">Beállítások</h3>
+            <button onclick="toggleSettingsMenu()" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer px-1">&times;</button>
+        </div>
 
         <!-- Music (Zene) vezérlés -->
-        <div class="mb-3 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+        <div class="mb-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
             <div class="flex items-center justify-between mb-1.5">
                 <span class="text-xs font-bold text-slate-200">🎵 Háttérzene (Music)</span>
                 <button id="music-toggle-btn" onclick="toggleMusic()" class="text-xs px-2.5 py-1 rounded-lg font-bold transition bg-red-600 text-white cursor-pointer">KI</button>
             </div>
             <input type="range" id="music-volume" min="0" max="1" step="0.05" value="0.2" oninput="updateMusicVolume(this.value)" class="w-full accent-yellow-400 cursor-pointer">
+        </div>
+
+        <!-- SAJÁT ZENE BEÁLLÍTÁSA GOMB -->
+        <div class="mb-3">
+            <button onclick="openCustomMusicModal()" class="w-full bg-amber-600/90 hover:bg-amber-500 text-white font-bold text-xs py-2 px-3 rounded-xl border border-amber-400/50 transition flex items-center justify-center gap-2 cursor-pointer">
+                🎧 Saját zene beállítása
+            </button>
         </div>
 
         <!-- SFX (Hangeffektek) vezérlés -->
@@ -157,6 +191,34 @@
         </button>
     </div>
 
+    <!-- SAJÁT ZENE MODAL (FELTÖLTÉS & RESET) -->
+    <div id="custom-music-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="closeCustomMusicModal()">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl relative" onclick="event.stopPropagation()">
+            <!-- Bezáró X gomb -->
+            <button onclick="closeCustomMusicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            
+            <div class="text-3xl mb-2">🎵</div>
+            <h3 class="text-xl font-black text-amber-400 mb-2">Saját zene beállítása</h3>
+            <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                Tölts fel egy saját zenét (pl. MP3 formátumban) a telefonodról vagy a gépedről, és az fog szólni háttérzeneként!
+            </p>
+
+            <div class="mb-4 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center">
+                <input type="file" id="custom-music-file-input" accept="audio/*" onchange="handleCustomMusicUpload(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-500 file:cursor-pointer cursor-pointer">
+                <p id="current-custom-track-name" class="text-xs text-yellow-300 mt-2 font-semibold truncate">Nincs saját zene feltöltve</p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button onclick="resetToDefaultMusic()" class="w-full bg-slate-800 hover:bg-slate-700 text-red-400 border border-red-500/40 font-bold text-xs py-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-2">
+                    🔄 Alapértelmezett zene visszaállítása
+                </button>
+                <button onclick="closeCustomMusicModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-3 rounded-xl transition cursor-pointer">
+                    Bezárás
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- KEZDŐKÉPERNYŐ (START SCREEN) -->
     <main id="start-screen" class="flex-1 flex flex-col items-center justify-center px-4 py-8 text-center">
         <div class="max-w-2xl w-full bg-slate-900/85 backdrop-blur-md border-2 border-yellow-500/40 rounded-3xl p-6 sm:p-10 gold-glow relative">
@@ -172,58 +234,94 @@
                 </svg>
             </div>
 
-            <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-red-500 gold-text-shadow mb-2">
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight rgb-title mb-2">
                 Legyen Ön is Részeg!
             </h1>
             <p class="text-slate-300 text-sm sm:text-base mb-5 max-w-lg mx-auto">
                 Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
             </p>
 
-            <!-- Aktív szint jelző és az 5 perces újrakeverési visszaszámláló -->
-            <div class="flex flex-wrap items-center justify-center gap-2 mb-5">
-                <div class="inline-flex items-center gap-2 bg-slate-800/90 border border-yellow-500/30 px-4 py-2 rounded-full text-xs sm:text-sm text-yellow-300">
-                    <span>Aktív szint:</span>
-                    <strong id="active-set-label" class="text-white">🟢 Könnyű (15 kérdés)</strong>
-                </div>
-                <!-- 5 perces visszaszámláló az automatikus újrakeverésig -->
-                <div class="inline-flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/50 px-3 py-2 rounded-full text-xs font-bold text-amber-300 shadow-inner" title="Idő a kérdések automatikus újrakeveréséig">
-                    <span>⏱️ Újrakeverés:</span>
-                    <span id="set-countdown-timer" class="font-mono text-white">05:00</span>
-                </div>
-            </div>
-
-            <!-- 3 Nehézségi Szint Gyorsválasztó -->
-            <div class="max-w-xl mx-auto mb-6">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Válassz nehézségi szintet:</p>
-                <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                    <button id="btn-diff-easy" onclick="selectDifficulty('easy')" class="bg-emerald-950/75 hover:bg-emerald-900/90 border-2 border-emerald-500/60 text-emerald-300 font-extrabold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition cursor-pointer">
-                        🟢 Könnyű
-                    </button>
-                    <button id="btn-diff-normal" onclick="selectDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border-2 border-amber-500/40 text-amber-300 font-extrabold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition cursor-pointer">
-                        🟡 Normál
-                    </button>
-                    <button id="btn-diff-hard" onclick="selectDifficulty('hard')" class="bg-red-950/75 hover:bg-red-900/90 border-2 border-red-500/40 text-red-300 font-extrabold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition cursor-pointer">
-                        🔴 Nehéz
-                    </button>
-                </div>
-            </div>
-
-            <!-- Főmenü gombok: Játék, Create, Kérdések Betöltése -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
-                <button onclick="startGame()" class="sm:col-span-2 bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg sm:text-xl py-4 px-8 rounded-2xl shadow-lg shadow-red-600/30 transform hover:scale-[1.02] active:scale-[0.98] transition cursor-pointer">
-                    🍻 Játék
+            <!-- FŐMENÜ KÉT GOMB: EGYJÁTÉKOS & TÖBBJÁTÉKOS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto mb-6">
+                <button onclick="openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 transition cursor-pointer flex items-center justify-center gap-2">
+                    👤 Egyjátékos
                 </button>
-                <button onclick="openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-3.5 px-4 rounded-2xl transition text-sm cursor-pointer">
-                    ✍️ Create
-                </button>
-                <button onclick="showLoadModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-3.5 px-4 rounded-2xl transition text-sm cursor-pointer">
-                    📂 Kérdések Betöltése
+                <button onclick="openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-lg py-4 px-6 rounded-2xl transition cursor-pointer flex items-center justify-center gap-2">
+                    👥 Többjátékos
                 </button>
             </div>
 
-            <div class="mt-8 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
-                <span>15 kérdéses paklik (5 percenkénti automatikus újrakeveréssel)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.3 HOTFIX</span>
+            <!-- EGYJÁTÉKOS ALMENÜ (Rejtett alapból) -->
+            <div id="singleplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Egyjátékos mód beállításai</span>
+                    <button onclick="backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
+                </div>
+
+                <!-- Aktív szint jelző -->
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
+                    <div class="inline-flex items-center gap-2 bg-slate-900 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs text-yellow-300">
+                        <span>Aktív szint:</span>
+                        <strong id="active-set-label" class="text-white">🟢 Könnyű (15 kérdés)</strong>
+                    </div>
+                </div>
+
+                <!-- Nehézségi Szint Gyorsválasztó -->
+                <div class="mb-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Válassz nehézségi szintet:</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button id="btn-diff-easy" onclick="selectDifficulty('easy')" class="bg-emerald-950/75 hover:bg-emerald-900/90 border border-emerald-500/60 text-emerald-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
+                            🟢 Könnyű
+                        </button>
+                        <button id="btn-diff-normal" onclick="selectDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border border-amber-500/40 text-amber-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
+                            🟡 Normál
+                        </button>
+                        <button id="btn-diff-hard" onclick="selectDifficulty('hard')" class="bg-red-950/75 hover:bg-red-900/90 border border-red-500/40 text-red-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
+                            🔴 Nehéz
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button onclick="openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl transition text-xs cursor-pointer">
+                        ✍️ Kérdés készítő
+                    </button>
+                    <button onclick="showLoadModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl transition text-xs cursor-pointer">
+                        📂 Kérdések Betöltése
+                    </button>
+                </div>
+
+                <button onclick="startGame()" class="w-full bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-black py-3 rounded-xl shadow-lg transition cursor-pointer text-sm">
+                    🚀 Játék Indítása (Egyjátékos)
+                </button>
+            </div>
+
+            <!-- TÖBBJÁTÉKOS ALMENÜ (6 jegyű kód megadása) -->
+            <div id="multiplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Többjátékos (Kód megadása)</span>
+                    <button onclick="backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
+                </div>
+
+                <p class="text-xs text-slate-300 mb-3">
+                    Írd be a barátod által generált **6 jegyű kódot** (pl. <em>123456</em>), hogy betöltsd az Ő egyedi kérdéssorát!
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                    <input type="text" id="quiz-code-input" maxlength="6" placeholder="Pl.: 123456" class="flex-1 bg-slate-900 border-2 border-amber-500/60 focus:border-yellow-400 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest text-yellow-300 outline-none">
+                    <button onclick="loadQuizByCode()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black px-6 py-3 rounded-xl transition cursor-pointer text-sm">
+                        🎮 Csatlakozás
+                    </button>
+                </div>
+
+                <div class="text-[11px] text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 text-left">
+                    💡 <em>Teszt kód kipróbáláshoz:</em> Írd be hogy <code class="text-yellow-400 font-bold">123456</code> és kattints a csatlakozásra!
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
+                <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
+                <span class="font-mono font-bold text-yellow-400">v2.11 Fix & Automata Kódok</span>
             </div>
         </div>
     </main>
@@ -267,7 +365,7 @@
                 Kérdés betöltése...
             </h2>
             <p id="instruction-hint" class="text-xs sm:text-sm text-yellow-400/90 mt-2">
-                Válassz ki egy választ (vagy használd a + / − gombokat), és helyezd el az összes poharadat!
+                Válassz ki egy választ (vagy használd az ALL-IN / + / − gombokat), és helyezd el az összes poharadat!
             </p>
         </div>
 
@@ -295,7 +393,7 @@
                     <span id="unplaced-count" class="bg-red-600 text-white font-black text-sm px-3 py-0.5 rounded-full">10</span>
                 </div>
                 <div class="text-xs text-slate-400">
-                    Kattints egy pohárra a kiválasztott válaszra rakáshoz, vagy a válaszon lévő pohárra a visszavételhez!
+                    Kattints egy pohárra a kiválasztott válaszra rakáshoz, vagy használd az ALL-IN gombot!
                 </div>
             </div>
 
@@ -326,7 +424,6 @@
             <h3 id="feedback-title" class="text-2xl font-black text-white mb-2">Eredmény</h3>
             <p id="feedback-message" class="text-slate-300 text-base mb-6 leading-relaxed"></p>
             
-            <!-- Dinamikus gombok konténer a Modalban (ha elfogy a pohár és van újratöltés) -->
             <div id="feedback-actions" class="flex flex-col gap-2.5">
                 <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base transition cursor-pointer">
                     Rendben!
@@ -336,17 +433,17 @@
     </div>
 
     <!-- JÁTÉKSZABÁLYOK MODAL -->
-    <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('rules-modal', false)">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
+            <button onclick="toggleModal('rules-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-black text-yellow-400">📜 Játékszabályok</h2>
-                <button onclick="toggleModal('rules-modal', false)" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             </div>
             <ul class="space-y-3 text-sm sm:text-base text-slate-300">
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">1.</span> <span>A játékot <strong>10 darab piros pohárral</strong> kezded.</span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">2.</span> <span>Minden kérdésnél az <strong>összes megmaradt poharadat</strong> szét kell osztanod a 4 válaszlehetőség között.</span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">3.</span> <span>Az <strong>Ellenőrzés</strong> után a rossz válaszra tett poharak elvesznek – <strong>annyit kell innod, ahány poharat elveszítettél!</strong></span></li>
-                <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre.</span></li>
+                <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre. Használhatod az <strong>ALL-IN</strong> gombot is!</span></li>
                 <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (egyszer használható).</span></li>
             </ul>
             <button onclick="toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl transition cursor-pointer">
@@ -356,11 +453,11 @@
     </div>
 
     <!-- CREATE MODAL -->
-    <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
+    <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('create-modal', false)">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col relative" onclick="event.stopPropagation()">
+            <button onclick="toggleModal('create-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl sm:text-2xl font-black text-yellow-400">✍️ Saját kérdéssor szerkesztő</h2>
-                <button onclick="toggleModal('create-modal', false)" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             </div>
             <div class="mb-4">
                 <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Kérdéssor neve:</label>
@@ -380,11 +477,11 @@
     </div>
 
     <!-- LOAD MODAL -->
-    <div id="load-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col">
+    <div id="load-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('load-modal', false)">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col relative" onclick="event.stopPropagation()">
+            <button onclick="toggleModal('load-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl sm:text-2xl font-black text-yellow-400">📂 Kérdések Betöltése</h2>
-                <button onclick="toggleModal('load-modal', false)" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             </div>
             <div id="saved-questions-list" class="flex-1 overflow-y-auto space-y-3 mb-4"></div>
             <button onclick="toggleModal('load-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition cursor-pointer">Bezárás</button>
@@ -392,14 +489,14 @@
     </div>
 
     <!-- HÜLYE VAGYOK MODAL -->
-    <div id="hulye-vagyok-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col">
+    <div id="hulye-vagyok-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="closeHulyeVagyokModal()">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col relative" onclick="event.stopPropagation()">
+            <button onclick="closeHulyeVagyokModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-2xl">🤖</span>
                     <h2 class="text-xl font-black text-amber-400">Hülye Vagyok Segítség</h2>
                 </div>
-                <button onclick="closeHulyeVagyokModal()" class="text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             </div>
             <div id="hulye-timer-wrapper" class="hidden mb-3 bg-slate-950 border border-amber-500/40 rounded-2xl p-3">
                 <div class="flex items-center justify-between text-xs font-bold text-amber-300 mb-1.5">
@@ -420,9 +517,12 @@
         </div>
     </div>
 
+    <!-- HÁTTÉRRE KATTINTÁSHOZ EGYEDI AUDIO ELEMENT -->
+    <audio id="custom-bg-audio" loop class="hidden"></audio>
+
     <script>
         /* ==========================================================================
-           1. EGYSÉGESÍTETT BEÉPÍTETT KÉRDÉSDATABÁZIS (15 kérdésre szűkítve)
+           1. EGYSÉGESÍTETT BEÉPÍTETT KÉRDÉSDATABÁZIS (15 kérdéses szintek)
            ========================================================================== */
         const ALL_BUILTIN_QUESTIONS = {
             easy: [
@@ -479,7 +579,7 @@
         };
 
         /* ==========================================================================
-           2. VÉLETLENSZERŰ KEVERÉS ÉS 5 PERCES HÁTTÉR-ÚJRAKEVERÉSI IDŐZÍTŐ
+           2. VÉLETLENSZERŰ KEVERÉS & ÁLLAPOTOK
            ========================================================================== */
         let currentDifficultyKey = 'easy';
         let activeSetName = "🟢 Könnyű";
@@ -490,6 +590,7 @@
         let displayedAnswers = [];
         let selectedAnswerSlot = 0;
         let isRoundChecked = false;
+        let isAllInUsedOnAnswer = [false, false, false, false];
 
         let lifelines = {
             fiftyFifty: false,
@@ -502,10 +603,6 @@
         let hulyeSecondsLeft = 10;
         let onFeedbackCloseCallback = null;
 
-        let setTimerInterval = null;
-        const TIMER_DURATION = 300; // 5 perc (300 másodperc)
-
-        // Fisher-Yates tömbkeverő algoritmus
         function shuffleArray(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -515,52 +612,19 @@
             return arr;
         }
 
-        function initBackgroundTimer() {
-            let expiryTime = localStorage.getItem('QuizShuffleExpiry');
-            const now = Math.floor(Date.now() / 1000);
-
-            if (!expiryTime || parseInt(expiryTime, 10) <= now) {
-                expiryTime = now + TIMER_DURATION;
-                localStorage.setItem('QuizShuffleExpiry', expiryTime);
-            }
-
-            if (setTimerInterval) clearInterval(setTimerInterval);
-
-            setTimerInterval = setInterval(() => {
-                const currentTime = Math.floor(Date.now() / 1000);
-                const targetExpiry = parseInt(localStorage.getItem('QuizShuffleExpiry') || (currentTime + TIMER_DURATION), 10);
-                let secondsLeft = targetExpiry - currentTime;
-
-                if (secondsLeft <= 0) {
-                    shuffleAllDifficulties();
-                    const newExpiry = Math.floor(Date.now() / 1000) + TIMER_DURATION;
-                    localStorage.setItem('QuizShuffleExpiry', newExpiry);
-                    secondsLeft = TIMER_DURATION;
-                }
-
-                updateSetTimerDisplay(secondsLeft);
-            }, 1000);
-
-            const currentLeft = parseInt(localStorage.getItem('QuizShuffleExpiry'), 10) - now;
-            updateSetTimerDisplay(currentLeft > 0 ? currentLeft : 0);
+        function openSinglePlayerMenu() {
+            document.getElementById('singleplayer-menu').classList.remove('hidden');
+            document.getElementById('multiplayer-menu').classList.add('hidden');
         }
 
-        function updateSetTimerDisplay(secondsLeft) {
-            const timerEl = document.getElementById('set-countdown-timer');
-            if (!timerEl) return;
-            const mins = Math.floor(secondsLeft / 60);
-            const secs = secondsLeft % 60;
-            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        function openMultiplayerMenu() {
+            document.getElementById('multiplayer-menu').classList.remove('hidden');
+            document.getElementById('singleplayer-menu').classList.add('hidden');
         }
 
-        function shuffleAllDifficulties() {
-            Object.keys(ALL_BUILTIN_QUESTIONS).forEach(key => {
-                ALL_BUILTIN_QUESTIONS[key] = shuffleArray(ALL_BUILTIN_QUESTIONS[key]);
-            });
-
-            if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
-                questions = ALL_BUILTIN_QUESTIONS[currentDifficultyKey];
-            }
+        function backToMainStartMenu() {
+            document.getElementById('singleplayer-menu').classList.add('hidden');
+            document.getElementById('multiplayer-menu').classList.add('hidden');
         }
 
         function selectDifficulty(diffKey) {
@@ -593,8 +657,62 @@
             });
         }
 
+        /* 6 jegyű kód alapú titkosított / tömörített betöltés kezelése */
+        function loadQuizByCode() {
+            const codeInput = document.getElementById('quiz-code-input').value.trim();
+            if (!codeInput || codeInput.length !== 6) {
+                showFeedback("Hibás kód", "Kérlek, adj meg érvényes 6 jegyű kódot (pl. 123456)!", "⚠️");
+                return;
+            }
+
+            // Beépített tesztkód (123456)
+            if (codeInput === "123456") {
+                questions = shuffleArray([
+                    { question: "[Többjátékos Kód] Melyik a legnépszerűbb ivós kártyajáték?", answers: ["Kings Cup", "Uno", "Monopoly", "Pókermák"], correct: 0 },
+                    { question: "[Többjátékos Kód] Hány centiliter egy szabvány feles?", answers: ["4 cl", "2 cl", "5 cl", "10 cl"], correct: 0 },
+                    { question: "[Többjátékos Kód] Mi a neve a híres mexikói kukoricapárlatnak?", answers: ["Tequila", "Mezcal", "Vodka", "Gin"], correct: 0 }
+                ]);
+                activeSetName = "🔑 Kódos Kvíz (#123456)";
+                startGameFromCode();
+                return;
+            }
+
+            // Helyi titkosított kódok tára ellenőrzése
+            const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
+            if (savedCodes[codeInput]) {
+                try {
+                    const jsonString = atob(savedCodes[codeInput]);
+                    const decodedQuestions = JSON.parse(jsonString);
+                    questions = shuffleArray(decodedQuestions);
+                    activeSetName = `🔑 Titkos Kvíz (#${codeInput})`;
+                    startGameFromCode();
+                    return;
+                } catch (e) {
+                    console.error("Dekódolási hiba:", e);
+                }
+            }
+
+            showFeedback("Ismeretlen kód", `Nem található érvényes kvíz ezzel a kóddal: <strong>${codeInput}</strong>.<br><br>Használhatod a tesztkódot: <strong>123456</strong>`, "❌");
+        }
+
+        function startGameFromCode() {
+            currentQuestionIndex = 0;
+            totalGlasses = 10;
+            lifelines = { fiftyFifty: false, audience: false, hulyeVagyok: false, refill: false };
+
+            ['help-5050', 'help-audience', 'help-hulye', 'help-refill'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.classList.remove('lifeline-used');
+                btn.disabled = false;
+            });
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            prepareQuestion();
+        }
+
         /* ==========================================================================
-           3. MENTETT MUSIC & SFX AUDIO KEZELÉS
+           3. AUDIO KEZELÉS
            ========================================================================== */
         let audioCtx = null;
         let isMusicEnabled = localStorage.getItem('isMusicEnabled') === 'true';
@@ -604,6 +722,8 @@
 
         let bgMusicInterval = null;
         let bgBeatStep = 0;
+        let customAudioData = localStorage.getItem('customAudioData') || null;
+        let customAudioName = localStorage.getItem('customAudioName') || null;
 
         function initAudioSettingsUI() {
             const musicBtn = document.getElementById('music-toggle-btn');
@@ -631,6 +751,22 @@
                     sfxBtn.textContent = 'KI';
                     sfxBtn.className = 'text-xs px-2.5 py-1 rounded-lg font-bold transition bg-red-600 text-white cursor-pointer';
                 }
+            }
+
+            updateCustomMusicLabelUI();
+        }
+
+        function updateCustomMusicLabelUI() {
+            const label = document.getElementById('current-custom-track-name');
+            if (!label) return;
+            if (customAudioName) {
+                label.textContent = `Aktív saját zene: ${customAudioName}`;
+                label.classList.remove('text-slate-400');
+                label.classList.add('text-emerald-400');
+            } else {
+                label.textContent = "Nincs saját zene feltöltve (Beépített zene aktív)";
+                label.classList.add('text-slate-400');
+                label.classList.remove('text-emerald-400');
             }
         }
 
@@ -662,6 +798,8 @@
         function updateMusicVolume(val) {
             musicVolume = parseFloat(val);
             localStorage.setItem('musicVolume', musicVolume);
+            const customAudioEl = document.getElementById('custom-bg-audio');
+            if (customAudioEl) customAudioEl.volume = musicVolume;
         }
 
         function toggleSfx() {
@@ -707,14 +845,22 @@
 
         function startBackgroundMusic() {
             stopBackgroundMusic();
-            const bassNotes = [146.83, 146.83, 174.61, 146.83, 220.00, 196.00, 174.61, 164.81];
-            bgMusicInterval = setInterval(() => {
-                if (!isMusicEnabled) return;
-                const note = bassNotes[bgBeatStep % bassNotes.length];
-                playTone(note, 'triangle', 0.22, 0.25, 'music');
-                if (bgBeatStep % 2 === 0) playTone(note * 2, 'sine', 0.1, 0.15, 'music');
-                bgBeatStep++;
-            }, 420);
+            const customAudioEl = document.getElementById('custom-bg-audio');
+
+            if (customAudioData) {
+                customAudioEl.src = customAudioData;
+                customAudioEl.volume = musicVolume;
+                customAudioEl.play().catch(e => console.log("Custom audio autoplay prevented:", e));
+            } else {
+                const bassNotes = [146.83, 146.83, 174.61, 146.83, 220.00, 196.00, 174.61, 164.81];
+                bgMusicInterval = setInterval(() => {
+                    if (!isMusicEnabled || customAudioData) return;
+                    const note = bassNotes[bgBeatStep % bassNotes.length];
+                    playTone(note, 'triangle', 0.22, 0.25, 'music');
+                    if (bgBeatStep % 2 === 0) playTone(note * 2, 'sine', 0.1, 0.15, 'music');
+                    bgBeatStep++;
+                }, 420);
+            }
         }
 
         function stopBackgroundMusic() {
@@ -722,6 +868,46 @@
                 clearInterval(bgMusicInterval);
                 bgMusicInterval = null;
             }
+            const customAudioEl = document.getElementById('custom-bg-audio');
+            if (customAudioEl) {
+                customAudioEl.pause();
+                customAudioEl.currentTime = 0;
+            }
+        }
+
+        function handleCustomMusicUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customAudioData = e.target.result;
+                customAudioName = file.name;
+                localStorage.setItem('customAudioData', customAudioData);
+                localStorage.setItem('customAudioName', customAudioName);
+
+                updateCustomMusicLabelUI();
+                if (isMusicEnabled) {
+                    startBackgroundMusic();
+                }
+                showFeedback("Saját zene beállítva!", `A(z) <strong>"${file.name}"</strong> sikeresen feltöltve és beállítva háttérzenének!`, "🎵");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetToDefaultMusic() {
+            customAudioData = null;
+            customAudioName = null;
+            localStorage.removeItem('customAudioData');
+            localStorage.removeItem('customAudioName');
+            const fileInput = document.getElementById('custom-music-file-input');
+            if (fileInput) fileInput.value = '';
+
+            updateCustomMusicLabelUI();
+            if (isMusicEnabled) {
+                startBackgroundMusic();
+            }
+            showFeedback("Alapértelmezett zene", "A saját zene törölve lett, visszatértünk az eredeti beépített háttérzenéhez.", "🔄");
         }
 
         function playCupSound(isAdd = true) {
@@ -748,7 +934,7 @@
         }
 
         /* ==========================================================================
-           4. PIROS POHÁR SVG ÉS MODAL KEZELÉS
+           4. PIROS POHÁR SVG RENDERELÉS & MODAL KEZELÉS
            ========================================================================== */
         function getRedCupSVG(sizeClass = "w-7 h-7 sm:w-8 sm:h-8") {
             return `
@@ -768,6 +954,31 @@
             if (!el) return;
             if (show) el.classList.remove('hidden');
             else el.classList.add('hidden');
+        }
+
+        function toggleSettingsMenu() {
+            const menu = document.getElementById('settings-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function openCustomMusicModal() {
+            toggleSettingsMenu();
+            toggleModal('custom-music-modal', true);
+        }
+
+        function closeCustomMusicModal() {
+            toggleModal('custom-music-modal', false);
+        }
+
+        function handleOutsideClick(event) {
+            const settingsMenu = document.getElementById('settings-menu');
+            const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+            
+            if (!settingsMenu.classList.contains('hidden')) {
+                if (!settingsMenu.contains(event.target) && !settingsToggleBtn.contains(event.target)) {
+                    settingsMenu.classList.add('hidden');
+                }
+            }
         }
 
         function showFeedback(title, message, icon = "🍻", callback = null, customActionsHTML = null) {
@@ -802,6 +1013,10 @@
            5. JÁTÉKMENET ÉS RENDERELÉS
            ========================================================================== */
         function startGame() {
+            if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
+                questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
+            }
+
             if (!questions || questions.length === 0) {
                 showFeedback("Nincs kérdés!", "Először tölts be vagy hozz létre egy kérdéssort!", "⚠️");
                 return;
@@ -825,6 +1040,7 @@
         function prepareQuestion() {
             isRoundChecked = false;
             answerBets = [0, 0, 0, 0];
+            isAllInUsedOnAnswer = [false, false, false, false];
             selectedAnswerSlot = 0;
             document.getElementById('audience-chart-box').classList.add('hidden');
 
@@ -932,10 +1148,15 @@
                             </span>
                         </div>
                         ${!isRoundChecked ? `
-                        <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-                            <button onclick="removeCupFromAnswer(${index})" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-600 text-white font-black flex items-center justify-center border border-slate-600 transition cursor-pointer">−</button>
-                            <span class="w-6 text-center font-black text-yellow-400 text-sm">${answerBets[index]}</span>
-                            <button onclick="addCupToAnswer(${index})" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 text-white font-black flex items-center justify-center border border-slate-600 transition cursor-pointer">+</button>
+                        <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+                            <button onclick="triggerAllIn(${index})" class="all-in-btn text-xs font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer" title="Az összes pohár felrakása ide">
+                                ALL IN
+                            </button>
+                            <div class="flex items-center gap-1">
+                                <button onclick="removeCupFromAnswer(${index})" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-600 text-white font-black flex items-center justify-center border border-slate-600 transition cursor-pointer">−</button>
+                                <span class="w-6 text-center font-black text-yellow-400 text-sm">${answerBets[index]}</span>
+                                <button onclick="addCupToAnswer(${index})" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-600 text-white font-black flex items-center justify-center border border-slate-600 transition cursor-pointer">+</button>
+                            </div>
                         </div>
                         ` : `
                         <span class="text-xs font-black px-2.5 py-1 rounded-lg ${ans.isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}">
@@ -951,8 +1172,30 @@
             });
         }
 
+        function triggerAllIn(index) {
+            if (isRoundChecked || displayedAnswers[index].hidden) return;
+
+            answerBets = [0, 0, 0, 0];
+            isAllInUsedOnAnswer = [false, false, false, false];
+
+            answerBets[index] = totalGlasses;
+            isAllInUsedOnAnswer[index] = true;
+            selectedAnswerSlot = index;
+            playSuccessSound();
+            renderGameUI();
+        }
+
         function handleAnswerCardClick(index) {
             if (isRoundChecked || displayedAnswers[index].hidden) return;
+            if (isAllInUsedOnAnswer[index]) {
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                return;
+            }
+            if (isAllInUsedOnAnswer.some(val => val)) {
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                return;
+            }
+
             const placedTotal = answerBets.reduce((a, b) => a + b, 0);
             if (placedTotal === totalGlasses && answerBets[index] === 0) {
                 showFeedback("Már elhelyezted az összes poharad!", "Már az összes poharad felkerült.", "⚠️");
@@ -964,14 +1207,24 @@
 
         function addCupToSelected() {
             if (isRoundChecked) return;
-            if (displayedAnswers[selectedAnswerSlot]?.hidden) {
-                selectedAnswerSlot = displayedAnswers.findIndex(a => !a.hidden);
+            if (isAllInUsedOnAnswer.some(val => val)) {
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                return;
+            }
+            if (displayedAnswers[selectedAnswerSlot]?.hidden || isAllInUsedOnAnswer[selectedAnswerSlot]) {
+                const firstValid = displayedAnswers.findIndex((a, idx) => !a.hidden && !isAllInUsedOnAnswer[idx]);
+                if (firstValid !== -1) selectedAnswerSlot = firstValid;
+                else return;
             }
             addCupToAnswer(selectedAnswerSlot);
         }
 
         function addCupToAnswer(index) {
-            if (isRoundChecked || displayedAnswers[index].hidden) return;
+            if (isRoundChecked || displayedAnswers[index].hidden || isAllInUsedOnAnswer[index]) return;
+            if (isAllInUsedOnAnswer.some(val => val)) {
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                return;
+            }
             const placedTotal = answerBets.reduce((a, b) => a + b, 0);
             if (placedTotal === totalGlasses && answerBets[index] === 0) return;
             selectedAnswerSlot = index;
@@ -984,6 +1237,10 @@
 
         function removeCupFromAnswer(index) {
             if (isRoundChecked) return;
+            if (isAllInUsedOnAnswer[index] || isAllInUsedOnAnswer.some(val => val)) {
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                return;
+            }
             if (answerBets[index] > 0) {
                 answerBets[index]--;
                 playCupSound(false);
@@ -993,7 +1250,12 @@
 
         function returnAllCupsToTray() {
             if (isRoundChecked) return;
+            if (isAllInUsedOnAnswer.some(val => val)) {
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                return;
+            }
             answerBets = [0, 0, 0, 0];
+            isAllInUsedOnAnswer = [false, false, false, false];
             playCupSound(false);
             renderGameUI();
         }
@@ -1025,9 +1287,7 @@
             if (totalGlasses === 0) {
                 playDrinkSound();
                 
-                // Ellenőrizzük, hogy a poharak újratöltése segítség fel lett-e már használva
                 if (!lifelines.refill) {
-                    // Ha még nem lett felhasználva, felkínáljuk a modálban az újratöltést
                     const refillActionsHTML = `
                         <button onclick="executeModalRefillAndContinue()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base transition cursor-pointer mb-2">
                             🍷 Poharak Újratöltése (10 db)
@@ -1039,7 +1299,6 @@
                     showFeedback("ELFOGYTAK A POHARAID!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került!<br><br>Mivel még nem használtad az újratöltést, most azonnal pótolhatod őket!`, "🍷", null, refillActionsHTML);
                     document.getElementById('next-question-btn').textContent = "Quiz folytatására";
                 } else {
-                    // Ha már felhasználták korábban, vége a játéknak
                     showFeedback("ELVESZÍTETTED AZ ÖSSZES POHARAD!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került és az újratöltés is elfogyott!`, "💀");
                     document.getElementById('next-question-btn').textContent = "🏁 Játék befejezése";
                 }
@@ -1071,7 +1330,6 @@
                 return;
             }
             if (totalGlasses <= 0 && !lifelines.refill) {
-                // Ha valaki valahogy rákattintana, de még nem töltötte újra
                 refillGlasses(document.getElementById('help-refill'));
                 return;
             }
@@ -1098,6 +1356,7 @@
             wrongIndices.slice(0, 2).forEach(idx => {
                 displayedAnswers[idx].hidden = true;
                 answerBets[idx] = 0;
+                isAllInUsedOnAnswer[idx] = false;
             });
             if (displayedAnswers[selectedAnswerSlot].hidden) {
                 selectedAnswerSlot = displayedAnswers.findIndex(a => !a.hidden);
@@ -1245,7 +1504,6 @@
                 renderGameUI();
                 showFeedback("Poharak újratöltve!", "A készleted újra <strong>10 darab piros pohár</strong>!", "🍷");
                 
-                // Ha a fő képernyőn a gomb a Quiz folytatására váltott, visszaállítjuk
                 const nextBtn = document.getElementById('next-question-btn');
                 if (nextBtn && nextBtn.textContent.includes("Quiz folytatás")) {
                     nextBtn.textContent = currentQuestionIndex < questions.length - 1 ? "➡️ Következő kérdés" : "🏆 Eredményhirdetés";
@@ -1256,7 +1514,7 @@
         }
 
         /* ==========================================================================
-           7. CREATE & LOAD MODÁLOK
+           7. CREATE & LOAD MODÁLOK (Mentés + Fix Megosztási Kódok)
            ========================================================================== */
         function openCreateModal(editName = null) {
             const container = document.getElementById('questions-container');
@@ -1334,12 +1592,51 @@
             saved[setName] = parsedQuestions;
             localStorage.setItem('SavedQuestions', JSON.stringify(saved));
 
-            currentDifficultyKey = 'custom';
-            activeSetName = setName;
-            questions = parsedQuestions;
-            document.getElementById('active-set-label').textContent = `${setName} (${questions.length} kérdés)`;
+            // Ha van már hozzá tartozó fix kód, automatikusan frissítjük a tartalmát is!
+            let setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
+            if (setCodes[setName]) {
+                const code = setCodes[setName];
+                const jsonString = JSON.stringify(parsedQuestions);
+                const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
+                const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
+                savedCodes[code] = encodedData;
+                localStorage.setItem('SavedQuizCodes', JSON.stringify(savedCodes));
+            }
+
             toggleModal('create-modal', false);
-            showFeedback("Mentve!", `A(z) <strong>"${setName}"</strong> elmentve!`, "✅");
+            showFeedback("Sikeres mentés!", `A(z) <strong>"${setName}"</strong> sikeresen elmentve, és a kódja automatikusan frissítve lett!`, "🎉");
+        }
+
+        // Fix megosztási kód kezelés: ha már kapott kódot, mindig ugyanazt adja vissza
+        function shareCustomSet(name) {
+            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const set = saved[name];
+            if (!set) return;
+
+            const jsonString = JSON.stringify(set);
+            const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
+
+            let setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
+            let fixedCode = setCodes[name];
+
+            if (!fixedCode) {
+                // Ha még nem volt kódja, generálunk egy egyedi 6 jegyűt
+                const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
+                do {
+                    fixedCode = Math.floor(100000 + Math.random() * 900000).toString();
+                } while (savedCodes[fixedCode]);
+
+                setCodes[name] = fixedCode;
+                localStorage.setItem('SavedSetCodes', JSON.stringify(setCodes));
+            }
+
+            // Frissítjük a kódhoz tartozó adatokat (így módosításkor is a fix kód marad érvényes, de az új tartalommal)
+            const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
+            savedCodes[fixedCode] = encodedData;
+            localStorage.setItem('SavedQuizCodes', JSON.stringify(savedCodes));
+
+            toggleModal('load-modal', false);
+            showFeedback("Megosztási kód (Fix & Aktuális)", `A(z) <strong>"${name}"</strong> kérdéssorod állandó 6 jegyű kódja:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${fixedCode}</code><br><br>Ez a kód mindörökké ehhez a sorozathoz tartozik. Ha módosítod a kérdéseket, ez a kód automatikusan az új verziót fogja megosztani!`, "📤");
         }
 
         function showLoadModal() {
@@ -1353,7 +1650,7 @@
                     <div class="bg-slate-800/90 border border-yellow-500/40 rounded-2xl p-4 flex items-center justify-between gap-3">
                         <div>
                             <h4 class="font-extrabold text-white text-base">${label}</h4>
-                            <p class="text-xs text-slate-400">${count} kérdés (véletlenszerű keveréssel)</p>
+                            <p class="text-xs text-slate-400">${count} kérdés</p>
                         </div>
                         <button onclick="loadBuiltInFromModal('${diffKey}')" class="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition cursor-pointer">
                             Kiválasztás
@@ -1372,15 +1669,16 @@
                     const count = saved[name].length;
                     const safeName = name.replace(/'/g, "\\'");
                     listEl.innerHTML += `
-                        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 flex items-center justify-between gap-3">
+                        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div>
                                 <h4 class="font-bold text-white">${name}</h4>
                                 <span class="text-xs text-slate-400">${count} kérdés</span>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="loadCustomSet('${safeName}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Betöltés</button>
-                                <button onclick="toggleModal('load-modal', false); openCreateModal('${safeName}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Szerk.</button>
-                                <button onclick="deleteCustomSet('${safeName}')" class="bg-red-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs">Törlés</button>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button onclick="loadCustomSet('${safeName}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Betöltés</button>
+                                <button onclick="shareCustomSet('${safeName}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer" title="Megosztás fix 6 jegyű kóddal">📤 Megosztás</button>
+                                <button onclick="toggleModal('load-modal', false); openCreateModal('${safeName}')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Szerk.</button>
+                                <button onclick="deleteCustomSet('${safeName}')" class="bg-red-600 hover:bg-red-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Törlés</button>
                             </div>
                         </div>
                     `;
@@ -1399,10 +1697,10 @@
             if (saved[name]) {
                 currentDifficultyKey = 'custom';
                 activeSetName = name;
-                questions = saved[name];
+                questions = shuffleArray(saved[name]);
                 document.getElementById('active-set-label').textContent = `${name} (${questions.length} kérdés)`;
                 toggleModal('load-modal', false);
-                showFeedback("Betöltve!", `A(z) <strong>"${name}"</strong> aktív!`, "✅");
+                showFeedback("Betöltve!", `A(z) <strong>"${name}"</strong> aktív és összekeverve!`, "✅");
             }
         }
 
@@ -1416,10 +1714,6 @@
         /* ==========================================================================
            8. BEÁLLÍTÁSOK
            ========================================================================== */
-        function toggleSettingsMenu() {
-            document.getElementById('settings-menu').classList.toggle('hidden');
-        }
-
         function setPaletteColor() {
             const color = document.getElementById('palette-color-input').value;
             document.body.style.backgroundImage = 'none';
@@ -1438,6 +1732,7 @@
 
         function exitToMenu() {
             stopHulyeTimer();
+            backToMainStartMenu();
             document.getElementById('settings-menu').classList.add('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
@@ -1445,7 +1740,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDifficulty('easy');
-            initBackgroundTimer();
             initAudioSettingsUI();
 
             const savedColor = localStorage.getItem('backgroundColor');
