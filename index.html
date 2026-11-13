@@ -665,39 +665,44 @@
             });
         }
 
-        function loadQuizByCode() {
+        // Online megosztás API – ugyanazon a Render szerveren fut, mint az alkalmazás.
+        const QUIZ_API_BASE = 'https://legyen-on-is-reszeg.onrender.com';
+
+        async function loadQuizByCode() {
             const codeInput = document.getElementById('quiz-code-input').value.trim();
-            if (!codeInput || codeInput.length !== 6) {
+            if (!/^\d{6}$/.test(codeInput)) {
                 showFeedback("Hibás kód", "Kérlek, adj meg érvényes 6 jegyű kódot (pl. 123456)!", "⚠️");
                 return;
             }
 
-            if (codeInput === "123456") {
-                questions = shuffleArray([
-                    { question: "[Többjátékos Kód] Melyik a legnépszerűbb ivós kártyajáték?", answers: ["Kings Cup", "Uno", "Monopoly", "Pókermák"], correct: 0 },
-                    { question: "[Többjátékos Kód] Hány centiliter egy szabvány feles?", answers: ["4 cl", "2 cl", "5 cl", "10 cl"], correct: 0 },
-                    { question: "[Többjátékos Kód] Mi a neve a híres mexikói kukoricapárlatnak?", answers: ["Tequila", "Mezcal", "Vodka", "Gin"], correct: 0 }
-                ]);
-                activeSetName = "🔑 Kódos Kvíz (#123456)";
-                startGameFromCode();
-                return;
-            }
-
+            // Régi, helyben mentett kódok továbbra is működnek ezen a készüléken.
             const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
             if (savedCodes[codeInput]) {
                 try {
-                    const jsonString = atob(savedCodes[codeInput]);
-                    const decodedQuestions = JSON.parse(jsonString);
-                    questions = shuffleArray(decodedQuestions);
-                    activeSetName = `🔑 Titkos Kvíz (#${codeInput})`;
-                    startGameFromCode();
-                    return;
-                } catch (e) {
-                    console.error("Dekódolási hiba:", e);
-                }
+                    const decodedQuestions = JSON.parse(decodeURIComponent(escape(atob(savedCodes[codeInput]))));
+                    if (Array.isArray(decodedQuestions) && decodedQuestions.length) {
+                        questions = shuffleArray(decodedQuestions);
+                        activeSetName = `🔑 Helyi kvíz (#${codeInput})`;
+                        startGameFromCode();
+                        return;
+                    }
+                } catch (e) { console.warn('Helyi kód olvasási hiba:', e); }
             }
 
-            showFeedback("Ismeretlen kód", `Nem található érvényes kvíz ezzel a kóddal: <strong>${codeInput}</strong>.<br><br>Használhatod a tesztkódot: <strong>123456</strong>`, "❌");
+            try {
+                const response = await fetch(`${QUIZ_API_BASE}/api/share/${encodeURIComponent(codeInput)}`);
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || !data.success || !Array.isArray(data.questions) || !data.questions.length) {
+                    showFeedback("Ismeretlen kód", `Nem található megosztott kérdéssor ezzel a kóddal: <strong>${codeInput}</strong>.`, "❌");
+                    return;
+                }
+                questions = shuffleArray(data.questions);
+                activeSetName = `🔑 Megosztott kvíz (#${codeInput})`;
+                startGameFromCode();
+            } catch (error) {
+                console.error('Kód letöltési hiba:', error);
+                showFeedback("Kapcsolódási hiba", "A megosztott kérdéssort most nem sikerült letölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "📡");
+            }
         }
 
         function startGameFromCode() {
@@ -1612,47 +1617,34 @@
             saved[setName] = parsedQuestions;
             localStorage.setItem('SavedQuestions', JSON.stringify(saved));
 
-            let setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
-            if (setCodes[setName]) {
-                const code = setCodes[setName];
-                const jsonString = JSON.stringify(parsedQuestions);
-                const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
-                const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
-                savedCodes[code] = encodedData;
-                localStorage.setItem('SavedQuizCodes', JSON.stringify(savedCodes));
-            }
-
             toggleModal('create-modal', false);
-            showFeedback("Sikeres mentés!", `A(z) <strong>"${setName}"</strong> sikeresen elmentve, és a kódja automatikusan frissítve lett!`, "🎉");
+            showFeedback("Sikeres mentés!", `A(z) <strong>"${setName}"</strong> kérdéssor sikeresen elmentve ezen a készüléken. Ha módosítottad a már megosztott kérdéseket, nyomd meg újra a 📤 Megosztás gombot, és küldd el az új kódot!`, "🎉");
         }
 
-        function shareCustomSet(name) {
+        async function shareCustomSet(name) {
             const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
             const set = saved[name];
-            if (!set) return;
+            if (!set || !set.length) return;
 
-            const jsonString = JSON.stringify(set);
-            const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
-
-            let setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
-            let fixedCode = setCodes[name];
-
-            if (!fixedCode) {
-                const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
-                do {
-                    fixedCode = Math.floor(100000 + Math.random() * 900000).toString();
-                } while (savedCodes[fixedCode]);
-
-                setCodes[name] = fixedCode;
+            try {
+                const response = await fetch(`${QUIZ_API_BASE}/api/share`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ questions: set })
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || !data.success || !data.code) {
+                    throw new Error(data.error || 'A szerver nem adott megosztási kódot.');
+                }
+                const code = String(data.code);
+                const setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
+                setCodes[name] = code;
                 localStorage.setItem('SavedSetCodes', JSON.stringify(setCodes));
+                toggleModal('load-modal', false);
+                showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.`, "📤");
+            } catch (error) {
+                console.error('Megosztási hiba:', error);
+                showFeedback("Megosztás nem sikerült", "Nem sikerült feltölteni a kérdéssort a szerverre. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "⚠️");
             }
-
-            const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
-            savedCodes[fixedCode] = encodedData;
-            localStorage.setItem('SavedQuizCodes', JSON.stringify(savedCodes));
-
-            toggleModal('load-modal', false);
-            showFeedback("Megosztási kód (Fix & Aktuális)", `A(z) <strong>"${name}"</strong> kérdéssorod állandó 6 jegyű kódja:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${fixedCode}</code><br><br>Ez a kód mindörökké ehhez a sorozathoz tartozik. Ha módosítod a kérdéseket, ez a kód automatikusan az új verziót fogja megosztani!`, "📤");
         }
 
         function showLoadModal() {
