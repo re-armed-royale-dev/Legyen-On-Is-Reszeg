@@ -273,7 +273,7 @@
                         <button id="btn-diff-easy" onclick="selectDifficulty('easy')" class="bg-emerald-950/75 hover:bg-emerald-900/90 border border-emerald-500/60 text-emerald-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
                             🟢 Könnyű
                         </button>
-                        <button id="btn-diff-normal" onclick="selectDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border border-amber-500/40 text-amber-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
+                        <button id="btn-diff-normal" onclick="selectDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border border-emerald-500/40 text-amber-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
                             🟡 Normál
                         </button>
                         <button id="btn-diff-hard" onclick="selectDifficulty('hard')" class="bg-red-950/75 hover:bg-red-900/90 border border-red-500/40 text-red-300 font-extrabold py-2 px-2 rounded-xl text-xs transition cursor-pointer">
@@ -321,7 +321,7 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.11 Fix & Automata Kódok</span>
+                <span class="font-mono font-bold text-yellow-400">v2.13 All-in Overwrite</span>
             </div>
         </div>
     </main>
@@ -1149,7 +1149,7 @@
                         </div>
                         ${!isRoundChecked ? `
                         <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                            <button onclick="triggerAllIn(${index})" class="all-in-btn text-xs font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer" title="Az összes pohár felrakása ide">
+                            <button onclick="triggerAllIn(${index})" class="all-in-btn text-xs font-black px-2.5 py-1.5 rounded-xl transition cursor-pointer" title="Az összes pohár felrakása ide (akár máshonnan is elvéve)">
                                 ALL IN
                             </button>
                             <div class="flex items-center gap-1">
@@ -1172,27 +1172,29 @@
             });
         }
 
+        /* --- ALL-IN LOGIKA FRISSÍTÉS: Minden poharat összeszed és rárak a kiválasztott válaszra --- */
         function triggerAllIn(index) {
             if (isRoundChecked || displayedAnswers[index].hidden) return;
 
+            // Nullázzuk az összes eddigi tétet / All-in flaget
             answerBets = [0, 0, 0, 0];
             isAllInUsedOnAnswer = [false, false, false, false];
 
+            // Az összes megmaradt poharat (totalGlasses) rárakjuk az adott válaszra
             answerBets[index] = totalGlasses;
             isAllInUsedOnAnswer[index] = true;
             selectedAnswerSlot = index;
+
             playSuccessSound();
             renderGameUI();
         }
 
         function handleAnswerCardClick(index) {
             if (isRoundChecked || displayedAnswers[index].hidden) return;
+
+            // Ha az adott válaszon All-in van, ne engedjük simán módosítani
             if (isAllInUsedOnAnswer[index]) {
-                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
-                return;
-            }
-            if (isAllInUsedOnAnswer.some(val => val)) {
-                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
+                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat egyesével visszavenni nem lehet! Használd a 'Poharak visszavétele' gombot, ha változtatni szeretnél.", "⚠️");
                 return;
             }
 
@@ -1208,11 +1210,12 @@
         function addCupToSelected() {
             if (isRoundChecked) return;
             if (isAllInUsedOnAnswer.some(val => val)) {
-                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
-                return;
+                // Ha All-in van valahol, töröljük az All-in-t, ha a tálcáról akarunk pakolni
+                answerBets = [0, 0, 0, 0];
+                isAllInUsedOnAnswer = [false, false, false, false];
             }
-            if (displayedAnswers[selectedAnswerSlot]?.hidden || isAllInUsedOnAnswer[selectedAnswerSlot]) {
-                const firstValid = displayedAnswers.findIndex((a, idx) => !a.hidden && !isAllInUsedOnAnswer[idx]);
+            if (displayedAnswers[selectedAnswerSlot]?.hidden) {
+                const firstValid = displayedAnswers.findIndex(a => !a.hidden);
                 if (firstValid !== -1) selectedAnswerSlot = firstValid;
                 else return;
             }
@@ -1220,10 +1223,10 @@
         }
 
         function addCupToAnswer(index) {
-            if (isRoundChecked || displayedAnswers[index].hidden || isAllInUsedOnAnswer[index]) return;
+            if (isRoundChecked || displayedAnswers[index].hidden) return;
             if (isAllInUsedOnAnswer.some(val => val)) {
-                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
-                return;
+                answerBets = [0, 0, 0, 0];
+                isAllInUsedOnAnswer = [false, false, false, false];
             }
             const placedTotal = answerBets.reduce((a, b) => a + b, 0);
             if (placedTotal === totalGlasses && answerBets[index] === 0) return;
@@ -1237,12 +1240,9 @@
 
         function removeCupFromAnswer(index) {
             if (isRoundChecked) return;
-            if (isAllInUsedOnAnswer[index] || isAllInUsedOnAnswer.some(val => val)) {
-                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
-                return;
-            }
             if (answerBets[index] > 0) {
                 answerBets[index]--;
+                isAllInUsedOnAnswer[index] = false; // Ha elvesszük belőle, már nem tiszta All-in
                 playCupSound(false);
                 renderGameUI();
             }
@@ -1250,10 +1250,6 @@
 
         function returnAllCupsToTray() {
             if (isRoundChecked) return;
-            if (isAllInUsedOnAnswer.some(val => val)) {
-                showFeedback("All-in zárolás", "Az All-in alatt álló poharakat visszavenni nem lehet!", "⚠️");
-                return;
-            }
             answerBets = [0, 0, 0, 0];
             isAllInUsedOnAnswer = [false, false, false, false];
             playCupSound(false);
@@ -1592,7 +1588,6 @@
             saved[setName] = parsedQuestions;
             localStorage.setItem('SavedQuestions', JSON.stringify(saved));
 
-            // Ha van már hozzá tartozó fix kód, automatikusan frissítjük a tartalmát is!
             let setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
             if (setCodes[setName]) {
                 const code = setCodes[setName];
@@ -1607,7 +1602,6 @@
             showFeedback("Sikeres mentés!", `A(z) <strong>"${setName}"</strong> sikeresen elmentve, és a kódja automatikusan frissítve lett!`, "🎉");
         }
 
-        // Fix megosztási kód kezelés: ha már kapott kódot, mindig ugyanazt adja vissza
         function shareCustomSet(name) {
             const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
             const set = saved[name];
@@ -1620,7 +1614,6 @@
             let fixedCode = setCodes[name];
 
             if (!fixedCode) {
-                // Ha még nem volt kódja, generálunk egy egyedi 6 jegyűt
                 const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
                 do {
                     fixedCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -1630,7 +1623,6 @@
                 localStorage.setItem('SavedSetCodes', JSON.stringify(setCodes));
             }
 
-            // Frissítjük a kódhoz tartozó adatokat (így módosításkor is a fix kód marad érvényes, de az új tartalommal)
             const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
             savedCodes[fixedCode] = encodedData;
             localStorage.setItem('SavedQuizCodes', JSON.stringify(savedCodes));
