@@ -49,18 +49,22 @@ jobs:
       - name: iOS projekt létrehozása
         run: npx cap add ios
 
-      - name: iOS projekt frissítése
+      - name: iOS projekt szinkronizálása
         run: npx cap sync ios
 
-      - name: iOS projekt ellenőrzése
+      - name: CocoaPods függőségek telepítése
         run: |
-          test -d ios/App/App.xcodeproj
-          xcodebuild -list -project ios/App/App.xcodeproj
+          cd ios/App
+          pod install --repo-update
+          test -d App.xcworkspace
+
+      - name: iOS projekt ellenőrzése
+        run: xcodebuild -list -workspace ios/App/App.xcworkspace
 
       - name: iPhone alkalmazás fordítása
         run: |
           xcodebuild \
-            -project ios/App/App.xcodeproj \
+            -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
