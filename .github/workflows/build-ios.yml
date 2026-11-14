@@ -51,6 +51,11 @@ jobs:
       - name: iOS projekt frissítése
         run: npx cap sync ios
 
+      - name: CocoaPods telepítése
+        run: |
+          cd ios/App
+          pod install
+
       - name: iPhone alkalmazás fordítása
         run: |
           xcodebuild \
