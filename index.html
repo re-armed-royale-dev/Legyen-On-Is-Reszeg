@@ -592,10 +592,11 @@
            1. UPDATE: KÜLÖN HTML FÁJLOKBÓL (easy.html, normal.html, hard.html)
               25 KÉRDÉSBŐL 15 ÖSSZEVÁLOGATÁSA
            ========================================================================== */
-        const LEVEL_HTML_FILES = {
-            easy: 'easy.html',
-            normal: 'normal.html',
-            hard: 'hard.html'
+        // 1. JSON Fájlok beállítása
+        const LEVEL_JSON_FILES = {
+            easy: 'easy.json',
+            normal: 'normal.json',
+            hard: 'hard.json'
         };
 
         const LEVEL_QUESTION_POOLS = {
@@ -642,27 +643,19 @@
             return shuffleArray(pool).slice(0, Math.min(count, pool.length));
         }
 
-        async function fetchLevelQuestionsFromHtml(diffKey) {
+        // 2. JSON fájlok aszinkron betöltése a GitHub-ról / szerverről
+        async function fetchLevelQuestionsFromJson(diffKey) {
             if (LEVEL_QUESTION_POOLS[diffKey] && LEVEL_QUESTION_POOLS[diffKey].length > 0) {
                 return LEVEL_QUESTION_POOLS[diffKey];
             }
 
-            const fileUrl = LEVEL_HTML_FILES[diffKey] || LEVEL_HTML_FILES.easy;
+            const fileUrl = LEVEL_JSON_FILES[diffKey] || LEVEL_JSON_FILES.easy;
             const response = await fetch(fileUrl, { cache: 'no-store' });
             if (!response.ok) {
                 throw new Error(`Nem sikerült betölteni a(z) ${fileUrl} fájlt (${response.status})`);
             }
 
-            const htmlText = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlText, 'text/html');
-            const dataScript = doc.getElementById('questions-data');
-
-            if (!dataScript) {
-                throw new Error(`A(z) ${fileUrl} nem tartalmaz érvényes kérdéslistát!`);
-            }
-
-            const parsedPool = JSON.parse(dataScript.textContent.trim());
+            const parsedPool = await response.json();
             if (!Array.isArray(parsedPool) || parsedPool.length === 0) {
                 throw new Error(`A(z) ${fileUrl} kérdéslistája üres!`);
             }
@@ -714,7 +707,7 @@
             }
 
             try {
-                const pool = await fetchLevelQuestionsFromHtml(diffKey);
+                const pool = await fetchLevelQuestionsFromJson(diffKey);
                 questions = pickRandomQuestionsFromPool(pool, QUESTIONS_PER_GAME);
                 if (labelEl) {
                     labelEl.textContent = `${activeSetName} (${pool.length}-ből ${questions.length} kérdés)`;
@@ -726,7 +719,7 @@
                 }
                 showFeedback(
                     "Nincs internet kapcsolat",
-                    `Nem sikerült betölteni a(z) <strong>${LEVEL_HTML_FILES[diffKey]}</strong> szint kérdéseit. Ellenőrizd az internetkapcsolatot vagy a fájl elérhetőségét!`,
+                    `Nem sikerült betölteni a(z) <strong>${LEVEL_JSON_FILES[diffKey]}</strong> szint kérdéseit. Ellenőrizd az internetkapcsolatot vagy a fájl elérhetőségét!`,
                     "📡"
                 );
             }
@@ -1108,12 +1101,12 @@
         async function startGame() {
             if (currentDifficultyKey !== 'custom') {
                 try {
-                    const pool = await fetchLevelQuestionsFromHtml(currentDifficultyKey);
+                    const pool = await fetchLevelQuestionsFromJson(currentDifficultyKey);
                     questions = pickRandomQuestionsFromPool(pool, QUESTIONS_PER_GAME);
                 } catch (error) {
                     showFeedback(
                         "Nincs internet kapcsolat",
-                        `Nem sikerült betölteni a szint kérdéseit (${LEVEL_HTML_FILES[currentDifficultyKey]}). Ellenőrizd az internetkapcsolatot!`,
+                        `Nem sikerült betölteni a szint kérdéseit (${LEVEL_JSON_FILES[currentDifficultyKey]}). Ellenőrizd az internetkapcsolatot!`,
                         "📡"
                     );
                     return;
