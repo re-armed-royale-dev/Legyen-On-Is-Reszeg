@@ -1,3 +1,4 @@
+
 name: iPhone IPA Build
 
 on:
@@ -26,8 +27,8 @@ jobs:
       - name: Capacitor telepítése
         run: |
           npm init -y
-          npm install @capacitor/core @capacitor/ios
-          npm install --save-dev @capacitor/cli
+          npm install @capacitor/core@7 @capacitor/ios@7
+          npm install --save-dev @capacitor/cli@7
 
       - name: Webes fájlok előkészítése
         run: |
@@ -51,19 +52,19 @@ jobs:
       - name: iOS projekt frissítése
         run: npx cap sync ios
 
-      - name: CocoaPods telepítése
+      - name: iOS projekt ellenőrzése
         run: |
-          cd ios/App
-          pod install
+          test -d ios/App/App.xcodeproj
+          xcodebuild -list -project ios/App/App.xcodeproj
 
       - name: iPhone alkalmazás fordítása
         run: |
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath build/App.xcarchive \
+            -archivePath "$GITHUB_WORKSPACE/build/App.xcarchive" \
             CODE_SIGNING_ALLOWED=NO \
             archive
 
