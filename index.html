@@ -346,7 +346,7 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.16 Hotfix Update</span>
+                <span class="font-mono font-bold text-yellow-400">v2.19 Share Loading Hotfix</span>
             </div>
         </div>
     </main>
@@ -442,7 +442,7 @@
         </div>
     </section>
 
-    <!-- Hotfix 3: EREDMÉNY / IVÁS / NINCS INTERNET ÉRTESÍTŐ MODAL (z-[100] - MINDEN ABLAK ELŐTT) -->
+    <!-- Értesítő Modal -->
     <div id="feedback-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
         <div class="bg-slate-900 border-2 border-yellow-500/60 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl transform transition-all relative z-[101]">
             <div id="feedback-icon" class="text-5xl mb-3">🍻</div>
@@ -454,6 +454,19 @@
                     Rendben!
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- MEGOSZTÁS TÖLTŐ MODAL (ANIMÁLT PÖTTYÖKKEL) -->
+    <div id="share-loading-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[110]">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-amber-500/10 rounded-full border border-amber-400/40 animate-pulse">
+                <span class="text-3xl">📤</span>
+            </div>
+            <h3 class="text-lg font-black text-amber-400 mb-2">Megosztás</h3>
+            <p class="text-sm text-slate-300 font-semibold">
+                A kód generálása folyamatban van<span id="loading-dots" class="inline-block tracking-widest text-yellow-400 font-black">.</span>
+            </p>
         </div>
     </div>
 
@@ -547,7 +560,7 @@
 
     <script>
         /* ==========================================================================
-           0. HOTFIX 2: NAGYÍTÁS TILTÁSA & KÉPERNYŐFORGATÁS VÉDELEM
+           0. HOTFIX 2 & HOTFIX 4: NAGYÍTÁS TILTÁSA & KÉPERNYŐFORGATÁS VÉDELEM
            ========================================================================== */
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
@@ -582,10 +595,15 @@
             }
         }, { passive: false });
 
-        // Képernyőforgatáskor ne dobjon ki a kérdéssorból, ha aktív a játék
         window.addEventListener('orientationchange', function () {
             if (!document.getElementById('game-screen').classList.contains('hidden')) {
-                setTimeout(() => renderGameUI(), 100);
+                setTimeout(() => renderGameUI(), 120);
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (!document.getElementById('game-screen').classList.contains('hidden')) {
+                setTimeout(() => renderGameUI(), 120);
             }
         });
 
@@ -671,6 +689,7 @@
         let hulyeTimerInterval = null;
         let hulyeSecondsLeft = 10;
         let onFeedbackCloseCallback = null;
+        let shareDotsInterval = null;
 
         function shuffleArray(array) {
             const arr = [...array];
@@ -1595,7 +1614,7 @@
         }
 
         /* ==========================================================================
-           7. CREATE & LOAD MODÁLOK (Mentés + Fix Megosztási Kódok)
+           7. CREATE & LOAD MODÁLOK & MEGOSZTÁS ANIMÁLT PÖTTYÖKKEL
            ========================================================================== */
         function openCreateModal(editName = null) {
             const container = document.getElementById('questions-container');
@@ -1677,10 +1696,34 @@
             showFeedback("Sikeres mentés!", `A(z) <strong>"${setName}"</strong> kérdéssor sikeresen elmentve ezen a készüléken. Ha módosítottad a már megosztott kérdéseket, nyomd meg újra a 📤 Megosztás gombot, és küldd el az új kódot!`, "🎉");
         }
 
+        function startShareDotsAnimation() {
+            const dotsEl = document.getElementById('loading-dots');
+            if (!dotsEl) return;
+            let step = 1;
+            dotsEl.textContent = '.';
+            if (shareDotsInterval) clearInterval(shareDotsInterval);
+            shareDotsInterval = setInterval(() => {
+                step = (step % 3) + 1;
+                dotsEl.textContent = '.'.repeat(step);
+            }, 450);
+        }
+
+        function stopShareDotsAnimation() {
+            if (shareDotsInterval) {
+                clearInterval(shareDotsInterval);
+                shareDotsInterval = null;
+            }
+        }
+
         async function shareCustomSet(name) {
             const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
             const set = saved[name];
             if (!set || !set.length) return;
+
+            // Bezárjuk a betöltés/kezelő ablakot és megnyitjuk a "kód generálása folyamatban" modalt
+            toggleModal('load-modal', false);
+            toggleModal('share-loading-modal', true);
+            startShareDotsAnimation();
 
             try {
                 const response = await fetch(`${QUIZ_API_BASE}/api/share`, {
@@ -1688,6 +1731,10 @@
                     body: JSON.stringify({ questions: set })
                 });
                 const data = await response.json().catch(() => ({}));
+                
+                stopShareDotsAnimation();
+                toggleModal('share-loading-modal', false);
+
                 if (!response.ok || !data.success || !data.code) {
                     throw new Error(data.error || 'A szerver nem adott megosztási kódot.');
                 }
@@ -1695,10 +1742,13 @@
                 const setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
                 setCodes[name] = code;
                 localStorage.setItem('SavedSetCodes', JSON.stringify(setCodes));
-                toggleModal('load-modal', false);
+
+                // Megjelenítjük a kódos ablakot
                 showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.`, "📤");
             } catch (error) {
                 console.error('Megosztási hiba:', error);
+                stopShareDotsAnimation();
+                toggleModal('share-loading-modal', false);
                 showFeedback("Megosztás nem sikerült", "Nem sikerült feltölteni a kérdéssort a szerverre. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "⚠️");
             }
         }
