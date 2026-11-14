@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const crypto = require("crypto");
+const { Pool } = require("pg");
 
 const app = express();
 const server = http.createServer(app);
@@ -12,19 +13,28 @@ const io = new Server(server, {
 });
 
 app.use(express.json({ limit: "2mb" }));
+
 app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
 
-    next();
+  next();
 });
 
-const shares = new Map();
+// Supabase adatbázis-kapcsolat
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    })
+  : null;
+
+// Multiplayer szobák
 const rooms = new Map();
 
 function makeCode() {
@@ -36,57 +46,146 @@ function getCode(map) {
   do {
     code = makeCode();
   } while (map.has(code));
+
   return code;
+}
+
+// Adatbázis és tábla automatikus létrehozása
+async function initializeDatabase() {
+  if (!pool) {
+    throw new Error("A DATABASE_URL környezeti változó nincs beállítva!");
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS public.quiz_shares (
+      code TEXT PRIMARY KEY,
+      questions JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  console.log("Supabase adatbázis csatlakoztatva!");
+  console.log("quiz_shares tábla ellenőrizve!");
 }
 
 app.get("/", (req, res) => {
   res.send("Legyen Ön is Részeg – szerver működik! 🍻");
 });
 
-// Kérdéssor megosztása
-app.post("/api/share", (req, res) => {
-  const { questions } = req.body;
+// Kérdéssor megosztása – mentés Supabase-be
+app.post("/api/share", async (req, res) => {
+  const { questions } = req.body || {};
 
   if (!Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ error: "Érvénytelen kérdéssor." });
+    return res.status(400).json({
+      error: "Érvénytelen kérdéssor."
+    });
   }
 
   if (questions.length > 500) {
-    return res.status(400).json({ error: "Túl sok kérdés." });
+    return res.status(400).json({
+      error: "Túl sok kérdés."
+    });
   }
 
-  const code = getCode(shares);
-  shares.set(code, {
-    questions,
-    createdAt: Date.now()
-  });
+  try {
+    // Egyedi megosztási kód generálása
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = makeCode();
 
-  res.json({ success: true, code });
+      try {
+        await pool.query(
+          `INSERT INTO public.quiz_shares (code, questions)
+           VALUES ($1, $2::jsonb)`,
+          [code, JSON.stringify(questions)]
+        );
+
+        return res.json({
+          success: true,
+          code
+        });
+      } catch (error) {
+        // Ha a kód már létezik, új kódot próbálunk
+        if (error.code !== "23505") {
+          throw error;
+        }
+      }
+    }
+
+    return res.status(500).json({
+      error: "Nem sikerült megosztási kódot létrehozni."
+    });
+
+  } catch (error) {
+    console.error("Mentési hiba:", error);
+
+    return res.status(500).json({
+      error: "A kérdéssor mentése nem sikerült."
+    });
+  }
 });
 
 // Kérdéssor letöltése kód alapján
-app.get("/api/share/:code", (req, res) => {
-  const item = shares.get(req.params.code);
+app.get("/api/share/:code", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT questions
+       FROM public.quiz_shares
+       WHERE code = $1`,
+      [String(req.params.code)]
+    );
 
-  if (!item) {
-    return res.status(404).json({ error: "Ismeretlen kód." });
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: "Ismeretlen kód."
+      });
+    }
+
+    res.json({
+      success: true,
+      questions: result.rows[0].questions
+    });
+
+  } catch (error) {
+    console.error("Betöltési hiba:", error);
+
+    res.status(500).json({
+      error: "A kérdéssor betöltése nem sikerült."
+    });
   }
-
-  res.json({
-    success: true,
-    questions: item.questions
-  });
 });
 
-// Multiplayer
+// Adatbázis állapotának ellenőrzése
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+
+    res.json({
+      ok: true,
+      database: "connected"
+    });
+
+  } catch (error) {
+    res.status(503).json({
+      ok: false,
+      database: "error"
+    });
+  }
+});
+
+// MULTIPLAYER
 io.on("connection", (socket) => {
 
   // Szoba létrehozása
   socket.on("create-room", (data, callback) => {
-    const questions = data && data.questions;
+    data = data || {};
+
+    const questions = data.questions;
 
     if (!Array.isArray(questions) || questions.length === 0) {
-      return callback?.({ error: "Nincs kérdéssor." });
+      return callback?.({
+        error: "Nincs kérdéssor."
+      });
     }
 
     const code = getCode(rooms);
@@ -117,19 +216,27 @@ io.on("connection", (socket) => {
 
   // Csatlakozás szobához
   socket.on("join-room", (data, callback) => {
+    data = data || {};
+
     const code = String(data.code || "");
     const room = rooms.get(code);
 
     if (!room) {
-      return callback?.({ error: "Nem található ilyen szoba." });
+      return callback?.({
+        error: "Nem található ilyen szoba."
+      });
     }
 
     if (room.started) {
-      return callback?.({ error: "A játék már elkezdődött." });
+      return callback?.({
+        error: "A játék már elkezdődött."
+      });
     }
 
     if (room.players.size >= 8) {
-      return callback?.({ error: "A szoba megtelt." });
+      return callback?.({
+        error: "A szoba megtelt."
+      });
     }
 
     room.players.set(socket.id, {
@@ -144,7 +251,10 @@ io.on("connection", (socket) => {
       players: [...room.players.values()]
     });
 
-    callback?.({ success: true, code });
+    callback?.({
+      success: true,
+      code
+    });
   });
 
   // Játék indítása
@@ -153,14 +263,19 @@ io.on("connection", (socket) => {
     const room = rooms.get(code);
 
     if (!room || room.host !== socket.id) {
-      return callback?.({ error: "Csak a szoba létrehozója indíthat." });
+      return callback?.({
+        error: "Csak a szoba létrehozója indíthat."
+      });
     }
 
     room.started = true;
     room.questionIndex = 0;
 
     sendQuestion(code, room);
-    callback?.({ success: true });
+
+    callback?.({
+      success: true
+    });
   });
 
   // Válasz elküldése
@@ -169,12 +284,17 @@ io.on("connection", (socket) => {
     const room = rooms.get(code);
 
     if (!room || !room.started) {
-      return callback?.({ error: "Nincs aktív játék." });
+      return callback?.({
+        error: "Nincs aktív játék."
+      });
     }
 
     const player = room.players.get(socket.id);
+
     if (!player || player.submitted) {
-      return callback?.({ error: "Már elküldted a válaszod." });
+      return callback?.({
+        error: "Már elküldted a válaszod."
+      });
     }
 
     const bets = data && data.bets;
@@ -185,7 +305,9 @@ io.on("connection", (socket) => {
       !bets.every(n => Number.isInteger(n) && n >= 0) ||
       bets.reduce((a, b) => a + b, 0) !== 10
     ) {
-      return callback?.({ error: "Pontosan 10 poharat kell elhelyezned." });
+      return callback?.({
+        error: "Pontosan 10 poharat kell elhelyezned."
+      });
     }
 
     const question = room.questions[room.questionIndex];
@@ -196,7 +318,9 @@ io.on("connection", (socket) => {
       correctIndex < 0 ||
       correctIndex > 3
     ) {
-      return callback?.({ error: "Hibás kérdésadat." });
+      return callback?.({
+        error: "Hibás kérdésadat."
+      });
     }
 
     const correctGlasses = bets[correctIndex];
@@ -217,7 +341,9 @@ io.on("connection", (socket) => {
       totalPlayers: room.players.size
     });
 
-    callback?.({ success: true });
+    callback?.({
+      success: true
+    });
   });
 
   // Következő kérdés
@@ -226,21 +352,29 @@ io.on("connection", (socket) => {
     const room = rooms.get(code);
 
     if (!room || room.host !== socket.id) {
-      return callback?.({ error: "Csak a házigazda léptethet." });
+      return callback?.({
+        error: "Csak a házigazda léptethet."
+      });
     }
 
     const allSubmitted = [...room.players.values()]
       .every(player => player.submitted);
 
     if (!allSubmitted) {
-      return callback?.({ error: "Még nem válaszolt minden játékos." });
+      return callback?.({
+        error: "Még nem válaszolt minden játékos."
+      });
     }
 
     room.questionIndex++;
 
     if (room.questionIndex >= room.questions.length) {
       io.to(code).emit("game-finished");
-      return callback?.({ success: true, finished: true });
+
+      return callback?.({
+        success: true,
+        finished: true
+      });
     }
 
     for (const player of room.players.values()) {
@@ -248,7 +382,10 @@ io.on("connection", (socket) => {
     }
 
     sendQuestion(code, room);
-    callback?.({ success: true });
+
+    callback?.({
+      success: true
+    });
   });
 
   // Kilépés
@@ -269,6 +406,7 @@ io.on("connection", (socket) => {
       io.to(code).emit("room-error", {
         message: "A házigazda kilépett."
       });
+
       rooms.delete(code);
       return;
     }
@@ -280,10 +418,11 @@ io.on("connection", (socket) => {
 
 });
 
+// Kérdés küldése a játékosoknak
 function sendQuestion(code, room) {
   const question = room.questions[room.questionIndex];
 
-  // A helyes válasz indexét nem küldjük el a játékosoknak
+  // A helyes válasz indexét nem küldjük el
   const safeQuestion = { ...question };
   delete safeQuestion.correctIndex;
 
@@ -296,6 +435,14 @@ function sendQuestion(code, room) {
 
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log("Szerver elindult a " + PORT + " porton.");
-});
+// Adatbázis inicializálása, majd szerverindítás
+initializeDatabase()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log("Szerver elindult a " + PORT + " porton.");
+    });
+  })
+  .catch((error) => {
+    console.error("Adatbázis inicializálási hiba:", error);
+    process.exit(1);
+  });
