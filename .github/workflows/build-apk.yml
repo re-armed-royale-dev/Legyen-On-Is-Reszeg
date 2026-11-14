@@ -42,6 +42,8 @@ jobs:
           cp normal.json app/src/main/assets/normal.json
           cp hard.json app/src/main/assets/hard.json
 
+          echo "android.useAndroidX=true" >> gradle.properties
+
           cat > settings.gradle <<'EOF'
           pluginManagement {
               repositories {
