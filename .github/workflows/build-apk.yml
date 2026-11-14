@@ -34,6 +34,8 @@ jobs:
         run: |
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/party/reszegkviz
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
 
           cp index.html app/src/main/assets/index.html
           cp easy.json app/src/main/assets/easy.json
@@ -99,13 +101,54 @@ jobs:
                   }
               }
           }
+
+          dependencies {
+              implementation 'androidx.core:core-splashscreen:1.0.1'
+          }
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:windowBackground">#0B0F19</item>
+                  <item name="android:colorAccent">#FBBF24</item>
+              </style>
+
+              <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+                  <item name="windowSplashScreenBackground">#0B0F19</item>
+                  <item name="windowSplashScreenAnimatedIcon">@drawable/splash_cup</item>
+                  <item name="postSplashScreenTheme">@style/AppTheme</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/res/drawable/splash_cup.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path
+                  android:fillColor="#B91C1C"
+                  android:pathData="M27,30 L76,30 L70,82 Q69,88 63,88 L41,88 Q35,88 34,82 Z" />
+              <path
+                  android:fillColor="#FBBF24"
+                  android:pathData="M24,25 L80,25 L80,33 L24,33 Z" />
+              <path
+                  android:fillColor="#FDE68A"
+                  android:pathData="M35,18 Q43,10 51,18 Q60,8 68,18 Q76,15 78,25 L29,25 Q29,19 35,18 Z" />
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M39,40 L44,40 L43,68 L38,68 Z"
+                  android:fillAlpha="0.28" />
+          </vector>
           EOF
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
               <application
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:theme="@style/Theme.App.Starting"
                   android:label="Legyen Ön is Részeg"
                   android:usesCleartextTraffic="true">
                   <activity
@@ -130,16 +173,21 @@ jobs:
           import android.webkit.WebView;
           import android.webkit.WebSettings;
           import android.webkit.WebChromeClient;
+          import android.webkit.WebViewClient;
           import android.webkit.ValueCallback;
           import android.webkit.WebChromeClient.FileChooserParams;
+          import androidx.core.splashscreen.SplashScreen;
 
           public class MainActivity extends Activity {
 
               private ValueCallback<Uri[]> filePathCallback;
               private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
+              private volatile boolean webViewReady = false;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
+                  SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+                  splashScreen.setKeepOnScreenCondition(() -> !webViewReady);
                   super.onCreate(savedInstanceState);
 
                   WebView webView = new WebView(this);
@@ -149,6 +197,13 @@ jobs:
                   settings.setDomStorageEnabled(true);
                   settings.setAllowFileAccess(true);
                   settings.setAllowContentAccess(true);
+
+                  webView.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public void onPageFinished(WebView view, String url) {
+                          webViewReady = true;
+                      }
+                  });
 
                   webView.setWebChromeClient(new WebChromeClient() {
                       @Override
