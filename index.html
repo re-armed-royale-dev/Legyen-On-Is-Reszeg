@@ -287,7 +287,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
                     <div class="inline-flex items-center gap-2 bg-slate-900 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs text-yellow-300">
                         <span>Aktív szint:</span>
-                        <strong id="active-set-label" class="text-white">🟢 Könnyű (25-ből 15 kérdés)</strong>
+                        <strong id="active-set-label" class="text-white">🟢 Könnyű (15 kérdés)</strong>
                     </div>
                 </div>
 
@@ -345,8 +345,8 @@
             </div>
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
-                <span>15 kérdéses paklik (25 kérdéses szintfájlokból válogatva)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.16 Update & Hotfix</span>
+                <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
+                <span class="font-mono font-bold text-yellow-400">v2.16 Hotfix Update</span>
             </div>
         </div>
     </main>
@@ -442,6 +442,21 @@
         </div>
     </section>
 
+    <!-- Hotfix 3: EREDMÉNY / IVÁS / NINCS INTERNET ÉRTESÍTŐ MODAL (z-[100] - MINDEN ABLAK ELŐTT) -->
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+        <div class="bg-slate-900 border-2 border-yellow-500/60 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl transform transition-all relative z-[101]">
+            <div id="feedback-icon" class="text-5xl mb-3">🍻</div>
+            <h3 id="feedback-title" class="text-2xl font-black text-white mb-2">Eredmény</h3>
+            <p id="feedback-message" class="text-slate-300 text-base mb-6 leading-relaxed"></p>
+            
+            <div id="feedback-actions" class="flex flex-col gap-2.5">
+                <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
+                    Rendben!
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JÁTÉKSZABÁLYOK MODAL -->
     <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('rules-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
@@ -527,21 +542,6 @@
         </div>
     </div>
 
-    <!-- Hotfix 3: EREDMÉNY / IVÁS / NINCS INTERNET ÉRTESÍTŐ MODAL (z-[100] - MINDEN ABLAK ELŐTT) -->
-    <div id="feedback-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-        <div class="bg-slate-900 border-2 border-yellow-500/60 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl transform transition-all relative z-[101]">
-            <div id="feedback-icon" class="text-5xl mb-3">🍻</div>
-            <h3 id="feedback-title" class="text-2xl font-black text-white mb-2">Eredmény</h3>
-            <p id="feedback-message" class="text-slate-300 text-base mb-6 leading-relaxed"></p>
-            
-            <div id="feedback-actions" class="flex flex-col gap-2.5">
-                <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
-                    Rendben!
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- HÁTTÉRRE KATTINTÁSHOZ EGYEDI AUDIO ELEMENT -->
     <audio id="custom-bg-audio" loop class="hidden"></audio>
 
@@ -582,6 +582,7 @@
             }
         }, { passive: false });
 
+        // Képernyőforgatáskor ne dobjon ki a kérdéssorból, ha aktív a játék
         window.addEventListener('orientationchange', function () {
             if (!document.getElementById('game-screen').classList.contains('hidden')) {
                 setTimeout(() => renderGameUI(), 100);
@@ -589,24 +590,65 @@
         });
 
         /* ==========================================================================
-           1. UPDATE: KÜLÖN HTML FÁJLOKBÓL (easy.html, normal.html, hard.html)
-              25 KÉRDÉSBŐL 15 ÖSSZEVÁLOGATÁSA
+           1. EGYSÉGESÍTETT BEÉPÍTETT KÉRDÉSDATABÁZIS (15 kérdéses szintek)
            ========================================================================== */
-        // 1. JSON Fájlok beállítása
-        const LEVEL_JSON_FILES = {
-            easy: 'easy.json',
-            normal: 'normal.json',
-            hard: 'hard.json'
+        const ALL_BUILTIN_QUESTIONS = {
+            easy: [
+                { question: "Melyik országból származik a világhírű Tokaji aszú?", answers: ["Magyarország", "Franciaország", "Olaszország", "Spanyolország"], correct: 0 },
+                { question: "Hány lapból áll egy hagyományos magyar kártyapakli?", answers: ["32 lapból", "52 lapból", "24 lapból", "36 lapból"], correct: 0 },
+                { question: "Melyik bolygó a Naprendszer legnagyobb bolygója?", answers: ["Jupiter", "Szaturnusz", "Neptunusz", "Föld"], correct: 0 },
+                { question: "Mi a klasszikus Mojito koktél alkoholos alapja?", answers: ["Fehér rum", "Vodka", "Tequila", "Whisky"], correct: 0 },
+                { question: "Melyik városban található a híres Colosseum?", answers: ["Róma", "Athén", "Milánó", "Nápoly"], correct: 0 },
+                { question: "Hány percig tart egy rendes játékidejű labdarúgó-mérkőzés?", answers: ["90 perc", "80 perc", "100 perc", "60 perc"], correct: 0 },
+                { question: "Melyik kontinensen található a Szahara sivatag?", answers: ["Afrika", "Ázsia", "Dél-Amerika", "Ausztrália"], correct: 0 },
+                { question: "Hány húrja van egy klasszikus akusztikus gitárnak?", answers: ["6", "4", "5", "8"], correct: 0 },
+                { question: "Melyik magyar város híres a busójárásról?", answers: ["Mohács", "Debrecen", "Sopron", "Eger"], correct: 0 },
+                { question: "Milyen színű a smaragd drágakő?", answers: ["Zöld", "Kék", "Piros", "Sárga"], correct: 0 },
+                { question: "Hány napból áll egy szökőév?", answers: ["366 napból", "365 napból", "364 napból", "360 napból"], correct: 0 },
+                { question: "Melyik állat látható a Ferrari logójában?", answers: ["Ágaskodó ló", "Bika", "Oroszlán", "Sas"], correct: 0 },
+                { question: "Mi Japán fővárosa?", answers: ["Tokió", "Kiotó", "Oszaka", "Szöul"], correct: 0 },
+                { question: "Melyik gyümölcsből készül hagyományosan a valódi cider?", answers: ["Alma", "Szőlő", "Szilva", "Barack"], correct: 0 },
+                { question: "Hány színe van a szivárványnak a hagyományos felosztás szerint?", answers: ["7", "5", "6", "8"], correct: 0 }
+            ],
+            normal: [
+                { question: "Melyik kémiai elem vegyjele az 'Au'?", answers: ["Arany", "Ezüst", "Alumínium", "Réz"], correct: 0 },
+                { question: "Melyik sörfőzési eljárásra jellemző az alsóerjesztés?", answers: ["Lager", "Ale", "Stout", "Weissbier"], correct: 0 },
+                { question: "Melyik filmben hangzik el a híres mondat: 'Én vagyok az apád'?", answers: ["Star Wars: A Birodalom visszavág", "A Gyűrűk Ura", "Mátrix", "Indiana Jones"], correct: 0 },
+                { question: "Hány százalékos alkoholtartalom felett nevezünk egy italt klasszikusan tömény szesznek?", answers: ["15–20% felett", "5% felett", "50% felett", "80% felett"], correct: 0 },
+                { question: "Melyik évben tört ki a magyar forradalom és szabadságharc?", answers: ["1848", "1867", "1956", "1849"], correct: 0 },
+                { question: "Ki festette a híres 'Mona Lisa' című portrét?", answers: ["Leonardo da Vinci", "Michelangelo", "Raffaello", "Vincent van Gogh"], correct: 0 },
+                { question: "Melyik ország nemzeti itala a szaké?", answers: ["Japán", "Kína", "Dél-Korea", "Thaiföld"], correct: 0 },
+                { question: "Hány csontból áll nagyjából egy felnőtt emberi csontváz?", answers: ["206", "154", "256", "312"], correct: 0 },
+                { question: "Melyik együttes frontembere volt Freddie Mercury?", answers: ["Queen", "The Beatles", "Led Zeppelin", "Pink Floyd"], correct: 0 },
+                { question: "Melyik magyar borvidékről származik az Egri Bikavér?", answers: ["Egri borvidék", "Villányi borvidék", "Szekszárdi borvidék", "Badacsonyi borvidék"], correct: 0 },
+                { question: "Melyik világvárosban található a Big Ben harangtorony?", answers: ["London", "New York", "Dublin", "Edinburgh"], correct: 0 },
+                { question: "Milyen állat a dingo?", answers: ["Vadon élő kutya Ausztráliában", "Dél-amerikai macskaféle", "Afrikai antilop", "Ázsiai majomfaj"], correct: 0 },
+                { question: "Melyik évben lépett ember először a Holdra?", answers: ["1969", "1965", "1972", "1959"], correct: 0 },
+                { question: "Mi a golyóstoll magyar feltalálójának a neve?", answers: ["Bíró László József", "Jedlik Ányos", "Irinyi János", "Teller Ede"], correct: 0 },
+                { question: "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?", answers: ["Úszás", "Atlétika", "Torna", "Evezés"], correct: 0 }
+            ],
+            hard: [
+                { question: "Melyik kémiai elem rendszáma a 79-es a periódusos rendszerben?", answers: ["Arany (Au)", "Platina (Pt)", "Higany (Hg)", "Ezüst (Ag)"], correct: 0 },
+                { question: "Melyik évben adták ki az Aranybullát II. András király uralkodása idején?", answers: ["1222", "1241", "1301", "1196"], correct: 0 },
+                { question: "Mi a Föld legméldebb ismert óceáni pontja a Mariana-árokban?", answers: ["Challenger-szakadék", "Puerto Rico-árok", "Jáva-árok", "Kermadec-árok"], correct: 0 },
+                { question: "Ki írta a 'Bűn és bűnhődés' című világirodalmi klasszikust?", answers: ["Fjodor Mihajlovics Dosztojevszkij", "Lev Nyikolajevics Tolsztoj", "Anton Pavlovics Csehov", "Nyikolaj Vasziljevics Gogol"], correct: 0 },
+                { question: "Melyik skót whiskyrégió híres a legerősebben tőzeges, füstös single malt whiskykéről?", answers: ["Islay", "Speyside", "Lowland", "Campbeltown"], correct: 0 },
+                { question: "Hány holdja van a Mars bolygónak?", answers: ["2 (Phobos és Deimos)", "0", "1", "4"], correct: 0 },
+                { question: "Melyik magyar tudós kapta meg elsőként a fizikai Nobel-díjat 1905-ben?", answers: ["Lénárd Fülöp", "Wigner Jenő", "Gábor Dénes", "Krausz Ferenc"], correct: 0 },
+                { question: "Mi Bhután fővárosa?", answers: ["Timpu (Thimphu)", "Katmandu", "Vientián", "Phnompen"], correct: 0 },
+                { question: "Melyik zeneszerző utolsó, befejezetlen műve a d-moll Requiem (K. 626)?", answers: ["Wolfgang Amadeus Mozart", "Ludwig van Beethoven", "Franz Schubert", "Johannes Brahms"], correct: 0 },
+                { question: "Melyik görög istennő volt a bölcsesség, a jog és a mesterségek istennője?", answers: ["Pallasz Athéné", "Héra", "Artemisz", "Aphrodité"], correct: 0 },
+                { question: "Milyen mértékegységgel mérjük az elektromos ellenállást az SI-rendszerben?", answers: ["Ohm (Ω)", "Amper (A)", "Volt (V)", "Farad (F)"], correct: 0 },
+                { question: "Melyik évben ért véget a százéves háború Anglia és Franciaország között?", answers: ["1453", "1337", "1415", "1492"], correct: 0 },
+                { question: "Melyik ország szigete Szocotra, amely különleges sárkányvérfáiról híres?", answers: ["Jemen", "Omán", "Szomália", "Madagaszkár"], correct: 0 },
+                { question: "Ki festette a 'Guernica' című monumentális háborúellenes festményt 1937-ben?", answers: ["Pablo Picasso", "Salvador Dalí", "Joan Miró", "Francisco Goya"], correct: 0 },
+                { question: "Mi az emberi test legkisebb csontja, amely a középfülben található?", answers: ["Kengyel (stapes)", "Üllő (incus)", "Kalapács (malleus)", "Ekecsont (vomer)"], correct: 0 }
+            ]
         };
 
-        const LEVEL_QUESTION_POOLS = {
-            easy: [],
-            normal: [],
-            hard: []
-        };
-
-        const QUESTIONS_PER_GAME = 15;
-
+        /* ==========================================================================
+           2. VÉLETLENSZERŰ KEVERÉS & ÁLLAPOTOK
+           ========================================================================== */
         let currentDifficultyKey = 'easy';
         let activeSetName = "🟢 Könnyű";
         let questions = [];
@@ -639,31 +681,6 @@
             return arr;
         }
 
-        function pickRandomQuestionsFromPool(pool, count = QUESTIONS_PER_GAME) {
-            return shuffleArray(pool).slice(0, Math.min(count, pool.length));
-        }
-
-        // 2. JSON fájlok aszinkron betöltése a GitHub-ról / szerverről
-        async function fetchLevelQuestionsFromJson(diffKey) {
-            if (LEVEL_QUESTION_POOLS[diffKey] && LEVEL_QUESTION_POOLS[diffKey].length > 0) {
-                return LEVEL_QUESTION_POOLS[diffKey];
-            }
-
-            const fileUrl = LEVEL_JSON_FILES[diffKey] || LEVEL_JSON_FILES.easy;
-            const response = await fetch(fileUrl, { cache: 'no-store' });
-            if (!response.ok) {
-                throw new Error(`Nem sikerült betölteni a(z) ${fileUrl} fájlt (${response.status})`);
-            }
-
-            const parsedPool = await response.json();
-            if (!Array.isArray(parsedPool) || parsedPool.length === 0) {
-                throw new Error(`A(z) ${fileUrl} kérdéslistája üres!`);
-            }
-
-            LEVEL_QUESTION_POOLS[diffKey] = parsedPool;
-            return parsedPool;
-        }
-
         function openSinglePlayerMenu() {
             document.getElementById('singleplayer-menu').classList.remove('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
@@ -679,17 +696,24 @@
             document.getElementById('multiplayer-menu').classList.add('hidden');
         }
 
-        async function selectDifficulty(diffKey) {
+        function selectDifficulty(diffKey) {
             currentDifficultyKey = diffKey;
-            await loadDifficulty(diffKey);
+            loadDifficulty(diffKey);
             playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
         }
 
-        async function loadDifficulty(diffKey) {
-            currentDifficultyKey = diffKey;
+        function loadDifficulty(diffKey) {
+            const rawList = ALL_BUILTIN_QUESTIONS[diffKey] || ALL_BUILTIN_QUESTIONS['easy'];
+            questions = shuffleArray(rawList);
+
             if (diffKey === 'easy') activeSetName = "🟢 Könnyű";
             else if (diffKey === 'normal') activeSetName = "🟡 Normál";
             else if (diffKey === 'hard') activeSetName = "🔴 Nehéz";
+
+            const labelEl = document.getElementById('active-set-label');
+            if (labelEl) {
+                labelEl.textContent = `${activeSetName} (${questions.length} kérdés)`;
+            }
 
             ['easy', 'normal', 'hard'].forEach(key => {
                 const btn = document.getElementById(`btn-diff-${key}`);
@@ -700,32 +724,8 @@
                     btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
                 }
             });
-
-            const labelEl = document.getElementById('active-set-label');
-            if (labelEl) {
-                labelEl.textContent = `${activeSetName} (betöltés...)`;
-            }
-
-            try {
-                const pool = await fetchLevelQuestionsFromJson(diffKey);
-                questions = pickRandomQuestionsFromPool(pool, QUESTIONS_PER_GAME);
-                if (labelEl) {
-                    labelEl.textContent = `${activeSetName} (${pool.length}-ből ${questions.length} kérdés)`;
-                }
-            } catch (error) {
-                console.error('Szint betöltési hiba:', error);
-                if (labelEl) {
-                    labelEl.textContent = `${activeSetName} (betöltési hiba)`;
-                }
-                showFeedback(
-                    "Nincs internet kapcsolat",
-                    `Nem sikerült betölteni a(z) <strong>${LEVEL_JSON_FILES[diffKey]}</strong> szint kérdéseit. Ellenőrizd az internetkapcsolatot vagy a fájl elérhetőségét!`,
-                    "📡"
-                );
-            }
         }
 
-        // Online megosztás API – ugyanazon a Render szerveren fut, mint az alkalmazás.
         const QUIZ_API_BASE = 'https://legyen-on-is-reszeg.onrender.com';
 
         async function loadQuizByCode() {
@@ -735,7 +735,6 @@
                 return;
             }
 
-            // Régi, helyben mentett kódok továbbra is működnek ezen a készüléken.
             const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
             if (savedCodes[codeInput]) {
                 try {
@@ -747,11 +746,6 @@
                         return;
                     }
                 } catch (e) { console.warn('Helyi kód olvasási hiba:', e); }
-            }
-
-            if (!navigator.onLine) {
-                showFeedback("Nincs internet kapcsolat", "Nincs aktív internetkapcsolat. Csatlakozz az internethez, majd próbáld újra!", "📡");
-                return;
             }
 
             try {
@@ -766,7 +760,7 @@
                 startGameFromCode();
             } catch (error) {
                 console.error('Kód letöltési hiba:', error);
-                showFeedback("Nincs internet kapcsolat", "A megosztott kérdéssort most nem sikerült letölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "📡");
+                showFeedback("Kapcsolódási hiba", "A megosztott kérdéssort most nem sikerült letölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "📡");
             }
         }
 
@@ -1072,9 +1066,6 @@
                     </button>
                 `;
             }
-            // Hotfix 3: Mindig legfelülre helyezzük a modal réteget, hogy a megnyitott ablakok előtt jelenjen meg
-            const modalEl = document.getElementById('feedback-modal');
-            modalEl.style.zIndex = '9999';
             toggleModal('feedback-modal', true);
         }
 
@@ -1087,30 +1078,12 @@
             }
         }
 
-        window.addEventListener('offline', () => {
-            showFeedback(
-                "Nincs internet kapcsolat",
-                "Megszakadt az internetkapcsolat! Kérlek, ellenőrizd a hálózatot a folytatáshoz.",
-                "📡"
-            );
-        });
-
         /* ==========================================================================
            5. JÁTÉKMENET ÉS RENDERELÉS
            ========================================================================== */
-        async function startGame() {
-            if (currentDifficultyKey !== 'custom') {
-                try {
-                    const pool = await fetchLevelQuestionsFromJson(currentDifficultyKey);
-                    questions = pickRandomQuestionsFromPool(pool, QUESTIONS_PER_GAME);
-                } catch (error) {
-                    showFeedback(
-                        "Nincs internet kapcsolat",
-                        `Nem sikerült betölteni a szint kérdéseit (${LEVEL_JSON_FILES[currentDifficultyKey]}). Ellenőrizd az internetkapcsolatot!`,
-                        "📡"
-                    );
-                    return;
-                }
+        function startGame() {
+            if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
+                questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
             }
 
             if (!questions || questions.length === 0) {
@@ -1172,7 +1145,6 @@
             const unplaced = totalGlasses - placedTotal;
             document.getElementById('unplaced-count').textContent = unplaced;
 
-            // Poharak visszavétele gomb állapot frissítése All-in zárolás esetén
             const clearBtn = document.getElementById('clear-bets-btn');
             if (clearBtn) {
                 if (isAllInLocked) {
@@ -1298,7 +1270,6 @@
             });
         }
 
-        /* --- ALL-IN: Zárolja a poharakat erre a válaszra a kör végéig --- */
         function triggerAllIn(index) {
             if (isRoundChecked || isAllInLocked || displayedAnswers[index].hidden) return;
 
@@ -1711,11 +1682,6 @@
             const set = saved[name];
             if (!set || !set.length) return;
 
-            if (!navigator.onLine) {
-                showFeedback("Nincs internet kapcsolat", "Nincs aktív internetkapcsolat. A megosztáshoz csatlakozz az internethez!", "📡");
-                return;
-            }
-
             try {
                 const response = await fetch(`${QUIZ_API_BASE}/api/share`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1733,29 +1699,29 @@
                 showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.`, "📤");
             } catch (error) {
                 console.error('Megosztási hiba:', error);
-                showFeedback("Nincs internet kapcsolat", "Nem sikerült feltölteni a kérdéssort a szerverre. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "📡");
+                showFeedback("Megosztás nem sikerült", "Nem sikerült feltölteni a kérdéssort a szerverre. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "⚠️");
             }
         }
 
-        async function showLoadModal() {
+        function showLoadModal() {
             const listEl = document.getElementById('saved-questions-list');
-            listEl.innerHTML = `<p class="text-xs font-bold uppercase tracking-wider text-yellow-400 mb-1">Beépített szintek (25 kérdés / szint):</p>`;
+            listEl.innerHTML = `<p class="text-xs font-bold uppercase tracking-wider text-yellow-400 mb-1">Beépített szintek:</p>`;
 
-            for (const diffKey of ['easy', 'normal', 'hard']) {
+            ['easy', 'normal', 'hard'].forEach(diffKey => {
                 const label = diffKey === 'easy' ? '🟢 Könnyű' : (diffKey === 'normal' ? '🟡 Normál' : '🔴 Nehéz');
-                const poolCount = LEVEL_QUESTION_POOLS[diffKey]?.length || 25;
+                const count = ALL_BUILTIN_QUESTIONS[diffKey].length;
                 listEl.innerHTML += `
                     <div class="bg-slate-800/90 border border-yellow-500/40 rounded-2xl p-4 flex items-center justify-between gap-3">
                         <div>
                             <h4 class="font-extrabold text-white text-base">${label}</h4>
-                            <p class="text-xs text-slate-400">${poolCount} kérdésből 15 válogatva</p>
+                            <p class="text-xs text-slate-400">${count} kérdés</p>
                         </div>
                         <button onclick="loadBuiltInFromModal('${diffKey}')" class="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs cursor-pointer">
                             Kiválasztás
                         </button>
                     </div>
                 `;
-            }
+            });
 
             listEl.innerHTML += `<p class="text-xs font-bold uppercase tracking-wider text-slate-400 pt-2 mb-1">Saját mentett kérdéssorok:</p>`;
             const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
@@ -1785,9 +1751,9 @@
             toggleModal('load-modal', true);
         }
 
-        async function loadBuiltInFromModal(diffKey) {
+        function loadBuiltInFromModal(diffKey) {
             toggleModal('load-modal', false);
-            await selectDifficulty(diffKey);
+            selectDifficulty(diffKey);
         }
 
         function loadCustomSet(name) {
@@ -1836,8 +1802,8 @@
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadDifficulty('easy');
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDifficulty('easy');
             initAudioSettingsUI();
 
             const savedColor = localStorage.getItem('backgroundColor');
