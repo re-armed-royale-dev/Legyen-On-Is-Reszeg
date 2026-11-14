@@ -6,6 +6,9 @@ on:
   push:
     paths:
       - 'index.html'
+      - 'easy.json'
+      - 'normal.json'
+      - 'hard.json'
       - '.github/workflows/build-apk.yml'
 
 jobs:
@@ -33,6 +36,9 @@ jobs:
           mkdir -p app/src/main/java/com/party/reszegkviz
 
           cp index.html app/src/main/assets/index.html
+          cp easy.json app/src/main/assets/easy.json
+          cp normal.json app/src/main/assets/normal.json
+          cp hard.json app/src/main/assets/hard.json
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
