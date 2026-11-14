@@ -34,6 +34,14 @@ const pool = process.env.DATABASE_URL
     })
   : null;
 
+// ANDROID ALKALMAZÁS FRISSÍTÉSI BEÁLLÍTÁSAI
+const APP_VERSION_CODE = Number(process.env.APP_VERSION_CODE || 2);
+const APP_VERSION_NAME = process.env.APP_VERSION_NAME || "1.1";
+const MIN_SUPPORTED_VERSION_CODE = Number(
+  process.env.MIN_SUPPORTED_VERSION_CODE || 2
+);
+const APK_DOWNLOAD_URL = process.env.APK_DOWNLOAD_URL || "";
+
 // Multiplayer szobák
 const rooms = new Map();
 
@@ -68,8 +76,22 @@ async function initializeDatabase() {
   console.log("quiz_shares tábla ellenőrizve!");
 }
 
+// FŐOLDAL
 app.get("/", (req, res) => {
   res.send("Legyen Ön is Részeg – szerver működik! 🍻");
+});
+
+// ANDROID VERZIÓELLENŐRZÉS
+app.get("/api/version", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+
+  res.json({
+    success: true,
+    versionCode: APP_VERSION_CODE,
+    versionName: APP_VERSION_NAME,
+    minSupportedVersionCode: MIN_SUPPORTED_VERSION_CODE,
+    downloadUrl: APK_DOWNLOAD_URL
+  });
 });
 
 // Kérdéssor megosztása – mentés Supabase-be
@@ -89,7 +111,6 @@ app.post("/api/share", async (req, res) => {
   }
 
   try {
-    // Egyedi megosztási kód generálása
     for (let attempt = 0; attempt < 5; attempt++) {
       const code = makeCode();
 
@@ -105,7 +126,6 @@ app.post("/api/share", async (req, res) => {
           code
         });
       } catch (error) {
-        // Ha a kód már létezik, új kódot próbálunk
         if (error.code !== "23505") {
           throw error;
         }
@@ -327,7 +347,6 @@ io.on("connection", (socket) => {
 
     player.submitted = true;
 
-    // Az eredményt csak az adott játékos kapja meg
     socket.emit("answer-result", {
       correctGlasses,
       remainingGlasses: correctGlasses
@@ -422,7 +441,6 @@ io.on("connection", (socket) => {
 function sendQuestion(code, room) {
   const question = room.questions[room.questionIndex];
 
-  // A helyes válasz indexét nem küldjük el
   const safeQuestion = { ...question };
   delete safeQuestion.correctIndex;
 
@@ -440,6 +458,8 @@ initializeDatabase()
   .then(() => {
     server.listen(PORT, () => {
       console.log("Szerver elindult a " + PORT + " porton.");
+      console.log("Alkalmazás verzió: " + APP_VERSION_NAME);
+      console.log("Minimális verzió: " + MIN_SUPPORTED_VERSION_CODE);
     });
   })
   .catch((error) => {
