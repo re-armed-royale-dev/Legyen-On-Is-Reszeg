@@ -277,7 +277,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
                     <div class="inline-flex items-center gap-2 bg-slate-900 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs text-yellow-300">
                         <span>Aktív szint:</span>
-                        <strong id="active-set-label" class="text-white">🟢 Könnyű (15 kérdés)</strong>
+                        <strong id="active-set-label" class="text-white">🟢 Könnyű (20 kérdés)</strong>
                     </div>
                 </div>
 
@@ -333,8 +333,8 @@
             </div>
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
-                <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.23 Persistent Unlock Hotfix</span>
+                <span>20 kérdéses paklik (Automatikusan keverve belépéskor)</span>
+                <span class="font-mono font-bold text-yellow-400">v2.24 Hotfix (20 Q & 2x Refill)</span>
             </div>
         </div>
     </main>
@@ -345,7 +345,7 @@
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-yellow-500/30">
                     <span class="text-xs text-slate-400 block">Kérdés</span>
-                    <span id="question-counter" class="text-base sm:text-lg font-black text-yellow-400">1 / 15</span>
+                    <span id="question-counter" class="text-base sm:text-lg font-black text-yellow-400">1 / 20</span>
                 </div>
                 <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-red-500/30">
                     <span class="text-xs text-slate-400 block">Megmaradt poharak</span>
@@ -363,8 +363,8 @@
                 <button id="help-hulye" onclick="openHulyeVagyok()" class="bg-amber-600/90 hover:bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-400/50 cursor-pointer" title="Az aktuális kérdés helyes válaszának lekérése">
                     🤖 Hülye Vagyok
                 </button>
-                <button id="help-refill" onclick="refillGlasses(this)" class="bg-red-700/90 hover:bg-red-600 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-red-400/50 cursor-pointer" title="Csak 2 vagy kevesebb pohárnál használható">
-                    🍷 Poharak Újratöltése
+                <button id="help-refill" onclick="refillGlasses(this)" class="bg-red-700/90 hover:bg-red-600 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-400/50 cursor-pointer" title="Maximum 2 alkalommal használható (ha ≤ 2 pohár maradt)">
+                    🍷 Poharak Újratöltése (<span id="refill-count">2</span>/2)
                 </button>
             </div>
         </div>
@@ -459,9 +459,9 @@
             <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-amber-500/10 rounded-full border border-amber-400/40 animate-pulse">
                 <span class="text-3xl">📤</span>
             </div>
-            <h3 class="text-lg font-black text-amber-400 mb-2">Megosztás</h3>
+            <h3 id="loading-modal-title" class="text-lg font-black text-amber-400 mb-2">Betöltés...</h3>
             <p class="text-sm text-slate-300 font-semibold">
-                A kód generálása folyamatban van<span id="loading-dots" class="inline-block tracking-widest text-yellow-400 font-black">.</span>
+                <span id="loading-modal-text">Kérdéssor letöltése a szerverről</span><span id="loading-dots" class="inline-block tracking-widest text-yellow-400 font-black">.</span>
             </p>
         </div>
     </div>
@@ -477,7 +477,7 @@
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">2.</span> <span>Minden kérdésnél az <strong>összes megmaradt poharadat</strong> szét kell osztanod a 4 válaszlehetőség között.</span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">3.</span> <span>Az <strong>Ellenőrzés</strong> után a rossz válaszra tett poharak elvesznek – <strong>annyit kell innod, ahány poharat elveszítettél!</strong></span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre. Használhatod az <strong>ALL-IN</strong> gombot is!</span></li>
-                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (egyszer használható).</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (2 alkalommal).</span></li>
             </ul>
             <button onclick="toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
                 Értem, induljon a buli!
@@ -498,7 +498,7 @@
             <div id="questions-container" class="flex-1 overflow-y-auto space-y-4 pr-1 mb-4"></div>
             <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
                 <button onclick="addQuestionItem()" class="bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-xl text-sm cursor-pointer">
-                    ➕ Új kérdés hozzáadása (max 15)
+                    ➕ Új kérdés hozzáadása (max 20)
                 </button>
                 <div class="flex gap-2">
                     <button onclick="toggleModal('create-modal', false)" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm cursor-pointer">Bezárás</button>
@@ -611,7 +611,12 @@
                 { question: "Melyik állat látható a Ferrari logójában?", answers: ["Ágaskodó ló", "Bika", "Oroszlán", "Sas"], correct: 0 },
                 { question: "Mi Japán fővárosa?", answers: ["Tokió", "Kiotó", "Oszaka", "Szöul"], correct: 0 },
                 { question: "Melyik gyümölcsből készül hagyományosan a valódi cider?", answers: ["Alma", "Szőlő", "Szilva", "Barack"], correct: 0 },
-                { question: "Hány színe van a szivárványnak a hagyományos felosztás szerint?", answers: ["7", "5", "6", "8"], correct: 0 }
+                { question: "Hány színe van a szivárványnak a hagyományos felosztás szerint?", answers: ["7", "5", "6", "8"], correct: 0 },
+                { question: "Melyik városban rendezték a 2024-es nyári olimpiai játékokat?", answers: ["Párizs", "London", "Tokió", "Los Angeles"], correct: 0 },
+                { question: "Melyik folyó szeli át Budapestet?", answers: ["Duna", "Tisza", "Dráva", "Rába"], correct: 0 },
+                { question: "Mi a magyar labdarúgó-válogatott szövetségi kapitánya (2023-2024)?", answers: ["Marco Rossi", "Dárdai Pál", "Gera Zoltán", "Storck Sándor"], correct: 0 },
+                { question: "Melyik emlős az egyetlen, amely képes repülni?", answers: ["Denevér", "Mókus", "Cinege", "Repülőkutya"], correct: 0 },
+                { question: "Milyen ízű a gin legfontosabb fűszere, a borókabogyó?", answers: ["Fűszeres, fás, gyantás", "Édes, karamellás", "Savanyú, citrusos", "Csípős, paprikás"], correct: 0 }
             ],
             normal: [
                 { question: "Melyik kémiai elem vegyjele az 'Au'?", answers: ["Arany", "Ezüst", "Alumínium", "Réz"], correct: 0 },
@@ -628,7 +633,12 @@
                 { question: "Milyen állat a dingo?", answers: ["Vadon élő kutya Ausztráliában", "Dél-amerikai macskaféle", "Afrikai antilop", "Ázsiai majomfaj"], correct: 0 },
                 { question: "Melyik évben lépett ember először a Holdra?", answers: ["1969", "1965", "1972", "1959"], correct: 0 },
                 { question: "Mi a golyóstoll magyar feltalálójának a neve?", answers: ["Bíró László József", "Jedlik Ányos", "Irinyi János", "Teller Ede"], correct: 0 },
-                { question: "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?", answers: ["Úszás", "Atlétika", "Torna", "Evezés"], correct: 0 }
+                { question: "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?", answers: ["Úszás", "Atlétika", "Torna", "Evezés"], correct: 0 },
+                { question: "Melyik ország területén található az ókori Trója városa?", answers: ["Törökország", "Görögország", "Olaszország", "Egyiptom"], correct: 0 },
+                { question: "Mi a neve a világ legmagasabb fájának (sequoia)?", answers: ["Hyperion", "General Sherman", "Methuselah", "Colossus"], correct: 0 },
+                { question: "Melyik évben mutatták be az első iPhone-t?", answers: ["2007", "2005", "2009", "2010"], correct: 0 },
+                { question: "Melyik zeneszerző írta a 'Négy évszak' hegedűversenyeket?", answers: ["Antonio Vivaldi", "Johann Sebastian Bach", "Wolfgang Amadeus Mozart", "Ludwig van Beethoven"], correct: 0 },
+                { question: "Melyik gáz alkotja a Föld légkörének a legnagyobb százalékát?", answers: ["Nitrogén (Azot)", "Oxigén", "Szén-dioxid", "Argon"], correct: 0 }
             ],
             hard: [
                 { question: "Melyik kémiai elem rendszáma a 79-es a periódusos rendszerben?", answers: ["Arany (Au)", "Platina (Pt)", "Higany (Hg)", "Ezüst (Ag)"], correct: 0 },
@@ -645,7 +655,12 @@
                 { question: "Melyik évben ért véget a százéves háború Anglia és Franciaország között?", answers: ["1453", "1337", "1415", "1492"], correct: 0 },
                 { question: "Melyik ország szigete Szocotra, amely különleges sárkányvérfáiról híres?", answers: ["Jemen", "Omán", "Szomália", "Madagaszkár"], correct: 0 },
                 { question: "Ki festette a 'Guernica' című monumentális háborúellenes festményt 1937-ben?", answers: ["Pablo Picasso", "Salvador Dalí", "Joan Miró", "Francisco Goya"], correct: 0 },
-                { question: "Mi az emberi test legkisebb csontja, amely a középfülben található?", answers: ["Kengyel (stapes)", "Üllő (incus)", "Kalapács (malleus)", "Ekecsont (vomer)"], correct: 0 }
+                { question: "Mi az emberi test legkisebb csontja, amely a középfülben található?", answers: ["Kengyel (stapes)", "Üllő (incus)", "Kalapács (malleus)", "Ekecsont (vomer)"], correct: 0 },
+                { question: "Melyik évben zajlott le a mohácsi csata?", answers: ["1526", "1541", "1456", "1686"], correct: 0 },
+                { question: "Mi a neve a Tejút galaxisunkhoz legközelebbi nagy spirálgalaxisnak?", answers: ["Androméda-galaxis", "Triangulum-galaxis", "Nagy Magellán-felhő", "Sombrero-galaxis"], correct: 0 },
+                { question: "Melyik évben írták alá a trianoni békeszerződést?", answers: ["1920", "1918", "1921", "1919"], correct: 0 },
+                { question: "Ki formulázta meg a kvantummechanika hullámegyenletét (Schrödinger-egyenlet)?", answers: ["Erwin Schrödinger", "Werner Heisenberg", "Niels Bohr", "Max Planck"], correct: 0 },
+                { question: "Melyik évben robbant ki a francia forradalom?", answers: ["1789", "1776", "1815", "1799"], correct: 0 }
             ]
         };
 
@@ -656,7 +671,7 @@
         let totalGlasses = 10;
         let answerBets = [0, 0, 0, 0];
         let displayedAnswers = [];
-        let selectedAnswerSlot = 0;
+        let selectedAnswerSlot = null; // Hotfix: nincs előre kiválasztva válasz
         let isRoundChecked = false;
         let isAllInUsedOnAnswer = [false, false, false, false];
         let isAllInLocked = false;
@@ -665,7 +680,7 @@
             fiftyFifty: false,
             audience: false,
             hulyeVagyok: false,
-            refill: false
+            refillCount: 0 // Hotfix: maximum 2 alkalom
         };
 
         let hulyeTimerInterval = null;
@@ -674,7 +689,6 @@
         let shareDotsInterval = null;
         let restrictionCountdownInterval = null;
 
-        // HOTFIX: Perzisztens feloldási állapot olvasása és mentése localStorage-ból
         function getStoredUnlocks() {
             try {
                 const stored = localStorage.getItem('PlatformUnlockStates');
@@ -888,9 +902,17 @@
                 } catch (e) { console.warn('Helyi kód olvasási hiba:', e); }
             }
 
+            // Hotfix: Kód megadásakor ugyanaz a töltésjelző ablak jelenik meg, mint a megosztáskor
+            toggleModal('share-loading-modal', true);
+            startShareDotsAnimation();
+
             try {
                 const response = await fetch(`${QUIZ_API_BASE}/api/share/${encodeURIComponent(codeInput)}`);
                 const data = await response.json().catch(() => ({}));
+                
+                stopShareDotsAnimation();
+                toggleModal('share-loading-modal', false);
+
                 if (!response.ok || !data.success || !Array.isArray(data.questions) || !data.questions.length) {
                     showFeedback("Ismeretlen kód", `Nem található megosztott kérdéssor ezzel a kóddal: <strong>${codeInput}</strong>.`, "❌");
                     return;
@@ -900,6 +922,8 @@
                 startGameFromCode();
             } catch (error) {
                 console.error('Kód letöltési hiba:', error);
+                stopShareDotsAnimation();
+                toggleModal('share-loading-modal', false);
                 showFeedback("Kapcsolódási hiba", "A megosztott kérdéssort most nem sikerült letölteni. Ellenőrizd az internetkapcsolatot, majd próbáld újra!", "📡");
             }
         }
@@ -907,12 +931,15 @@
         function startGameFromCode() {
             currentQuestionIndex = 0;
             totalGlasses = 10;
-            lifelines = { fiftyFifty: false, audience: false, hulyeVagyok: false, refill: false };
+            lifelines = { fiftyFifty: false, audience: false, hulyeVagyok: false, refillCount: 0 };
+            updateRefillUI();
 
             ['help-5050', 'help-audience', 'help-hulye', 'help-refill'].forEach(id => {
                 const btn = document.getElementById(id);
-                btn.classList.remove('lifeline-used');
-                btn.disabled = false;
+                if (btn) {
+                    btn.classList.remove('lifeline-used');
+                    btn.disabled = false;
+                }
             });
 
             document.getElementById('start-screen').classList.add('hidden');
@@ -1242,12 +1269,15 @@
 
             currentQuestionIndex = 0;
             totalGlasses = 10;
-            lifelines = { fiftyFifty: false, audience: false, hulyeVagyok: false, refill: false };
+            lifelines = { fiftyFifty: false, audience: false, hulyeVagyok: false, refillCount: 0 };
+            updateRefillUI();
 
             ['help-5050', 'help-audience', 'help-hulye', 'help-refill'].forEach(id => {
                 const btn = document.getElementById(id);
-                btn.classList.remove('lifeline-used');
-                btn.disabled = false;
+                if (btn) {
+                    btn.classList.remove('lifeline-used');
+                    btn.disabled = false;
+                }
             });
 
             document.getElementById('start-screen').classList.add('hidden');
@@ -1260,7 +1290,7 @@
             isAllInLocked = false;
             answerBets = [0, 0, 0, 0];
             isAllInUsedOnAnswer = [false, false, false, false];
-            selectedAnswerSlot = 0;
+            selectedAnswerSlot = null; // Hotfix: új kérdésnél nincs előre kiválasztva válasz
             document.getElementById('audience-chart-box').classList.add('hidden');
 
             const currentQ = questions[currentQuestionIndex];
@@ -1323,15 +1353,6 @@
             const letters = ['A', 'B', 'C', 'D'];
             const answersGrid = document.getElementById('answers-grid');
             answersGrid.innerHTML = '';
-
-            let hasSelectedCard = false;
-            displayedAnswers.forEach((ans, index) => {
-                if (selectedAnswerSlot === index && !ans.hidden) hasSelectedCard = true;
-            });
-            if (!hasSelectedCard) {
-                const firstVisible = displayedAnswers.findIndex(a => !a.hidden);
-                if (firstVisible !== -1) selectedAnswerSlot = firstVisible;
-            }
 
             displayedAnswers.forEach((ans, index) => {
                 if (ans.hidden) {
@@ -1450,7 +1471,7 @@
         function addCupToSelected() {
             if (isRoundChecked || isAllInLocked) return;
 
-            if (displayedAnswers[selectedAnswerSlot]?.hidden) {
+            if (selectedAnswerSlot === null || displayedAnswers[selectedAnswerSlot]?.hidden) {
                 const firstValid = displayedAnswers.findIndex(a => !a.hidden);
                 if (firstValid !== -1) selectedAnswerSlot = firstValid;
                 else return;
@@ -1515,19 +1536,19 @@
             if (totalGlasses === 0) {
                 playDrinkSound();
                 
-                if (!lifelines.refill) {
+                if (lifelines.refillCount < 2) {
                     const refillActionsHTML = `
                         <button onclick="executeModalRefillAndContinue()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
-                            🍷 Poharak Újratöltése (10 db)
+                            🍷 Poharak Újratöltése (10 db) (${2 - lifelines.refillCount} maradt)
                         </button>
                         <button onclick="closeFeedbackModal(); exitToMenu()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
                             Kilépés a főmenübe
                         </button>
                     `;
-                    showFeedback("ELFOGYTAK A POHARAID!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került!<br><br>Mivel még nem használtad az újratöltést, most azonnal pótolhatod őket!`, "🍷", null, refillActionsHTML);
+                    showFeedback("ELFOGYTAK A POHARAID!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került!<br><br>Mivel van még újratöltési lehetőséged (${2 - lifelines.refillCount}/2), most azonnal pótolhatod őket!`, "🍷", null, refillActionsHTML);
                     document.getElementById('next-question-btn').textContent = "Quiz folytatására";
                 } else {
-                    showFeedback("ELVESZÍTETTED AZ ÖSSZES POHARAD!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került és az újratöltés is elfogyott!`, "💀");
+                    showFeedback("ELVESZÍTETTED AZ ÖSSZES POHARAD!", `Mind a(z) <strong>${lostGlasses} pohár</strong> rossz válaszra került és az összes újratöltésed elfogyott!`, "💀");
                     document.getElementById('next-question-btn').textContent = "🏁 Játék befejezése";
                 }
             } else if (lostGlasses > 0) {
@@ -1543,21 +1564,35 @@
 
         function executeModalRefillAndContinue() {
             totalGlasses = 10;
-            lifelines.refill = true;
-            const refillBtn = document.getElementById('help-refill');
-            if (refillBtn) refillBtn.classList.add('lifeline-used');
+            lifelines.refillCount++;
+            updateRefillUI();
             playSuccessSound();
             renderGameUI();
             closeFeedbackModal();
             document.getElementById('next-question-btn').textContent = "Quiz folytatása";
         }
 
+        function updateRefillUI() {
+            const countSpan = document.getElementById('refill-count');
+            if (countSpan) countSpan.textContent = 2 - lifelines.refillCount;
+            const refillBtn = document.getElementById('help-refill');
+            if (refillBtn) {
+                if (lifelines.refillCount >= 2) {
+                    refillBtn.classList.add('lifeline-used');
+                    refillBtn.disabled = true;
+                } else {
+                    refillBtn.classList.remove('lifeline-used');
+                    refillBtn.disabled = false;
+                }
+            }
+        }
+
         function nextQuestion() {
-            if (totalGlasses <= 0 && lifelines.refill) {
-                showFeedback("Játék vége!", "Elfogyott az összes poharad!", "🍻", () => exitToMenu());
+            if (totalGlasses <= 0 && lifelines.refillCount >= 2) {
+                showFeedback("Játék vége!", "Elfogyott az összes poharad és az újratöltések is!", "🍻", () => exitToMenu());
                 return;
             }
-            if (totalGlasses <= 0 && !lifelines.refill) {
+            if (totalGlasses <= 0 && lifelines.refillCount < 2) {
                 refillGlasses(document.getElementById('help-refill'));
                 return;
             }
@@ -1585,7 +1620,7 @@
                     isAllInUsedOnAnswer[idx] = false;
                 }
             });
-            if (displayedAnswers[selectedAnswerSlot].hidden) {
+            if (selectedAnswerSlot !== null && displayedAnswers[selectedAnswerSlot].hidden) {
                 selectedAnswerSlot = displayedAnswers.findIndex(a => !a.hidden);
             }
             lifelines.fiftyFifty = true;
@@ -1716,20 +1751,18 @@
         }
 
         function refillGlasses(btn) {
-            if (lifelines.refill) {
-                showFeedback("Már felhasználtad!", "A poharak újratöltése már felhasználásra került.", "🍷");
+            if (lifelines.refillCount >= 2) {
+                showFeedback("Már felhasználtad mindkét alkalommal!", "A poharak újratöltése már kétszer felhasználásra került.", "🍷");
                 return;
             }
             if (totalGlasses <= 2 || totalGlasses === 0) {
                 totalGlasses = 10;
-                lifelines.refill = true;
-                if (btn) btn.classList.add('lifeline-used');
-                const refillBtnMain = document.getElementById('help-refill');
-                if (refillBtnMain) refillBtnMain.classList.add('lifeline-used');
+                lifelines.refillCount++;
+                updateRefillUI();
 
                 playSuccessSound();
                 renderGameUI();
-                showFeedback("Poharak újratöltve!", "A készleted újra <strong>10 darab piros pohár</strong>!", "🍷");
+                showFeedback("Poharak újratöltve!", `A készleted újra <strong>10 darab piros pohár</strong>! (${2 - lifelines.refillCount} újratöltés maradt)`, "🍷");
                 
                 const nextBtn = document.getElementById('next-question-btn');
                 if (nextBtn && nextBtn.textContent.includes("Quiz folytatás")) {
@@ -1763,7 +1796,7 @@
         function addQuestionItem(prefill = null) {
             const container = document.getElementById('questions-container');
             const count = container.getElementsByClassName('question-item').length;
-            if (count >= 15) return;
+            if (count >= 20) return; // Hotfix: max 20 kérdés
             const div = document.createElement('div');
             div.className = 'question-item bg-slate-800/80 border border-slate-700 rounded-2xl p-4 relative';
             const correctVal = prefill ? prefill.correct + 1 : 1;
@@ -1845,6 +1878,9 @@
             const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
             const set = saved[name];
             if (!set || !set.length) return;
+
+            document.getElementById('loading-modal-title').textContent = "Megosztás";
+            document.getElementById('loading-modal-text').textContent = "A kód generálása folyamatban van";
 
             toggleModal('load-modal', false);
             toggleModal('share-loading-modal', true);
