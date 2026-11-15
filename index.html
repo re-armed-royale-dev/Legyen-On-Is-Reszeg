@@ -271,15 +271,22 @@
                 Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
             </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-4">
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openRivalMenu()" class="bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/50 cursor-pointer flex items-center justify-center gap-2">
-                    ⚔️ Rivális (1v1)
+                    ⚔️ Rivális (Helyi)
                 </button>
                 <button id="code-entry-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
                     🔑 Kód Megadása
+                </button>
+            </div>
+
+            <!-- ÚJ ONLINE RIVÁLIS GOMB A FŐMENÜBEN -->
+            <div class="mb-6 max-w-2xl mx-auto">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openOnlineRivalMenu()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-cyan-600/30 border border-cyan-400/50 cursor-pointer flex items-center justify-center gap-2">
+                    🌐 Online Rivális – Két telefon
                 </button>
             </div>
 
@@ -325,15 +332,15 @@
                 </button>
             </div>
 
-            <!-- RIVÁLIS (1v1) MENÜ -->
+            <!-- RIVÁLIS (1v1 HELYI) MENÜ -->
             <div id="rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/85 border-2 border-fuchsia-500/50 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-black uppercase tracking-wider text-fuchsia-400">⚔️ Rivális Párbaj (1v1) Beállítások</span>
+                    <span class="text-xs font-black uppercase tracking-wider text-fuchsia-400">⚔️ Helyi Rivális Párbaj (1v1) Beállítások</span>
                     <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
                 </div>
 
                 <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-                    Ketten játszotok egymás ellen (10-10 pohárral)! Titokban rakjátok fel a téteket, és <strong>szivassátok egymást</strong> különleges képességekkel!
+                    Ketten játszotok egymás ellen (10-10 pohárral) egy telefonon! Titokban rakjátok fel a téteket, és <strong>szivassátok egymást</strong> különleges képességekkel!
                 </p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4 text-left">
@@ -366,29 +373,28 @@
                 </div>
 
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); startRivalGame()" class="w-full bg-gradient-to-r from-fuchsia-600 via-purple-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 text-white font-black py-3.5 rounded-xl shadow-lg shadow-fuchsia-600/30 cursor-pointer text-sm">
-                    ⚔️ Párbaj Indítása!
+                    ⚔️ Helyi Párbaj Indítása!
                 </button>
             </div>
 
-            <!-- ONLINE RIVÁLIS MENÜ -->
-            <!-- EXTERNAL ONLINE RIVAL MENU -->
-            <div id="online-rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/90 border-2 border-fuchsia-500/60 rounded-2xl p-4 mb-4 text-left">
+            <!-- ONLINE RIVÁLIS MENÜ (KÉT TELEFON) -->
+            <div id="online-rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/90 border-2 border-cyan-500/60 rounded-2xl p-4 mb-4 text-left">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-sm font-black uppercase text-fuchsia-400">
-                        🌐 Online Rivális 1v1
+                    <span class="text-sm font-black uppercase text-cyan-400">
+                        🌐 Online Rivális – Két telefon
                     </span>
-                    <button onclick="closeOnlineRivalMenu()" class="text-xs text-slate-400 hover:text-white font-bold">
+                    <button onclick="closeOnlineRivalMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">
                         ← Vissza
                     </button>
                 </div>
-                <p class="text-xs text-slate-300 mb-3">
-                    Játssz barátoddal online két különböző telefonon! Hozz létre egy szobát, vagy csatlakozz egy meglévőhöz.
+                <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+                    Játssz barátoddal online két különböző telefonon! Hozz létre egy szobát, vagy csatlakozz egy meglévőhöz a 6 jegyű szobakóddal.
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
-                    <button onclick="createOnlineRoom()" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md">
+                    <button onclick="createOnlineRoom()" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md cursor-pointer">
                         🏠 Szoba Létrehozása
                     </button>
-                    <button onclick="showJoinRoomInput()" class="bg-slate-800 hover:bg-slate-700 border border-fuchsia-500/40 text-fuchsia-300 font-bold py-3 px-4 rounded-xl text-xs">
+                    <button onclick="showJoinRoomInput()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 font-bold py-3 px-4 rounded-xl text-xs cursor-pointer">
                         🔑 Csatlakozás Szobához
                     </button>
                 </div>
@@ -421,14 +427,14 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>20 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.31 Rivális + Újratöltés</span>
+                <span class="font-mono font-bold text-yellow-400">v2.32 Online & Helyi Rivális</span>
             </div>
         </div>
     </main>
 
     <section id="game-screen" class="hidden flex-1 flex flex-col justify-between max-w-5xl w-full mx-auto px-4 pb-6 pt-2">
         
-        <!-- RIVÁLIS 1v1 ÁLLAPOTSÁV (Csak 1v1 módban látható) -->
+        <!-- RIVÁLIS 1v1 ÁLLAPOTSÁV (Csak helyi 1v1 módban látható) -->
         <div id="rival-scoreboard" class="hidden bg-gradient-to-r from-sky-950/90 via-slate-900 to-rose-950/90 border-2 border-fuchsia-500/50 rounded-2xl p-3 mb-3 shadow-xl">
             <div class="grid grid-cols-3 items-center gap-2 text-center">
                 <div id="rival-p1-card" class="bg-sky-900/40 border border-sky-500/50 rounded-xl p-2 transition-all">
@@ -548,7 +554,7 @@
         </div>
     </section>
 
-    <!-- RIVÁLIS KÉSZÜLÉK-ÁTADÓ KÉPERNYŐ (1v1 titkosítás) -->
+    <!-- RIVÁLIS KÉSZÜLÉK-ÁTADÓ KÉPERNYŐ (Helyi 1v1 titkosítás) -->
     <div id="rival-handoff-modal" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-[120]">
         <div class="bg-slate-900 border-2 border-fuchsia-500/70 rounded-3xl max-w-md w-full p-7 text-center shadow-2xl">
             <div class="text-5xl mb-3">🙈📱</div>
@@ -621,7 +627,7 @@
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">2.</span> <span>Minden kérdésnél az <strong>összes megmaradt poharadat</strong> szét kell osztanod a 4 válaszlehetőség között.</span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">3.</span> <span>Az <strong>Ellenőrzés</strong> után a rossz válaszra tett poharak elvesznek – <strong>annyit kell innod, ahány poharat elveszítettél!</strong></span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre. Használhatod az <strong>ALL-IN</strong> gombot is!</span></li>
-                <li class="flex gap-2.5"><span class="text-fuchsia-400 font-bold">⚔️</span> <span><strong>Rivális (1v1) mód:</strong> Ketten játszotok egymás ellen! Titokban rakjátok fel a téteket, és szivassátok egymást (Vakítás, 10 mp Időzavar, Felező tiltás, Pohár-sózás).</span></li>
+                <li class="flex gap-2.5"><span class="text-fuchsia-400 font-bold">⚔️</span> <span><strong>Rivális mód:</strong> Játssz helyben vagy online két telefonon egymás ellen! Titokban rakjátok fel a téteket, és szivassátok egymást (Vakítás, 10 mp Időzavar, Felező tiltás, Pohár-sózás).</span></li>
                 <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (2 alkalommal).</span></li>
             </ul>
             <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
@@ -828,7 +834,7 @@
             refillCount: 0
         };
 
-        /* ================= RIVÁLIS (1v1) ÁLLAPOT ================= */
+        /* ================= RIVÁLIS (1v1 HELYI) ÁLLAPOT ================= */
         let isRivalMode = false;
         let rivalTurn = 1; // 1 = Player 1, 2 = Player 2
         let rivalPlayers = {
@@ -1033,7 +1039,6 @@
 
         function closeOnlineRivalMenu() {
             document.getElementById('online-rival-menu').classList.add('hidden');
-            document.getElementById('rival-menu').classList.remove('hidden');
         }
 
         function createOnlineRoom() {
@@ -1042,7 +1047,7 @@
             statusArea.innerHTML = "🔄 Szoba létrehozása a szerveren...";
             setTimeout(() => {
                 const roomCode = Math.floor(100000 + Math.random() * 900000);
-                statusArea.innerHTML = `✅ Szoba létrehozva!<br>Szobakód: <strong class="text-yellow-400 text-lg">${roomCode}</strong><br><span class="text-xs text-slate-400">Várakozás a csatlakozóra...</span>`;
+                statusArea.innerHTML = `✅ Szoba létrehozva!<br>Szobakód: <strong class="text-cyan-400 text-lg">${roomCode}</strong><br><span class="text-xs text-slate-400">Várakozás a csatlakozóra...</span>`;
             }, 800);
         }
 
@@ -1051,8 +1056,8 @@
             statusArea.classList.remove('hidden');
             statusArea.innerHTML = `
                 <div class="flex gap-2 mt-1">
-                    <input type="text" id="join-room-code" maxlength="6" placeholder="Szobakód" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-yellow-300 outline-none">
-                    <button onclick="joinOnlineRoom()" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs">Csatlakozás</button>
+                    <input type="text" id="join-room-code" maxlength="6" placeholder="Szobakód" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-cyan-300 outline-none">
+                    <button onclick="joinOnlineRoom()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer">Csatlakozás</button>
                 </div>
             `;
         }
@@ -1542,7 +1547,7 @@
             prepareQuestion();
         }
 
-        /* ================= RIVÁLIS (1v1) LOGIKA ================= */
+        /* ================= RIVÁLIS (1v1 HELYI) LOGIKA ================= */
         function startRivalGame() {
             if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
                 questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
