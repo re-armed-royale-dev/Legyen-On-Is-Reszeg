@@ -42,8 +42,11 @@ const MIN_SUPPORTED_VERSION_CODE = Number(
 );
 const APK_DOWNLOAD_URL = process.env.APK_DOWNLOAD_URL || "";
 
-// Multiplayer szobák
+// Régi Multiplayer szobák
 const rooms = new Map();
+
+// ÚJ: Online Rivális szobák
+const onlineRivalRooms = new Map();
 
 function makeCode() {
   return String(crypto.randomInt(100000, 1000000));
@@ -51,11 +54,179 @@ function makeCode() {
 
 function getCode(map) {
   let code;
+
   do {
     code = makeCode();
   } while (map.has(code));
 
   return code;
+}
+
+// ONLINE RIVÁLIS – kérdések ellenőrzése
+function validateOnlineRivalQuestions(questions) {
+  if (
+    !Array.isArray(questions) ||
+    questions.length === 0 ||
+    questions.length > 500
+  ) {
+    return false;
+  }
+
+  return questions.every(q =>
+    q &&
+    typeof q.question === "string" &&
+    q.question.trim().length > 0 &&
+    Array.isArray(q.answers) &&
+    q.answers.length === 4 &&
+    q.answers.every(a => typeof a === "string") &&
+    Number.isInteger(q.correct) &&
+    q.correct >= 0 &&
+    q.correct <= 3
+  );
+}
+
+// ONLINE RIVÁLIS – nyilvános játékosadatok
+function getOnlineRivalPublicPlayers(room) {
+  return room.players.map(player => ({
+    name: player.name,
+    cups: player.cups,
+    submitted: player.submitted
+  }));
+}
+
+// ONLINE RIVÁLIS – időzítők törlése
+function clearOnlineRivalTimers(room) {
+  if (!room) return;
+
+  room.players.forEach(player => {
+    if (player.timer) {
+      clearTimeout(player.timer);
+      player.timer = null;
+    }
+  });
+}
+
+// ONLINE RIVÁLIS – biztonságos kérdésküldés
+function sendOnlineRivalQuestion(code, room) {
+  const question = room.questions[room.questionIndex];
+
+  if (!question) return;
+
+  room.players.forEach((player, index) => {
+    const activeEffects = { ...player.effects };
+
+    // A következő körre szóló hatások felhasználása
+    player.effects = {
+      blind: false,
+      timer: false,
+      block5050: false
+    };
+
+    const safeQuestion = {
+      question: question.question,
+      answers: [...question.answers]
+    };
+
+    io.to(player.id).emit("online-rival:question", {
+      index: room.questionIndex,
+      total: room.questions.length,
+      question: safeQuestion,
+      cups: player.cups,
+      opponent: room.players[1 - index]?.name || "Ellenfél",
+      opponentCups: room.players[1 - index]?.cups ?? 10,
+      effects: activeEffects
+    });
+
+    // 10 másodperces szerveroldali időkorlát
+    if (activeEffects.timer) {
+      const currentIndex = room.questionIndex;
+
+      player.timer = setTimeout(() => {
+        if (
+          !onlineRivalRooms.has(code) ||
+          !room.started ||
+          room.resolved ||
+          room.questionIndex !== currentIndex ||
+          player.submitted
+        ) {
+          return;
+        }
+
+        const bets = [0, 0, 0, 0];
+
+        for (let i = 0; i < player.cups; i++) {
+          bets[crypto.randomInt(0, 4)]++;
+        }
+
+        player.bets = bets;
+        player.submitted = true;
+        player.timer = null;
+
+        io.to(player.id).emit("online-rival:timeout", {
+          message: "Lejárt az idő! Automatikus válasz."
+        });
+
+        io.to(code).emit("online-rival:submitted", {
+          submittedCount: room.players.filter(p => p.submitted).length,
+          totalPlayers: 2
+        });
+
+        resolveOnlineRivalRound(code, room);
+      }, 10000);
+    }
+  });
+}
+
+// ONLINE RIVÁLIS – kör kiértékelése
+function resolveOnlineRivalRound(code, room) {
+  if (room.players.length !== 2) return;
+  if (!room.players.every(player => player.submitted)) return;
+  if (room.resolved) return;
+
+  room.resolved = true;
+
+  clearOnlineRivalTimers(room);
+
+  const question = room.questions[room.questionIndex];
+  const correctIndex = question.correct;
+
+  const first = room.players[0];
+  const second = room.players[1];
+
+  const firstCorrect = first.bets[correctIndex];
+  const secondCorrect = second.bets[correctIndex];
+
+  first.cups = firstCorrect;
+  second.cups = secondCorrect;
+
+  // Lopás: ha a támadó legalább egy poharat tett a helyes válaszra
+  if (first.activeSteal && firstCorrect >= 1) {
+    second.cups = Math.max(0, second.cups - 1);
+  }
+
+  if (second.activeSteal && secondCorrect >= 1) {
+    first.cups = Math.max(0, first.cups - 1);
+  }
+
+  // Eredmények kiküldése csak mindkét beküldés után
+  room.players.forEach((player, index) => {
+    const opponent = room.players[1 - index];
+
+    io.to(player.id).emit("online-rival:result", {
+      correctIndex,
+      correctGlasses: player.bets[correctIndex],
+      remainingGlasses: player.cups,
+      opponentCups: opponent.cups,
+      opponentName: opponent.name,
+      ownBets: player.bets,
+      opponentBets: opponent.bets
+    });
+  });
+
+  io.to(code).emit("online-rival:resolved", {
+    players: getOnlineRivalPublicPlayers(room),
+    questionIndex: room.questionIndex
+  });
 }
 
 // Adatbázis és tábla automatikus létrehozása
@@ -193,8 +364,12 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// MULTIPLAYER
+// SOCKET.IO
 io.on("connection", (socket) => {
+
+  // =====================================================
+  // RÉGI MULTIPLAYER – VÁLTOZATLAN
+  // =====================================================
 
   // Szoba létrehozása
   socket.on("create-room", (data, callback) => {
@@ -407,8 +582,326 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Kilépés
+  // =====================================================
+  // ÚJ ONLINE RIVÁLIS 1v1
+  // =====================================================
+
+  // Szoba létrehozása
+  socket.on("online-rival:create", (data, callback) => {
+    data = data || {};
+
+    if (!validateOnlineRivalQuestions(data.questions)) {
+      return callback?.({
+        error: "Érvénytelen vagy hiányzó kérdéssor."
+      });
+    }
+
+    const code = getCode(onlineRivalRooms);
+
+    const room = {
+      host: socket.id,
+      players: [{
+        id: socket.id,
+        name: String(data.name || "Játékos 1").trim().slice(0, 20),
+        cups: 10,
+        submitted: false,
+        bets: null,
+        effects: {
+          blind: false,
+          timer: false,
+          block5050: false
+        },
+        activeSteal: false,
+        usedSabotages: [],
+        timer: null
+      }],
+      questions: JSON.parse(JSON.stringify(data.questions)),
+      questionIndex: 0,
+      started: false,
+      resolved: false
+    };
+
+    onlineRivalRooms.set(code, room);
+
+    socket.join(code);
+    socket.data.onlineRivalCode = code;
+
+    callback?.({
+      success: true,
+      code,
+      players: getOnlineRivalPublicPlayers(room)
+    });
+  });
+
+  // Csatlakozás hatjegyű kóddal
+  socket.on("online-rival:join", (data, callback) => {
+    data = data || {};
+
+    const code = String(data.code || "").trim();
+    const room = onlineRivalRooms.get(code);
+
+    if (!room) {
+      return callback?.({
+        error: "Nem található ilyen szoba."
+      });
+    }
+
+    if (room.started) {
+      return callback?.({
+        error: "A játék már elkezdődött."
+      });
+    }
+
+    if (room.players.length >= 2) {
+      return callback?.({
+        error: "Ez a szoba már megtelt."
+      });
+    }
+
+    const player = {
+      id: socket.id,
+      name: String(data.name || "Játékos 2").trim().slice(0, 20),
+      cups: 10,
+      submitted: false,
+      bets: null,
+      effects: {
+        blind: false,
+        timer: false,
+        block5050: false
+      },
+      activeSteal: false,
+      usedSabotages: [],
+      timer: null
+    };
+
+    room.players.push(player);
+
+    socket.join(code);
+    socket.data.onlineRivalCode = code;
+
+    io.to(code).emit("online-rival:players", {
+      players: getOnlineRivalPublicPlayers(room)
+    });
+
+    callback?.({
+      success: true,
+      code,
+      players: getOnlineRivalPublicPlayers(room)
+    });
+  });
+
+  // Játék indítása
+  socket.on("online-rival:start", (callback) => {
+    const code = socket.data.onlineRivalCode;
+    const room = onlineRivalRooms.get(code);
+
+    if (!room || room.host !== socket.id) {
+      return callback?.({
+        error: "Csak a szoba létrehozója indíthat."
+      });
+    }
+
+    if (room.players.length !== 2) {
+      return callback?.({
+        error: "A játék indításához két játékos szükséges."
+      });
+    }
+
+    if (room.started) {
+      return callback?.({
+        error: "A játék már elindult."
+      });
+    }
+
+    room.started = true;
+    room.questionIndex = 0;
+
+    sendOnlineRivalQuestion(code, room);
+
+    callback?.({
+      success: true
+    });
+  });
+
+  // Poharak beküldése
+  socket.on("online-rival:submit", (data, callback) => {
+    const code = socket.data.onlineRivalCode;
+    const room = onlineRivalRooms.get(code);
+
+    if (!room || !room.started || room.resolved) {
+      return callback?.({
+        error: "Nincs aktív válaszkör."
+      });
+    }
+
+    const player = room.players.find(p => p.id === socket.id);
+
+    if (!player || player.submitted) {
+      return callback?.({
+        error: "A válaszodat már beküldted."
+      });
+    }
+
+    const bets = data && data.bets;
+
+    if (
+      !Array.isArray(bets) ||
+      bets.length !== 4 ||
+      !bets.every(n => Number.isInteger(n) && n >= 0) ||
+      bets.reduce((a, b) => a + b, 0) !== player.cups
+    ) {
+      return callback?.({
+        error: "Az összes megmaradt poharat el kell helyezned."
+      });
+    }
+
+    player.bets = [...bets];
+    player.submitted = true;
+
+    if (player.timer) {
+      clearTimeout(player.timer);
+      player.timer = null;
+    }
+
+    io.to(code).emit("online-rival:submitted", {
+      submittedCount: room.players.filter(p => p.submitted).length,
+      totalPlayers: 2
+    });
+
+    callback?.({
+      success: true
+    });
+
+    resolveOnlineRivalRound(code, room);
+  });
+
+  // Szabotázs aktiválása
+  socket.on("online-rival:sabotage", (data, callback) => {
+    const code = socket.data.onlineRivalCode;
+    const room = onlineRivalRooms.get(code);
+
+    if (!room || !room.started || room.resolved) {
+      return callback?.({
+        error: "Most nem használható szabotázs."
+      });
+    }
+
+    const player = room.players.find(p => p.id === socket.id);
+    const opponent = room.players.find(p => p.id !== socket.id);
+
+    if (!player || !opponent || player.submitted) {
+      return callback?.({
+        error: "Most nem használhatod ezt a szabotázst."
+      });
+    }
+
+    const type = String(data?.type || "");
+    const allowed = ["blind", "timer", "block5050", "steal"];
+
+    if (!allowed.includes(type)) {
+      return callback?.({
+        error: "Ismeretlen szabotázs."
+      });
+    }
+
+    if (player.usedSabotages.includes(type)) {
+      return callback?.({
+        error: "Ezt a szabotázst már felhasználtad."
+      });
+    }
+
+    player.usedSabotages.push(type);
+
+    if (type === "steal") {
+      player.activeSteal = true;
+    } else {
+      opponent.effects[type] = true;
+    }
+
+    io.to(opponent.id).emit("online-rival:effect", {
+      type
+    });
+
+    io.to(code).emit("online-rival:sabotage-used", {
+      playerName: player.name,
+      type
+    });
+
+    callback?.({
+      success: true,
+      type
+    });
+  });
+
+  // Következő kérdés
+  socket.on("online-rival:next", (callback) => {
+    const code = socket.data.onlineRivalCode;
+    const room = onlineRivalRooms.get(code);
+
+    if (!room || room.host !== socket.id) {
+      return callback?.({
+        error: "Csak a szoba létrehozója léptethet."
+      });
+    }
+
+    if (!room.resolved) {
+      return callback?.({
+        error: "Még nem válaszolt mindkét játékos."
+      });
+    }
+
+    room.questionIndex++;
+
+    if (room.questionIndex >= room.questions.length) {
+      io.to(code).emit("online-rival:finished", {
+        players: getOnlineRivalPublicPlayers(room)
+      });
+
+      clearOnlineRivalTimers(room);
+      onlineRivalRooms.delete(code);
+
+      return callback?.({
+        success: true,
+        finished: true
+      });
+    }
+
+    room.resolved = false;
+
+    for (const player of room.players) {
+      player.submitted = false;
+      player.bets = null;
+      player.activeSteal = false;
+    }
+
+    sendOnlineRivalQuestion(code, room);
+
+    callback?.({
+      success: true
+    });
+  });
+
+  // Kilépés és kapcsolat megszakadása
   socket.on("disconnect", () => {
+
+    // ONLINE RIVÁLIS kilépés
+    const onlineCode = socket.data.onlineRivalCode;
+
+    if (onlineCode) {
+      const onlineRoom = onlineRivalRooms.get(onlineCode);
+
+      if (onlineRoom) {
+        clearOnlineRivalTimers(onlineRoom);
+
+        io.to(onlineCode).emit("online-rival:opponent-left", {
+          message: "Az ellenfeled kilépett a játékból."
+        });
+
+        onlineRivalRooms.delete(onlineCode);
+      }
+    }
+
+    // RÉGI MULTIPLAYER kilépés – változatlan
     const code = socket.data.roomCode;
     const room = rooms.get(code);
 
@@ -437,7 +930,7 @@ io.on("connection", (socket) => {
 
 });
 
-// Kérdés küldése a játékosoknak
+// RÉGI MULTIPLAYER – kérdésküldés
 function sendQuestion(code, room) {
   const question = room.questions[room.questionIndex];
 
