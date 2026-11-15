@@ -23,7 +23,6 @@
             transition: background-color 0.4s ease;
         }
 
-        /* Globális finom benyomódó animáció minden aktív gombra */
         button {
             transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
         }
@@ -31,7 +30,6 @@
             transform: scale(0.95) translateY(1px) !important;
         }
 
-        /* Kaszinó / Kvíz-show arany és piros ragyogások */
         .gold-glow {
             box-shadow: 0 0 25px rgba(234, 179, 8, 0.25);
         }
@@ -42,7 +40,6 @@
             filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.55));
         }
 
-        /* Hotfix 1: Balról jobbra haladó RGB színátmenet a főcím betűin */
         @keyframes titleRgbGradientFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -65,7 +62,6 @@
             filter: drop-shadow(0 0 18px rgba(255, 153, 255, 0.35));
         }
 
-        /* All-in gomb pulzáló ragyogás */
         @keyframes allinGlow {
             0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4); }
             50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), 0 0 25px rgba(239, 68, 68, 0.7); }
@@ -78,7 +74,6 @@
             border: 1px solid #fca5a5;
         }
 
-        /* Válasz kártyák */
         .answer-card {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
             border: 2px solid rgba(234, 179, 8, 0.35);
@@ -105,7 +100,6 @@
             opacity: 0.88;
         }
 
-        /* Segítség gombok piros X jelölése használat után */
         .lifeline-used {
             opacity: 0.48;
             cursor: not-allowed !important;
@@ -125,7 +119,6 @@
             pointer-events: none;
         }
 
-        /* Pohár animáció */
         @keyframes popIn {
             0% { transform: scale(0.4) translateY(10px); opacity: 0; }
             80% { transform: scale(1.1); opacity: 1; }
@@ -135,7 +128,6 @@
             animation: popIn 0.22s ease-out forwards;
         }
 
-        /* Egyedi görgetősáv */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -147,7 +139,6 @@
             border-radius: 4px;
         }
     </style>
-    <!-- Apple PWA támogatás -->
     <link rel="apple-touch-icon" href="./icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Részeg Kvíz">
@@ -155,7 +146,6 @@
 </head>
 <body class="flex flex-col justify-between selection:bg-yellow-500 selection:text-slate-900" onclick="handleOutsideClick(event)">
 
-    <!-- FELSŐ SÁV: Szabályok & Beállítások -->
     <header class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between z-20">
         <div class="flex items-center gap-2">
             <span class="inline-block w-3 h-3 rounded-full bg-red-600 animate-pulse"></span>
@@ -171,14 +161,12 @@
         </div>
     </header>
 
-    <!-- BEÁLLÍTÁSOK DROPDOWN (AUDIO & HÁTTÉR) -->
     <div id="settings-menu" onclick="event.stopPropagation()" class="hidden fixed top-16 right-4 w-80 bg-slate-900 border-2 border-yellow-500/50 rounded-2xl p-4 shadow-2xl z-50">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-yellow-400 uppercase tracking-wider">Beállítások</h3>
             <button onclick="toggleSettingsMenu()" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer px-1">&times;</button>
         </div>
 
-        <!-- Music (Zene) vezérlés -->
         <div class="mb-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
             <div class="flex items-center justify-between mb-1.5">
                 <span class="text-xs font-bold text-slate-200">🎵 Háttérzene (Music)</span>
@@ -190,14 +178,12 @@
             <input type="range" id="music-volume" min="0" max="1" step="0.05" value="0.2" oninput="updateMusicVolume(this.value)" class="w-full accent-yellow-400 cursor-pointer">
         </div>
 
-        <!-- SAJÁT ZENE BEÁLLÍTÁSA GOMB -->
         <div class="mb-3">
             <button onclick="openCustomMusicModal()" class="w-full bg-amber-600/90 hover:bg-amber-500 text-white font-bold text-xs py-2 px-3 rounded-xl border border-amber-400/50 flex items-center justify-center gap-2 cursor-pointer">
                 🎧 Saját zene beállítása
             </button>
         </div>
 
-        <!-- SFX (Hangeffektek) vezérlés -->
         <div class="mb-3 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
             <div class="flex items-center justify-between mb-1.5">
                 <span class="text-xs font-bold text-slate-200">🔊 Hangeffektek (SFX)</span>
@@ -211,7 +197,6 @@
 
         <hr class="border-slate-800 my-2">
         
-        <!-- Háttérszín testreszabás -->
         <label class="block text-xs text-slate-300 mb-1">Háttérszín testreszabása:</label>
         <div class="flex gap-2 mb-3">
             <input type="color" id="palette-color-input" value="#0b0f19" class="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-slate-600">
@@ -228,7 +213,6 @@
         </button>
     </div>
 
-    <!-- SAJÁT ZENE MODAL (FELTÖLTÉS & RESET) -->
     <div id="custom-music-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="closeCustomMusicModal()">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl relative" onclick="event.stopPropagation()">
             <button onclick="closeCustomMusicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
@@ -255,10 +239,8 @@
         </div>
     </div>
 
-    <!-- KEZDŐKÉPERNYŐ (START SCREEN) -->
     <main id="start-screen" class="flex-1 flex flex-col items-center justify-center px-4 py-8 text-center">
         <div class="max-w-2xl w-full bg-slate-900/85 backdrop-blur-md border-2 border-yellow-500/40 rounded-3xl p-6 sm:p-10 gold-glow relative">
-            <!-- Red Solo Cup SVG Illusztráció -->
             <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-red-950/60 rounded-full border-2 border-red-500/50 red-cup-shadow">
                 <svg class="w-12 h-12" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 12H50L44 56C43.7 58.2 41.8 60 39.6 60H24.4C22.2 60 20.3 58.2 20 56L14 12Z" fill="#DC2626"/>
@@ -277,7 +259,6 @@
                 Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
             </p>
 
-            <!-- FŐMENÜ KÉT GOMB: EGYJÁTÉKOS & KÓD MEGADÁSA -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto mb-6">
                 <button onclick="openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
@@ -287,14 +268,12 @@
                 </button>
             </div>
 
-            <!-- EGYJÁTÉKOS ALMENÜ (Rejtett alapból) -->
             <div id="singleplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Egyjátékos mód beállításai</span>
                     <button onclick="backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
                 </div>
 
-                <!-- Aktív szint jelző -->
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
                     <div class="inline-flex items-center gap-2 bg-slate-900 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs text-yellow-300">
                         <span>Aktív szint:</span>
@@ -302,7 +281,6 @@
                     </div>
                 </div>
 
-                <!-- Nehézségi Szint Gyorsválasztó -->
                 <div class="mb-4">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Válassz nehézségi szintet:</p>
                     <div class="grid grid-cols-3 gap-2">
@@ -332,7 +310,6 @@
                 </button>
             </div>
 
-            <!-- KÓD MEGADÁSA ALMENÜ (6 jegyű kód megadása) -->
             <div id="multiplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Kód Megadása</span>
@@ -357,15 +334,13 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.22 Platform Restriction & Unlock</span>
+                <span class="font-mono font-bold text-yellow-400">v2.23 Persistent Unlock Hotfix</span>
             </div>
         </div>
     </main>
 
-    <!-- JÁTÉKTÉR (GAME SCREEN) -->
     <section id="game-screen" class="hidden flex-1 flex flex-col justify-between max-w-5xl w-full mx-auto px-4 pb-6 pt-2">
         
-        <!-- Felső Státusz & 4 Segítség Gomb -->
         <div class="flex flex-col md:flex-row items-center justify-between gap-3 bg-slate-900/85 border border-slate-800 rounded-2xl p-3 mb-4">
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="bg-slate-800 px-3.5 py-1.5 rounded-xl border border-yellow-500/30">
@@ -378,7 +353,6 @@
                 </div>
             </div>
 
-            <!-- 4 Segítség Gomb -->
             <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full md:w-auto">
                 <button id="help-5050" onclick="useFiftyFifty(this)" class="bg-amber-600/90 hover:bg-amber-500 text-white text-xs sm:text-sm font-bold px-3 py-2.5 rounded-xl border border-amber-400/50 cursor-pointer" title="Két helytelen válasz eltüntetése">
                     ✂️ Felező
@@ -395,7 +369,6 @@
             </div>
         </div>
 
-        <!-- Kérdés Kártya -->
         <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-yellow-500/50 rounded-3xl p-5 sm:p-8 text-center gold-glow mb-4">
             <h2 id="question-text" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-snug">
                 Kérdés betöltése...
@@ -405,23 +378,18 @@
             </p>
         </div>
 
-        <!-- Közönség Szavazás Oszlopdiagram -->
         <div id="audience-chart-box" class="hidden bg-slate-900/95 border-2 border-amber-400/60 rounded-2xl p-4 mb-4 shadow-xl">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-400">📊 A közönség szavazata:</span>
                 <button onclick="document.getElementById('audience-chart-box').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white font-bold px-2 py-0.5 rounded bg-slate-800 cursor-pointer">Elrejtés</button>
             </div>
             <div id="audience-bars" class="grid grid-cols-4 gap-3 items-end h-28 pt-4 px-2 bg-slate-950/80 rounded-xl border border-slate-800">
-                <!-- JS tölti fel -->
             </div>
         </div>
 
-        <!-- 4 Válaszlehetőség Rács -->
         <div id="answers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-5">
-            <!-- JS tölti fel -->
         </div>
 
-        <!-- Alsó Pohársáv (Cup Tray) & Ellenőrzés / Következő Kérdés Gombok -->
         <div class="bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl p-4 sm:p-5 shadow-2xl">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-2">
@@ -433,12 +401,9 @@
                 </div>
             </div>
 
-            <!-- Készleten lévő piros poharak sora -->
             <div id="cup-tray" class="min-h-[60px] bg-slate-950/85 border border-slate-800 rounded-2xl p-2.5 flex flex-wrap items-center justify-center gap-2 mb-4">
-                <!-- JS tölti fel -->
             </div>
 
-            <!-- Akciógombok -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button id="clear-bets-btn" onclick="returnAllCupsToTray()" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-5 rounded-xl border border-slate-600 text-sm cursor-pointer">
                     ↩️ Poharak visszavétele
@@ -453,7 +418,6 @@
         </div>
     </section>
 
-    <!-- Értesítő Modal -->
     <div id="feedback-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
         <div class="bg-slate-900 border-2 border-yellow-500/60 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl transform transition-all relative z-[101]">
             <div id="feedback-icon" class="text-5xl mb-3">🍻</div>
@@ -468,13 +432,15 @@
         </div>
     </div>
 
-    <!-- PLATFORM RESTRICTION MODAL (ÚJ) -->
     <div id="platform-restriction-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[150]">
         <div class="bg-slate-900 border-2 border-red-500/60 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <div class="text-4xl mb-3">⚠️</div>
             <h3 class="text-lg font-black text-red-400 mb-2">A te telefonod (Szoftvered) nem támogatott!</h3>
-            <p id="restriction-feature-name" class="text-sm text-slate-200 font-semibold mb-6 leading-relaxed">
+            <p id="restriction-feature-name" class="text-sm text-slate-200 font-semibold mb-2 leading-relaxed">
                 (A funkció neve) Csak Androidon elérhető!
+            </p>
+            <p id="restriction-timer-display" class="text-xs font-mono font-bold text-amber-400 mb-6 hidden">
+                Következő ingyenes feloldás: <span id="unlock-countdown-val">00:00</span> múlva
             </p>
             
             <div class="flex flex-col gap-2.5">
@@ -488,7 +454,6 @@
         </div>
     </div>
 
-    <!-- MEGOSZTÁS TÖLTŐ MODAL (ANIMÁLT PÖTTYÖKKEL) -->
     <div id="share-loading-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[110]">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-amber-500/10 rounded-full border border-amber-400/40 animate-pulse">
@@ -501,7 +466,6 @@
         </div>
     </div>
 
-    <!-- JÁTÉKSZABÁLYOK MODAL -->
     <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('rules-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
             <button onclick="toggleModal('rules-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
@@ -521,7 +485,6 @@
         </div>
     </div>
 
-    <!-- CREATE MODAL -->
     <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('create-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col relative" onclick="event.stopPropagation()">
             <button onclick="toggleModal('create-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
@@ -545,7 +508,6 @@
         </div>
     </div>
 
-    <!-- LOAD MODAL -->
     <div id="load-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('load-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col relative" onclick="event.stopPropagation()">
             <button onclick="toggleModal('load-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
@@ -557,7 +519,6 @@
         </div>
     </div>
 
-    <!-- HÜLYE VAGYOK MODAL -->
     <div id="hulye-vagyok-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="closeHulyeVagyokModal()">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col relative" onclick="event.stopPropagation()">
             <button onclick="closeHulyeVagyokModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
@@ -586,13 +547,9 @@
         </div>
     </div>
 
-    <!-- HÁTTÉRRE KATTINTÁSHOZ EGYEDI AUDIO ELEMENT -->
     <audio id="custom-bg-audio" loop class="hidden"></audio>
 
     <script>
-        /* ==========================================================================
-           0. HOTFIX 2 & HOTFIX 4: NAGYÍTÁS TILTÁSA & KÉPERNYŐFORGATÁS VÉDELEM
-           ========================================================================== */
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         }, { passive: false });
@@ -638,9 +595,6 @@
             }
         });
 
-        /* ==========================================================================
-           1. EGYSÉGESÍTETT BEÉPÍTETT KÉRDÉSDATABÁZIS (15 kérdéses szintek)
-           ========================================================================== */
         const ALL_BUILTIN_QUESTIONS = {
             easy: [
                 { question: "Melyik országból származik a világhírű Tokaji aszú?", answers: ["Magyarország", "Franciaország", "Olaszország", "Spanyolország"], correct: 0 },
@@ -695,9 +649,6 @@
             ]
         };
 
-        /* ==========================================================================
-           2. VÉLETLENSZERŰ KEVERÉS & ÁLLAPOTOK
-           ========================================================================== */
         let currentDifficultyKey = 'easy';
         let activeSetName = "🟢 Könnyű";
         let questions = [];
@@ -721,12 +672,25 @@
         let hulyeSecondsLeft = 10;
         let onFeedbackCloseCallback = null;
         let shareDotsInterval = null;
+        let restrictionCountdownInterval = null;
 
-        // Ideiglenes feloldás állapota (óra alapú limit + 1 perc élettartam)
-        let restrictionUnlockTimers = {
-            code: { expiresAt: 0, lastUnlockedAt: 0 },
-            create: { expiresAt: 0, lastUnlockedAt: 0 }
-        };
+        // HOTFIX: Perzisztens feloldási állapot olvasása és mentése localStorage-ból
+        function getStoredUnlocks() {
+            try {
+                const stored = localStorage.getItem('PlatformUnlockStates');
+                if (stored) return JSON.parse(stored);
+            } catch (e) {}
+            return {
+                code: { expiresAt: 0, lastUnlockedAt: 0 },
+                create: { expiresAt: 0, lastUnlockedAt: 0 }
+            };
+        }
+
+        function saveStoredUnlocks(states) {
+            try {
+                localStorage.setItem('PlatformUnlockStates', JSON.stringify(states));
+            } catch (e) {}
+        }
 
         function shuffleArray(array) {
             const arr = [...array];
@@ -737,7 +701,6 @@
             return arr;
         }
 
-        // iPhone/iPad felismerése – Safari, Chrome és főképernyős PWA esetén is.
         function isAppleMobileDevice() {
             const ua = navigator.userAgent || '';
             const platform = navigator.platform || '';
@@ -746,11 +709,11 @@
         }
 
         function isFeatureUnlocked(featureKey) {
+            const states = getStoredUnlocks();
             const now = Date.now();
-            return restrictionUnlockTimers[featureKey] && restrictionUnlockTimers[featureKey].expiresAt > now;
+            return states[featureKey] && states[featureKey].expiresAt > now;
         }
 
-        // iPhone-on vizuális jelzés a gombokon
         function applyPlatformRestrictions() {
             if (!isAppleMobileDevice()) return;
 
@@ -759,15 +722,56 @@
 
             [codeButton, createButton].forEach(button => {
                 if (!button) return;
-                // Nem tiltjuk le a .disabled-del, hogy rákattintható maradjon a modális ablakhoz
                 button.classList.add('border-dashed', 'border-red-500/60');
             });
 
-            if (codeButton && !isFeatureUnlocked('code')) {
-                codeButton.textContent = '🔒 Kód megadása (Nem támogatott)';
+            if (codeButton) {
+                if (isFeatureUnlocked('code')) {
+                    codeButton.textContent = '🔑 Kód Megadása (Feloldva)';
+                    codeButton.classList.remove('border-dashed', 'border-red-500/60');
+                } else {
+                    codeButton.textContent = '🔒 Kód megadása (Nem támogatott)';
+                }
             }
-            if (createButton && !isFeatureUnlocked('create')) {
-                createButton.textContent = '🔒 Kérdés készítő (Nem támogatott)';
+            if (createButton) {
+                if (isFeatureUnlocked('create')) {
+                    createButton.textContent = '✍️ Kérdés készítő (Feloldva)';
+                    createButton.classList.remove('border-dashed', 'border-red-500/60');
+                } else {
+                    createButton.textContent = '🔒 Kérdés készítő (Nem támogatott)';
+                }
+            }
+        }
+
+        function startRestrictionCountdown(featureKey) {
+            if (restrictionCountdownInterval) clearInterval(restrictionCountdownInterval);
+            const states = getStoredUnlocks();
+            const timerDisplay = document.getElementById('restriction-timer-display');
+            const countdownVal = document.getElementById('unlock-countdown-val');
+
+            const now = Date.now();
+            const lastTime = states[featureKey].lastUnlockedAt;
+            const oneHour = 60 * 60 * 1000;
+
+            if (lastTime && (now - lastTime < oneHour)) {
+                if (timerDisplay) timerDisplay.classList.remove('hidden');
+                
+                const updateTimer = () => {
+                    const currentTime = Date.now();
+                    const timeLeft = oneHour - (currentTime - lastTime);
+                    if (timeLeft <= 0) {
+                        if (timerDisplay) timerDisplay.classList.add('hidden');
+                        clearInterval(restrictionCountdownInterval);
+                        return;
+                    }
+                    const mins = Math.floor(timeLeft / 60000);
+                    const secs = Math.floor((timeLeft % 60000) / 1000);
+                    if (countdownVal) countdownVal.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                };
+                updateTimer();
+                restrictionCountdownInterval = setInterval(updateTimer, 1000);
+            } else {
+                if (timerDisplay) timerDisplay.classList.add('hidden');
             }
         }
 
@@ -777,12 +781,11 @@
                 return;
             }
 
-            // Megjelenítjük a kért modális ablakot
+            window.activeRestrictionKey = featureKey;
             const nameEl = document.getElementById('restriction-feature-name');
             nameEl.innerHTML = `<strong>${featureDisplayName}</strong> Csak Androidon elérhető!`;
             
-            // Eltároljuk, hogy melyik funkciót próbálta megnyitni a feloldáshoz
-            window.activeRestrictionKey = featureKey;
+            startRestrictionCountdown(featureKey);
             toggleModal('platform-restriction-modal', true);
         }
 
@@ -790,11 +793,11 @@
             const featureKey = window.activeRestrictionKey;
             if (!featureKey) return;
 
+            const states = getStoredUnlocks();
             const now = Date.now();
-            const lastTime = restrictionUnlockTimers[featureKey].lastUnlockedAt;
+            const lastTime = states[featureKey].lastUnlockedAt;
             const oneHour = 60 * 60 * 1000;
 
-            // Ellenőrizzük, hogy telt-e már el 1 óra az előző feloldás óta
             if (lastTime && (now - lastTime < oneHour)) {
                 const minutesLeft = Math.ceil((oneHour - (now - lastTime)) / 60000);
                 toggleModal('platform-restriction-modal', false);
@@ -802,15 +805,14 @@
                 return;
             }
 
-            // 1 perces feloldás megadása
-            restrictionUnlockTimers[featureKey].expiresAt = now + 60 * 1000;
-            restrictionUnlockTimers[featureKey].lastUnlockedAt = now;
+            states[featureKey].expiresAt = now + 60 * 1000;
+            states[featureKey].lastUnlockedAt = now;
+            saveStoredUnlocks(states);
 
             toggleModal('platform-restriction-modal', false);
             applyPlatformRestrictions();
 
             showFeedback("Sikeres 1 perces feloldás!", "A tiltás ideiglenesen feloldódott <strong>1 percre</strong>!", "🔓", () => {
-                // Ha lejár az 1 perc, frissítjük a gombok állapotát
                 setTimeout(() => {
                     applyPlatformRestrictions();
                 }, 60000);
@@ -918,9 +920,6 @@
             prepareQuestion();
         }
 
-        /* ==========================================================================
-           3. AUDIO KEZELÉS
-           ========================================================================== */
         let audioCtx = null;
         let isMusicEnabled = localStorage.getItem('isMusicEnabled') === 'true';
         let isSfxEnabled = localStorage.getItem('isSfxEnabled') !== 'false';
@@ -944,7 +943,6 @@
                 if (isMusicEnabled) {
                     musicBtn.textContent = 'BE';
                     musicBtn.className = 'text-xs px-2.5 py-1 rounded-lg font-bold bg-emerald-600 text-white cursor-pointer';
-                    // Automatikus zeneindítás belépéskor / első interakciónál
                     startBackgroundMusic();
                     document.addEventListener('click', () => {
                         if (isMusicEnabled && !bgMusicInterval && !document.getElementById('custom-bg-audio').currentTime) {
@@ -1159,9 +1157,6 @@
             playTone(233.08, 'sawtooth', 0.45, 0.16, 'sfx', 0.36);
         }
 
-        /* ==========================================================================
-           4. PIROS POHÁR SVG RENDERELÉS & MODAL KEZELÉS
-           ========================================================================== */
         function getRedCupSVG(sizeClass = "w-7 h-7 sm:w-8 sm:h-8") {
             return `
                 <svg class="${sizeClass} red-cup-shadow cup-animate inline-block" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1235,9 +1230,6 @@
             }
         }
 
-        /* ==========================================================================
-           5. JÁTÉKMENET ÉS RENDERELÉS
-           ========================================================================== */
         function startGame() {
             if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
                 questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
@@ -1579,9 +1571,6 @@
             }
         }
 
-        /* ==========================================================================
-           6. SEGÍTSÉGEK
-           ========================================================================== */
         function useFiftyFifty(btn) {
             if (lifelines.fiftyFifty || isRoundChecked) return;
             const wrongIndices = displayedAnswers.map((ans, idx) => (!ans.isCorrect ? idx : -1)).filter(idx => idx !== -1);
@@ -1751,9 +1740,6 @@
             }
         }
 
-        /* ==========================================================================
-           7. CREATE & LOAD MODÁLOK & MEGOSZTÁS ANIMÁLT PÖTTYÖKKEL
-           ========================================================================== */
         function openCreateModal(editName = null) {
             handleRestrictedAction('create', 'Kérdés készítő', () => {
                 const container = document.getElementById('questions-container');
@@ -1963,9 +1949,6 @@
             showLoadModal();
         }
 
-        /* ==========================================================================
-           8. BEÁLLÍTÁSOK
-           ========================================================================== */
         function setPaletteColor() {
             const color = document.getElementById('palette-color-input').value;
             document.body.style.backgroundImage = 'none';
