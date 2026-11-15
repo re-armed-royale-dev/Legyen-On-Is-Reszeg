@@ -282,7 +282,7 @@
                 <button onclick="openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
-                <button onclick="openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-lg py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
+                <button id="code-entry-btn" onclick="openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-lg py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
                     🔑 Kód Megadása
                 </button>
             </div>
@@ -319,7 +319,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    <button onclick="openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
+                    <button id="create-questions-btn" onclick="openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
                         ✍️ Kérdés készítő
                     </button>
                     <button onclick="showLoadModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
@@ -711,12 +711,43 @@
             return arr;
         }
 
+        // iPhone/iPad felismerése – Safari, Chrome és főképernyős PWA esetén is.
+        function isAppleMobileDevice() {
+            const ua = navigator.userAgent || '';
+            const platform = navigator.platform || '';
+            return /iPhone|iPad|iPod/i.test(ua) ||
+                (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        // iPhone-on letiltjuk a kódmegadást és a saját kérdéssor készítését.
+        function applyPlatformRestrictions() {
+            if (!isAppleMobileDevice()) return;
+
+            const codeButton = document.getElementById('code-entry-btn');
+            const createButton = document.getElementById('create-questions-btn');
+
+            [codeButton, createButton].forEach(button => {
+                if (!button) return;
+                button.disabled = true;
+                button.classList.add('opacity-40', 'cursor-not-allowed');
+                button.classList.remove('cursor-pointer');
+                button.title = 'Ez a funkció iPhone-on nem érhető el.';
+            });
+
+            if (codeButton) codeButton.textContent = '🔒 Kód megadása – nem elérhető';
+            if (createButton) createButton.textContent = '🔒 Kérdés készítő – nem elérhető';
+        }
+
         function openSinglePlayerMenu() {
             document.getElementById('singleplayer-menu').classList.remove('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
         }
 
         function openMultiplayerMenu() {
+            if (isAppleMobileDevice()) {
+                showFeedback("Ez a funkció nem elérhető", "A kód megadása iPhone-on nem használható.", "🔒");
+                return;
+            }
             document.getElementById('multiplayer-menu').classList.remove('hidden');
             document.getElementById('singleplayer-menu').classList.add('hidden');
         }
@@ -1647,6 +1678,10 @@
            7. CREATE & LOAD MODÁLOK & MEGOSZTÁS ANIMÁLT PÖTTYÖKKEL
            ========================================================================== */
         function openCreateModal(editName = null) {
+            if (isAppleMobileDevice()) {
+                showFeedback("Ez a funkció nem elérhető", "A kérdéskészítő iPhone-on nem használható.", "🔒");
+                return;
+            }
             const container = document.getElementById('questions-container');
             const nameInput = document.getElementById('question-set-name');
             container.innerHTML = '';
@@ -1665,6 +1700,10 @@
         }
 
         function addQuestionItem(prefill = null) {
+            if (isAppleMobileDevice()) {
+                showFeedback("Ez a funkció nem elérhető", "iPhone-on nem lehet kérdéseket készíteni.", "🔒");
+                return;
+            }
             const container = document.getElementById('questions-container');
             const count = container.getElementsByClassName('question-item').length;
             if (count >= 15) return;
@@ -1697,6 +1736,10 @@
         }
 
         function saveQuestions() {
+            if (isAppleMobileDevice()) {
+                showFeedback("Ez a funkció nem elérhető", "iPhone-on nem lehet saját kérdéssort menteni.", "🔒");
+                return;
+            }
             const setName = document.getElementById('question-set-name').value.trim();
             if (!setName) {
                 showFeedback("Hiányzó név", "Add meg a kérdéssor nevét!", "⚠️");
@@ -1884,6 +1927,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDifficulty('easy');
+            applyPlatformRestrictions();
             initAudioSettingsUI();
 
             const savedColor = localStorage.getItem('backgroundColor');
