@@ -437,20 +437,24 @@ jobs:
                   }
               }
 
-              // KAPCSOLATI HIBA
+              // KAPCSOLATI HIBA – OFFLINE JÁTÉK LEHETŐSÉGGEL
               private void showConnectionErrorDialog() {
-                  webViewReady = true;
-
                   if (isFinishing()) return;
+
+                  // A splash screen elengedése a hibaablak előtt.
+                  webViewReady = true;
 
                   new AlertDialog.Builder(this)
                       .setTitle("Kapcsolódási hiba")
                       .setMessage(
                           "Nem sikerült ellenőrizni az alkalmazás verzióját.\n\n" +
-                          "A játék biztonsági okból nem indítható el. " +
-                          "Ellenőrizd az internetkapcsolatot, majd próbáld újra."
+                          "Ellenőrizd az internetkapcsolatot, vagy indítsd el a játékot offline módban."
                       )
                       .setPositiveButton(
+                          "OFFLINE JÁTÉK",
+                          (dialog, which) -> loadGame()
+                      )
+                      .setNeutralButton(
                           "ÚJRA",
                           (dialog, which) -> checkVersion()
                       )
