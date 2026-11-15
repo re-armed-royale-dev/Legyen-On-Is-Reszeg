@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Legyen Ön is Részeg! – Party Kvíz Show</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         html, body {
@@ -367,6 +368,33 @@
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); startRivalGame()" class="w-full bg-gradient-to-r from-fuchsia-600 via-purple-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 text-white font-black py-3.5 rounded-xl shadow-lg shadow-fuchsia-600/30 cursor-pointer text-sm">
                     ⚔️ Párbaj Indítása!
                 </button>
+            </div>
+
+            <!-- ONLINE RIVÁLIS MENÜ -->
+            <!-- EXTERNAL ONLINE RIVAL MENU -->
+            <div id="online-rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/90 border-2 border-fuchsia-500/60 rounded-2xl p-4 mb-4 text-left">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-black uppercase text-fuchsia-400">
+                        🌐 Online Rivális 1v1
+                    </span>
+                    <button onclick="closeOnlineRivalMenu()" class="text-xs text-slate-400 hover:text-white font-bold">
+                        ← Vissza
+                    </button>
+                </div>
+                <p class="text-xs text-slate-300 mb-3">
+                    Játssz barátoddal online két különböző telefonon! Hozz létre egy szobát, vagy csatlakozz egy meglévőhöz.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                    <button onclick="createOnlineRoom()" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md">
+                        🏠 Szoba Létrehozása
+                    </button>
+                    <button onclick="showJoinRoomInput()" class="bg-slate-800 hover:bg-slate-700 border border-fuchsia-500/40 text-fuchsia-300 font-bold py-3 px-4 rounded-xl text-xs">
+                        🔑 Csatlakozás Szobához
+                    </button>
+                </div>
+                <div id="online-room-status-area" class="hidden bg-slate-900 border border-slate-800 rounded-xl p-3 text-center text-xs text-slate-300">
+                    <!-- Dinamikus állapot -->
+                </div>
             </div>
 
             <div id="multiplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
@@ -739,7 +767,7 @@
                 { question: "Melyik kémiai elem vegyjele az 'Au'?", answers: ["Arany", "Ezüst", "Alumínium", "Réz"], correct: 0 },
                 { question: "Melyik sörfőzési eljárásra jellemző az alsóerjesztés?", answers: ["Lager", "Ale", "Stout", "Weissbier"], correct: 0 },
                 { question: "Melyik filmben hangzik el a híres mondat: 'Én vagyok az apád'?", answers: ["Star Wars: A Birodalom visszavág", "A Gyűrűk Ura", "Mátrix", "Indiana Jones"], correct: 0 },
-                { question: "Hány százalékos alkoholtartalom felett nevezünk egy italt klasszikusan tömény szesznek?", answers: ["15–20% felett", "5% felett", "50% felett", "80% felett"], correct: 0 },
+                { question: "Hány százalékos alkoholtartalom felett nevezünk un. tömény szeszt klasszikusan?", answers: ["15–20% felett", "5% felett", "50% felett", "80% felett"], correct: 0 },
                 { question: "Melyik évben tört ki a magyar forradalom és szabadságharc?", answers: ["1848", "1867", "1956", "1849"], correct: 0 },
                 { question: "Ki festette a híres 'Mona Lisa' című portrét?", answers: ["Leonardo da Vinci", "Michelangelo", "Raffaello", "Vincent van Gogh"], correct: 0 },
                 { question: "Melyik ország nemzeti itala a szaké?", answers: ["Japán", "Kína", "Dél-Korea", "Thaiföld"], correct: 0 },
@@ -984,14 +1012,58 @@
             document.getElementById('singleplayer-menu').classList.remove('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
             document.getElementById('rival-menu').classList.add('hidden');
+            document.getElementById('online-rival-menu').classList.add('hidden');
         }
 
         function openRivalMenu() {
             document.getElementById('rival-menu').classList.remove('hidden');
             document.getElementById('singleplayer-menu').classList.add('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
+            document.getElementById('online-rival-menu').classList.add('hidden');
             const rivalLabel = document.getElementById('rival-active-set-label');
             if (rivalLabel) rivalLabel.textContent = activeSetName;
+        }
+
+        function openOnlineRivalMenu() {
+            document.getElementById('online-rival-menu').classList.remove('hidden');
+            document.getElementById('rival-menu').classList.add('hidden');
+            document.getElementById('singleplayer-menu').classList.add('hidden');
+            document.getElementById('multiplayer-menu').classList.add('hidden');
+        }
+
+        function closeOnlineRivalMenu() {
+            document.getElementById('online-rival-menu').classList.add('hidden');
+            document.getElementById('rival-menu').classList.remove('hidden');
+        }
+
+        function createOnlineRoom() {
+            const statusArea = document.getElementById('online-room-status-area');
+            statusArea.classList.remove('hidden');
+            statusArea.innerHTML = "🔄 Szoba létrehozása a szerveren...";
+            setTimeout(() => {
+                const roomCode = Math.floor(100000 + Math.random() * 900000);
+                statusArea.innerHTML = `✅ Szoba létrehozva!<br>Szobakód: <strong class="text-yellow-400 text-lg">${roomCode}</strong><br><span class="text-xs text-slate-400">Várakozás a csatlakozóra...</span>`;
+            }, 800);
+        }
+
+        function showJoinRoomInput() {
+            const statusArea = document.getElementById('online-room-status-area');
+            statusArea.classList.remove('hidden');
+            statusArea.innerHTML = `
+                <div class="flex gap-2 mt-1">
+                    <input type="text" id="join-room-code" maxlength="6" placeholder="Szobakód" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-yellow-300 outline-none">
+                    <button onclick="joinOnlineRoom()" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs">Csatlakozás</button>
+                </div>
+            `;
+        }
+
+        function joinOnlineRoom() {
+            const code = document.getElementById('join-room-code').value.trim();
+            if (code.length !== 6) {
+                showFeedback("Hibás szobakód", "A szobakódnak 6 jegyűnek kell lennie!", "⚠️");
+                return;
+            }
+            showFeedback("Csatlakozás", `Csatlakozás a(z) ${code} szobához...`, "🌐");
         }
 
         function openMultiplayerMenu() {
@@ -999,6 +1071,7 @@
                 document.getElementById('multiplayer-menu').classList.remove('hidden');
                 document.getElementById('singleplayer-menu').classList.add('hidden');
                 document.getElementById('rival-menu').classList.add('hidden');
+                document.getElementById('online-rival-menu').classList.add('hidden');
             });
         }
 
@@ -1006,6 +1079,7 @@
             document.getElementById('singleplayer-menu').classList.add('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
             document.getElementById('rival-menu').classList.add('hidden');
+            document.getElementById('online-rival-menu').classList.add('hidden');
         }
 
         function selectDifficulty(diffKey) {
@@ -1544,7 +1618,6 @@
                     playTone(880, 'sine', 0.05, 0.06, 'sfx');
                 } else {
                     stopRivalTimer();
-                    // Automatikusan szétszórjuk a maradék poharakat és leokézzuk a kört
                     autoFillRemainingRivalCups();
                     showFeedback("⏰ Lejárt az idő!", "A riválisod időzavar szívatása miatt lejárt a 10 másodperc! A maradék poharaid véletlenszerűen kerültek fel.", "⏰", () => {
                         checkAnswer();
@@ -1577,27 +1650,23 @@
             selectedAnswerSlot = null;
             isRoundChecked = false;
 
-            // Visszaállítjuk a kör közbeni felező / közönség jelöléseket az új játékos körére
             displayedAnswers.forEach(a => {
                 a.hidden = false;
                 a.audiencePct = null;
             });
             document.getElementById('audience-chart-box').classList.add('hidden');
 
-            // Megnézzük, kapott-e szívatást az ellenféltől erre a körre
             const incoming = rivalTurn === 1 ? rivalPendingSabotages.forP1 : rivalPendingSabotages.forP2;
             rivalActiveBlind = incoming.blind;
             rivalActiveBlock5050 = incoming.block5050;
             const hasTimerSabotage = incoming.timer;
 
-            // Töröljük a felhasznált bejövő szívatásokat
             if (rivalTurn === 1) {
                 rivalPendingSabotages.forP1 = { blind: false, timer: false, block5050: false };
             } else {
                 rivalPendingSabotages.forP2 = { blind: false, timer: false, block5050: false };
             }
 
-            // Vakítás UI
             const blindBar = document.getElementById('rival-blind-reveal-bar');
             if (rivalActiveBlind) {
                 blindBar.classList.remove('hidden');
@@ -1605,7 +1674,6 @@
                 blindBar.classList.add('hidden');
             }
 
-            // Fejléc / Scoreboard frissítés
             document.getElementById('rival-p1-glasses').textContent = `${rivalPlayers[1].glasses} 🍷`;
             document.getElementById('rival-p2-glasses').textContent = `${rivalPlayers[2].glasses} 🍷`;
             document.getElementById('glasses-badge-label').textContent = `${activePlayer.name} poharai`;
@@ -1626,7 +1694,6 @@
                 p1Card.classList.remove('ring-2', 'ring-sky-400', 'scale-[1.02]');
             }
 
-            // Segítségek állapotának betöltése az aktuális játékoshoz
             lifelines = { ...activePlayer.lifelines };
             updateRefillUI();
 
@@ -1653,7 +1720,6 @@
                 btnHulye.disabled = lifelines.hulyeVagyok;
             }
 
-            // Szivató gombok állapotának frissítése az aktuális játékoshoz
             document.getElementById('rival-sabotage-bar').classList.remove('hidden');
             ['blind', 'timer', 'block5050', 'steal'].forEach(key => {
                 const sBtn = document.getElementById(`sabotage-${key}`);
@@ -1663,7 +1729,6 @@
                 sBtn.disabled = used;
             });
 
-            // Gombok szövege
             const checkBtn = document.getElementById('check-answer-btn');
             checkBtn.classList.remove('hidden');
             checkBtn.textContent = rivalTurn === 1 ? '🔒 Tétek rögzítése (Átadás)' : '⚔️ Párbaj Felfedése!';
@@ -1745,7 +1810,6 @@
 
             let extraNotes = '';
 
-            // Pohár-sózás kiértékelése
             if (p1.pendingStealActive) {
                 p1.pendingStealActive = false;
                 if (p1Survived > 0 && p2.glasses > 0) {
@@ -1761,18 +1825,10 @@
                 }
             }
 
-            // Mentjük a játékosok poharait
             p1.glasses = Math.max(0, p1.glasses);
             p2.glasses = Math.max(0, p2.glasses);
 
-            // Ha valamelyik játékosnak 0 pohara maradt, ellenőrizzük az újratöltési lehetőséget
-            if (p1.glasses === 0 && p1.lifelines.refillCount < 2) {
-                // Ha P1 elfogyott, de van még újratöltése, felajánljuk neki
-                // (Ha a kártyák értékelésekor egyszerre fogy el, P1-et vesszük először)
-            }
-
-            // UI frissítés felfedett nézhez
-            totalGlasses = p1.glasses + p2.glasses; // Megjelenítéshez
+            totalGlasses = p1.glasses + p2.glasses;
             answerBets = displayedAnswers.map((_, idx) => (p1.bets[idx] || 0) + (p2.bets[idx] || 0));
             renderGameUI();
 
@@ -1803,7 +1859,6 @@
                 ${extraNotes ? `<div class="mt-2 text-xs text-amber-300 font-semibold">${extraNotes}</div>` : ''}
             `;
 
-            // Ellenőrizzük, hogy valaki kiesett-e vagy újratölthet-e
             if (p1.glasses === 0 && p1.lifelines.refillCount < 2) {
                 window.rivalRefillTargetPlayer = 1;
                 const refillActionsHTML = `
