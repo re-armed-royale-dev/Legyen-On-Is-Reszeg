@@ -152,10 +152,10 @@
             <span class="text-xs sm:text-sm font-bold tracking-wider uppercase text-yellow-400">Legyen Ön is Részeg!</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
-            <button onclick="event.stopPropagation(); toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
+            <button onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
                 📜 Szabályok
             </button>
-            <button id="settings-toggle-btn" onclick="event.stopPropagation(); toggleSettingsMenu()" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
+            <button id="settings-toggle-btn" onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleSettingsMenu()" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
                 ⚙️ <span class="hidden sm:inline">Beállítások</span>
             </button>
         </div>
@@ -164,7 +164,7 @@
     <div id="settings-menu" onclick="event.stopPropagation()" class="hidden fixed top-16 right-4 w-80 bg-slate-900 border-2 border-yellow-500/50 rounded-2xl p-4 shadow-2xl z-50">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-yellow-400 uppercase tracking-wider">Beállítások</h3>
-            <button onclick="toggleSettingsMenu()" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer px-1">&times;</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleSettingsMenu()" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer px-1">&times;</button>
         </div>
 
         <div class="mb-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
@@ -179,7 +179,7 @@
         </div>
 
         <div class="mb-3">
-            <button onclick="openCustomMusicModal()" class="w-full bg-amber-600/90 hover:bg-amber-500 text-white font-bold text-xs py-2 px-3 rounded-xl border border-amber-400/50 flex items-center justify-center gap-2 cursor-pointer">
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openCustomMusicModal()" class="w-full bg-amber-600/90 hover:bg-amber-500 text-white font-bold text-xs py-2 px-3 rounded-xl border border-amber-400/50 flex items-center justify-center gap-2 cursor-pointer">
                 🎧 Saját zene beállítása
             </button>
         </div>
@@ -200,39 +200,44 @@
         <label class="block text-xs text-slate-300 mb-1">Háttérszín testreszabása:</label>
         <div class="flex gap-2 mb-3">
             <input type="color" id="palette-color-input" value="#0b0f19" class="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-slate-600">
-            <button onclick="setPaletteColor()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg cursor-pointer">
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setPaletteColor()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg cursor-pointer">
                 Alkalmaz
             </button>
         </div>
-        <button onclick="resetBackgroundColor()" class="w-full mb-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2 rounded-lg border border-slate-700 cursor-pointer">
+        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); resetBackgroundColor()" class="w-full mb-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2 rounded-lg border border-slate-700 cursor-pointer">
             Alapértelmezett háttér
         </button>
         <hr class="border-slate-800 my-2">
-        <button onclick="exitToMenu()" class="w-full bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg cursor-pointer">
+        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); exitToMenu()" class="w-full bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg cursor-pointer">
             🚪 Kilépés a főmenübe
         </button>
     </div>
 
     <div id="custom-music-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="closeCustomMusicModal()">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl relative" onclick="event.stopPropagation()">
-            <button onclick="closeCustomMusicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeCustomMusicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             
             <div class="text-3xl mb-2">🎵</div>
             <h3 class="text-xl font-black text-amber-400 mb-2">Saját zene beállítása</h3>
             <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-                Tölts fel egy saját zenét (pl. MP3 formátumban) a telefonodról vagy a gépedről, és az fog szólni háttérzeneként!
+                Tölts fel egy saját zenét (MP3, OGG vagy WAV formátumban), és az fog szólni háttérzeneként!
             </p>
 
             <div class="mb-4 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center">
-                <input type="file" id="custom-music-file-input" accept="audio/*" onchange="handleCustomMusicUpload(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-500 file:cursor-pointer cursor-pointer">
-                <p id="current-custom-track-name" class="text-xs text-yellow-300 mt-2 font-semibold truncate">Nincs saját zene feltöltve</p>
+                <div class="flex items-center justify-center">
+                    <label class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl cursor-pointer shadow-md inline-block">
+                        📁 Fájl kiválasztása
+                        <input type="file" id="custom-music-file-input" accept="audio/mp3,audio/mpeg,audio/ogg,audio/wav" onchange="handleCustomMusicUpload(event)" class="hidden">
+                    </label>
+                </div>
+                <p id="current-custom-track-name" class="text-xs text-yellow-300 mt-3 font-semibold truncate">Nincs saját zene feltöltve</p>
             </div>
 
             <div class="flex flex-col gap-2">
-                <button onclick="resetToDefaultMusic()" class="w-full bg-slate-800 hover:bg-slate-700 text-red-400 border border-red-500/40 font-bold text-xs py-3 rounded-xl cursor-pointer flex items-center justify-center gap-2">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); resetToDefaultMusic()" class="w-full bg-slate-800 hover:bg-slate-700 text-red-400 border border-red-500/40 font-bold text-xs py-3 rounded-xl cursor-pointer flex items-center justify-center gap-2">
                     🔄 Alapértelmezett zene visszaállítása
                 </button>
-                <button onclick="closeCustomMusicModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-3 rounded-xl cursor-pointer">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeCustomMusicModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-3 rounded-xl cursor-pointer">
                     Bezárás
                 </button>
             </div>
@@ -260,10 +265,10 @@
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto mb-6">
-                <button onclick="openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
-                <button id="code-entry-btn" onclick="openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-lg py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
+                <button id="code-entry-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-lg py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
                     🔑 Kód Megadása
                 </button>
             </div>
@@ -271,7 +276,7 @@
             <div id="singleplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Egyjátékos mód beállításai</span>
-                    <button onclick="backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
                 </div>
 
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
@@ -297,15 +302,15 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    <button id="create-questions-btn" onclick="openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
+                    <button id="create-questions-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openCreateModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
                         ✍️ Kérdés készítő
                     </button>
-                    <button onclick="showLoadModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); showLoadModal()" class="bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer">
                         📂 Kérdések Betöltése
                     </button>
                 </div>
 
-                <button onclick="startGame()" class="w-full bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-black py-3 rounded-xl shadow-lg cursor-pointer text-sm">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); startGame()" class="w-full bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-black py-3 rounded-xl shadow-lg cursor-pointer text-sm">
                     🚀 Játék Indítása (Egyjátékos)
                 </button>
             </div>
@@ -313,7 +318,7 @@
             <div id="multiplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Kód Megadása</span>
-                    <button onclick="backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
                 </div>
 
                 <p class="text-xs text-slate-300 mb-3">
@@ -322,7 +327,7 @@
 
                 <div class="flex flex-col sm:flex-row gap-2 mb-3">
                     <input type="text" id="quiz-code-input" maxlength="6" placeholder="Pl.: 123456" class="flex-1 bg-slate-900 border-2 border-amber-500/60 focus:border-yellow-400 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest text-yellow-300 outline-none">
-                    <button onclick="loadQuizByCode()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black px-6 py-3 rounded-xl cursor-pointer text-sm">
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); loadQuizByCode()" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black px-6 py-3 rounded-xl cursor-pointer text-sm">
                         🎮 Csatlakozás
                     </button>
                 </div>
@@ -334,7 +339,7 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>20 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.24 Hotfix (20 Q & 2x Refill)</span>
+                <span class="font-mono font-bold text-yellow-400">v2.25 Hotfix (Audio & UX)</span>
             </div>
         </div>
     </main>
@@ -381,7 +386,7 @@
         <div id="audience-chart-box" class="hidden bg-slate-900/95 border-2 border-amber-400/60 rounded-2xl p-4 mb-4 shadow-xl">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-400">📊 A közönség szavazata:</span>
-                <button onclick="document.getElementById('audience-chart-box').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white font-bold px-2 py-0.5 rounded bg-slate-800 cursor-pointer">Elrejtés</button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); document.getElementById('audience-chart-box').classList.add('hidden')" class="text-xs text-slate-400 hover:text-white font-bold px-2 py-0.5 rounded bg-slate-800 cursor-pointer">Elrejtés</button>
             </div>
             <div id="audience-bars" class="grid grid-cols-4 gap-3 items-end h-28 pt-4 px-2 bg-slate-950/80 rounded-xl border border-slate-800">
             </div>
@@ -425,7 +430,7 @@
             <p id="feedback-message" class="text-slate-300 text-base mb-6 leading-relaxed"></p>
             
             <div id="feedback-actions" class="flex flex-col gap-2.5">
-                <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
+                <button id="feedback-close-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
                     Rendben!
                 </button>
             </div>
@@ -444,10 +449,10 @@
             </p>
             
             <div class="flex flex-col gap-2.5">
-                <button onclick="requestTemporaryUnlock()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-3 rounded-xl text-sm cursor-pointer shadow-lg">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); requestTemporaryUnlock()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-3 rounded-xl text-sm cursor-pointer shadow-lg">
                     🔓 1 perces feloldás
                 </button>
-                <button onclick="toggleModal('platform-restriction-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-sm cursor-pointer border border-slate-700">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('platform-restriction-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-sm cursor-pointer border border-slate-700">
                     Rendben
                 </button>
             </div>
@@ -468,7 +473,7 @@
 
     <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('rules-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
-            <button onclick="toggleModal('rules-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-black text-yellow-400">📜 Játékszabályok</h2>
             </div>
@@ -479,7 +484,7 @@
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre. Használhatod az <strong>ALL-IN</strong> gombot is!</span></li>
                 <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (2 alkalommal).</span></li>
             </ul>
-            <button onclick="toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
                 Értem, induljon a buli!
             </button>
         </div>
@@ -487,7 +492,7 @@
 
     <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('create-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col relative" onclick="event.stopPropagation()">
-            <button onclick="toggleModal('create-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('create-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl sm:text-2xl font-black text-yellow-400">✍️ Saját kérdéssor szerkesztő</h2>
             </div>
@@ -497,12 +502,12 @@
             </div>
             <div id="questions-container" class="flex-1 overflow-y-auto space-y-4 pr-1 mb-4"></div>
             <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
-                <button onclick="addQuestionItem()" class="bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-xl text-sm cursor-pointer">
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); addQuestionItem()" class="bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-xl text-sm cursor-pointer">
                     ➕ Új kérdés hozzáadása (max 20)
                 </button>
                 <div class="flex gap-2">
-                    <button onclick="toggleModal('create-modal', false)" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm cursor-pointer">Bezárás</button>
-                    <button onclick="saveQuestions()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-6 rounded-xl text-sm cursor-pointer">💾 Mentés</button>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('create-modal', false)" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm cursor-pointer">Bezárás</button>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); saveQuestions()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-6 rounded-xl text-sm cursor-pointer">💾 Mentés</button>
                 </div>
             </div>
         </div>
@@ -510,18 +515,18 @@
 
     <div id="load-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('load-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col relative" onclick="event.stopPropagation()">
-            <button onclick="toggleModal('load-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('load-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl sm:text-2xl font-black text-yellow-400">📂 Kérdések Betöltése</h2>
             </div>
             <div id="saved-questions-list" class="flex-1 overflow-y-auto space-y-3 mb-4"></div>
-            <button onclick="toggleModal('load-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl cursor-pointer">Bezárás</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('load-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl cursor-pointer">Bezárás</button>
         </div>
     </div>
 
     <div id="hulye-vagyok-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="closeHulyeVagyokModal()">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col relative" onclick="event.stopPropagation()">
-            <button onclick="closeHulyeVagyokModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeHulyeVagyokModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-2xl">🤖</span>
@@ -542,7 +547,7 @@
                 <button id="ask-current-q-btn" onclick="revealCurrentQuestionAnswer()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-3.5 px-4 rounded-xl shadow-lg cursor-pointer">
                     💡 Válasz lekérése
                 </button>
-                <button onclick="closeHulyeVagyokModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">Bezárás</button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeHulyeVagyokModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">Bezárás</button>
             </div>
         </div>
     </div>
@@ -671,7 +676,7 @@
         let totalGlasses = 10;
         let answerBets = [0, 0, 0, 0];
         let displayedAnswers = [];
-        let selectedAnswerSlot = null; // Hotfix: nincs előre kiválasztva válasz
+        let selectedAnswerSlot = null;
         let isRoundChecked = false;
         let isAllInUsedOnAnswer = [false, false, false, false];
         let isAllInLocked = false;
@@ -680,7 +685,7 @@
             fiftyFifty: false,
             audience: false,
             hulyeVagyok: false,
-            refillCount: 0 // Hotfix: maximum 2 alkalom
+            refillCount: 0
         };
 
         let hulyeTimerInterval = null;
@@ -902,7 +907,6 @@
                 } catch (e) { console.warn('Helyi kód olvasási hiba:', e); }
             }
 
-            // Hotfix: Kód megadásakor ugyanaz a töltésjelző ablak jelenik meg, mint a megosztáskor
             toggleModal('share-loading-modal', true);
             startShareDotsAnimation();
 
@@ -972,7 +976,7 @@
                     musicBtn.className = 'text-xs px-2.5 py-1 rounded-lg font-bold bg-emerald-600 text-white cursor-pointer';
                     startBackgroundMusic();
                     document.addEventListener('click', () => {
-                        if (isMusicEnabled && !bgMusicInterval && !document.getElementById('custom-bg-audio').currentTime) {
+                        if (isMusicEnabled && !bgMusicInterval && (!document.getElementById('custom-bg-audio').currentTime || document.getElementById('custom-bg-audio').paused)) {
                             startBackgroundMusic();
                         }
                     }, { once: true });
@@ -1101,6 +1105,7 @@
             if (customAudioData) {
                 customAudioEl.src = customAudioData;
                 customAudioEl.volume = musicVolume;
+                customAudioEl.loop = true;
                 customAudioEl.play().catch(e => console.log("Custom audio autoplay prevented:", e));
             } else {
                 const bassNotes = [146.83, 146.83, 174.61, 146.83, 220.00, 196.00, 174.61, 164.81];
@@ -1240,7 +1245,7 @@
                 actionsContainer.innerHTML = customActionsHTML;
             } else {
                 actionsContainer.innerHTML = `
-                    <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
+                    <button id="feedback-close-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
                         Rendben!
                     </button>
                 `;
@@ -1290,7 +1295,7 @@
             isAllInLocked = false;
             answerBets = [0, 0, 0, 0];
             isAllInUsedOnAnswer = [false, false, false, false];
-            selectedAnswerSlot = null; // Hotfix: új kérdésnél nincs előre kiválasztva válasz
+            selectedAnswerSlot = null;
             document.getElementById('audience-chart-box').classList.add('hidden');
 
             const currentQ = questions[currentQuestionIndex];
@@ -1538,10 +1543,10 @@
                 
                 if (lifelines.refillCount < 2) {
                     const refillActionsHTML = `
-                        <button onclick="executeModalRefillAndContinue()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
+                        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeModalRefillAndContinue()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
                             🍷 Poharak Újratöltése (10 db) (${2 - lifelines.refillCount} maradt)
                         </button>
-                        <button onclick="closeFeedbackModal(); exitToMenu()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal(); exitToMenu()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
                             Kilépés a főmenübe
                         </button>
                     `;
@@ -1796,14 +1801,14 @@
         function addQuestionItem(prefill = null) {
             const container = document.getElementById('questions-container');
             const count = container.getElementsByClassName('question-item').length;
-            if (count >= 20) return; // Hotfix: max 20 kérdés
+            if (count >= 20) return;
             const div = document.createElement('div');
             div.className = 'question-item bg-slate-800/80 border border-slate-700 rounded-2xl p-4 relative';
             const correctVal = prefill ? prefill.correct + 1 : 1;
             div.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-black uppercase text-yellow-400">Kérdés #${count + 1}</span>
-                    ${count > 0 ? `<button onclick="this.closest('.question-item').remove()" class="text-xs text-red-400 font-bold cursor-pointer">Törlés</button>` : ''}
+                    ${count > 0 ? `<button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); this.closest('.question-item').remove()" class="text-xs text-red-400 font-bold cursor-pointer">Törlés</button>` : ''}
                 </div>
                 <input type="text" class="q-text w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white mb-2.5" placeholder="Kérdés" value="${prefill ? prefill.question.replace(/"/g, '&quot;') : ''}">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
@@ -1926,7 +1931,7 @@
                             <h4 class="font-extrabold text-white text-base">${label}</h4>
                             <p class="text-xs text-slate-400">${count} kérdés</p>
                         </div>
-                        <button onclick="loadBuiltInFromModal('${diffKey}')" class="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs cursor-pointer">
+                        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); loadBuiltInFromModal('${diffKey}')" class="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs cursor-pointer">
                             Kiválasztás
                         </button>
                     </div>
@@ -1949,10 +1954,10 @@
                                 <span class="text-xs text-slate-400">${count} kérdés</span>
                             </div>
                             <div class="flex flex-wrap gap-1.5">
-                                <button onclick="loadCustomSet('${safeName}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Betöltés</button>
-                                <button onclick="shareCustomSet('${safeName}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer" title="Megosztás fix 6 jegyű kóddal">📤 Megosztás</button>
-                                <button onclick="toggleModal('load-modal', false); openCreateModal('${safeName}')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Szerk.</button>
-                                <button onclick="deleteCustomSet('${safeName}')" class="bg-red-600 hover:bg-red-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Törlés</button>
+                                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); loadCustomSet('${safeName}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Betöltés</button>
+                                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); shareCustomSet('${safeName}')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer" title="Megosztás fix 6 jegyű kóddal">📤 Megosztás</button>
+                                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('load-modal', false); openCreateModal('${safeName}')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Szerk.</button>
+                                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); deleteCustomSet('${safeName}')" class="bg-red-600 hover:bg-red-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs cursor-pointer">Törlés</button>
                             </div>
                         </div>
                     `;
