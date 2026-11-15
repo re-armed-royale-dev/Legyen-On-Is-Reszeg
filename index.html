@@ -1043,35 +1043,172 @@
             document.getElementById('online-rival-menu').classList.add('hidden');
         }
 
+        /* --- INTEGRÁLT ONLINE RIVÁLIS SZERVER KAPCSOLAT (SOCKET.IO) --- */
+        let onlineRivalSocket = null;
+        let onlineRivalRoomCode = null;
+        let onlineRivalIsHost = false;
+
+        function escapeOnlineRivalText(value) {
+            return String(value).replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char]);
+        }
+
+        function getOnlineRivalName() {
+            const field = document.getElementById('online-rival-name');
+            const name = field ? field.value.trim().slice(0, 20) : '';
+
+            if (!name) {
+                showFeedback("Hiányzó név", "Írd be a játékosnevedet!", "⚠️");
+                return null;
+            }
+
+            return name;
+        }
+
+        function connectOnlineRivalSocket() {
+            if (typeof io !== 'function') {
+                throw new Error("A Socket.IO nem töltődött be.");
+            }
+
+            if (!onlineRivalSocket) {
+                onlineRivalSocket = io(QUIZ_API_BASE, {
+                    transports: ['websocket', 'polling']
+                });
+
+                onlineRivalSocket.on('connect_error', () => {
+                    const area = document.getElementById('online-room-status-area');
+                    area.classList.remove('hidden');
+                    area.textContent = "❌ Nem sikerült kapcsolódni a szerverhez.";
+                });
+
+                onlineRivalSocket.on('online-rival:players', data => {
+                    renderOnlineRivalLobby(data.players || []);
+                });
+
+                onlineRivalSocket.on('online-rival:opponent-left', () => {
+                    showFeedback("A játékos kilépett", "Az ellenfeled elhagyta a szobát.", "⚠️");
+                });
+
+                onlineRivalSocket.on('online-rival:error', data => {
+                    showFeedback("Online hiba", data.message || "Ismeretlen hiba.", "⚠️");
+                });
+            }
+
+            return onlineRivalSocket;
+        }
+
+        function renderOnlineRivalLobby(players) {
+            const area = document.getElementById('online-room-status-area');
+            area.classList.remove('hidden');
+
+            const playerList = players.map(player =>
+                `<div class="text-sm text-white py-1">👤 ${escapeOnlineRivalText(player.name)}</div>`
+            ).join('');
+
+            area.innerHTML = `
+                <div class="text-center mt-2">
+                    <div class="text-xs text-slate-400">SZOBAKÓD</div>
+                    <div class="text-3xl font-black tracking-widest text-cyan-400">${onlineRivalRoomCode || ''}</div>
+                    <div class="text-sm text-slate-300 mt-3">Játékosok: ${players.length}/2</div>
+                    <div class="mt-2">${playerList}</div>
+                    <div class="text-xs text-slate-400 mt-3">
+                        ${players.length < 2 ? '⏳ Várakozás a másik játékosra...' : '✅ Mindkét játékos csatlakozott!'}
+                    </div>
+                </div>
+            `;
+        }
+
         function createOnlineRoom() {
-            const statusArea = document.getElementById('online-room-status-area');
-            statusArea.classList.remove('hidden');
-            statusArea.innerHTML = "🔄 Szoba létrehozása a szerveren...";
-            setTimeout(() => {
-                const roomCode = Math.floor(100000 + Math.random() * 900000);
-                statusArea.innerHTML = `✅ Szoba létrehozva!<br>Szobakód: <strong class="text-cyan-400 text-lg">${roomCode}</strong><br><span class="text-xs text-slate-400">Várakozás a csatlakozóra...</span>`;
-            }, 800);
+            const name = getOnlineRivalName();
+            if (!name) return;
+
+            if (!Array.isArray(questions) || questions.length === 0) {
+                showFeedback("Nincs kérdéssor", "Előbb tölts be egy kérdéssort!", "⚠️");
+                return;
+            }
+
+            try {
+                const socket = connectOnlineRivalSocket();
+                const area = document.getElementById('online-room-status-area');
+                area.classList.remove('hidden');
+                area.textContent = "🔄 Szoba létrehozása...";
+
+                socket.emit('online-rival:create', {
+                    name,
+                    questions
+                }, response => {
+                    if (!response || !response.success) {
+                        area.textContent = "❌ " + (response?.error || "Nem sikerült létrehozni a szobát.");
+                        return;
+                    }
+
+                    onlineRivalRoomCode = response.code;
+                    onlineRivalIsHost = true;
+                    renderOnlineRivalLobby(response.players || []);
+                });
+            } catch (error) {
+                showFeedback("Kapcsolódási hiba", error.message, "⚠️");
+            }
         }
 
         function showJoinRoomInput() {
             const statusArea = document.getElementById('online-room-status-area');
             statusArea.classList.remove('hidden');
+
             statusArea.innerHTML = `
                 <div class="flex gap-2 mt-1">
-                    <input type="text" id="join-room-code" maxlength="6" placeholder="Szobakód" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-cyan-300 outline-none">
-                    <button onclick="joinOnlineRoom()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer">Csatlakozás</button>
+                    <input type="text" id="join-room-code" maxlength="6"
+                        inputmode="numeric" placeholder="6 jegyű szobakód"
+                        class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-cyan-300 outline-none">
+                    <button onclick="joinOnlineRoom()"
+                        class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer">
+                        Csatlakozás
+                    </button>
                 </div>
             `;
         }
 
         function joinOnlineRoom() {
-            const code = document.getElementById('join-room-code').value.trim();
-            if (code.length !== 6) {
-                showFeedback("Hibás szobakód", "A szobakódnak 6 jegyűnek kell lennie!", "⚠️");
+            const name = getOnlineRivalName();
+            if (!name) return;
+
+            const field = document.getElementById('join-room-code');
+            const code = field ? field.value.trim() : '';
+
+            if (!/^\d{6}$/.test(code)) {
+                showFeedback("Hibás szobakód", "A kódnak pontosan 6 számjegyűnek kell lennie!", "⚠️");
                 return;
             }
-            showFeedback("Csatlakozás", `Csatlakozás a(z) ${code} szobához...`, "🌐");
+
+            try {
+                const socket = connectOnlineRivalSocket();
+                const area = document.getElementById('online-room-status-area');
+                area.classList.remove('hidden');
+                area.textContent = "🔄 Csatlakozás a szobához...";
+
+                socket.emit('online-rival:join', {
+                    code,
+                    name
+                }, response => {
+                    if (!response || !response.success) {
+                        area.textContent = "❌ " + (response?.error || "Nem sikerült csatlakozni.");
+                        return;
+                    }
+
+                    onlineRivalRoomCode = response.code;
+                    onlineRivalIsHost = false;
+                    renderOnlineRivalLobby(response.players || []);
+                });
+            } catch (error) {
+                showFeedback("Kapcsolódási hiba", error.message, "⚠️");
+            }
         }
+        /* ------------------------------------------------------------- */
 
         function openMultiplayerMenu() {
             handleRestrictedAction('code', 'Kód Megadása', () => {
