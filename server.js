@@ -45,7 +45,7 @@ const APK_DOWNLOAD_URL = process.env.APK_DOWNLOAD_URL || "";
 // Régi Multiplayer szobák
 const rooms = new Map();
 
-// ÚJ: Online Rivális szobák
+// Online Rivális szobák
 const onlineRivalRooms = new Map();
 
 function makeCode() {
@@ -115,7 +115,11 @@ function sendOnlineRivalQuestion(code, room) {
   room.players.forEach((player, index) => {
     const activeEffects = { ...player.effects };
 
-    // A következő körre szóló hatások felhasználása
+    // A következő kérdésre időzített Pohár-sózás aktiválása
+    player.activeSteal = player.pendingSteal;
+    player.pendingSteal = false;
+
+    // A következő kérdésre időzített hatások felhasználása
     player.effects = {
       blind: false,
       timer: false,
@@ -199,7 +203,8 @@ function resolveOnlineRivalRound(code, room) {
   first.cups = firstCorrect;
   second.cups = secondCorrect;
 
-  // Lopás: ha a támadó legalább egy poharat tett a helyes válaszra
+  // Pohár-sózás: ha a támadó legalább egy helyes poharat tett,
+  // az ellenfél egy extra poharat veszít
   if (first.activeSteal && firstCorrect >= 1) {
     second.cups = Math.max(0, second.cups - 1);
   }
@@ -583,7 +588,7 @@ io.on("connection", (socket) => {
   });
 
   // =====================================================
-  // ÚJ ONLINE RIVÁLIS 1v1
+  // ONLINE RIVÁLIS 1v1
   // =====================================================
 
   // Szoba létrehozása
@@ -612,6 +617,7 @@ io.on("connection", (socket) => {
           block5050: false
         },
         activeSteal: false,
+        pendingSteal: false,
         usedSabotages: [],
         timer: null
       }],
@@ -670,6 +676,7 @@ io.on("connection", (socket) => {
         block5050: false
       },
       activeSteal: false,
+      pendingSteal: false,
       usedSabotages: [],
       timer: null
     };
@@ -812,15 +819,12 @@ io.on("connection", (socket) => {
 
     player.usedSabotages.push(type);
 
+    // Minden szabotázs a következő kérdésre érvényes
     if (type === "steal") {
-      player.activeSteal = true;
+      player.pendingSteal = true;
     } else {
       opponent.effects[type] = true;
     }
-
-    io.to(opponent.id).emit("online-rival:effect", {
-      type
-    });
 
     io.to(code).emit("online-rival:sabotage-used", {
       playerName: player.name,
