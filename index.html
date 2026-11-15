@@ -277,13 +277,13 @@
                 Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
             </p>
 
-            <!-- FŐMENÜ KÉT GOMB: EGYJÁTÉKOS & TÖBBJÁTÉKOS -->
+            <!-- FŐMENÜ KÉT GOMB: EGYJÁTÉKOS & KÓD MEGADÁSA -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto mb-6">
                 <button onclick="openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
                 <button onclick="openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-lg py-4 px-6 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
-                    👥 Többjátékos
+                    🔑 Kód Megadása
                 </button>
             </div>
 
@@ -332,10 +332,10 @@
                 </button>
             </div>
 
-            <!-- TÖBBJÁTÉKOS ALMENÜ (6 jegyű kód megadása) -->
+            <!-- KÓD MEGADÁSA ALMENÜ (6 jegyű kód megadása) -->
             <div id="multiplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Többjátékos (Kód megadása)</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Kód Megadása</span>
                     <button onclick="backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
                 </div>
 
@@ -357,7 +357,7 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.20 Audio Counter Hotfix</span>
+                <span class="font-mono font-bold text-yellow-400">v2.21 Code Input Rename Hotfix</span>
             </div>
         </div>
     </main>
