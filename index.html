@@ -803,6 +803,11 @@
     <script>
 /* ================= ONLINE RIVÁLIS JÁTÉKMENET ================= */
 
+// ONLINE RIVÁLIS – GLOBÁLIS VÁLTOZÓK
+let onlineRivalSocket = null;
+let onlineRivalRoomCode = null;
+let onlineRivalIsHost = false;
+
 let onlineRivalQuestion = null;
 let onlineRivalBets = [0, 0, 0, 0];
 let onlineRivalCups = 10;
@@ -1531,60 +1536,60 @@ function setupOnlineRivalEvents() {
         }
         
         // ONLINE RIVÁLIS – VÁRÓSZOBA MEGJELENÍTÉSE
-        function renderOnlineRivalLobby(players) {
-            const area = document.getElementById('online-room-status-area');
-            if (!area) return;
+function renderOnlineRivalLobby(players) {
+    const area = document.getElementById('online-room-status-area');
+    if (!area) return;
 
-            players = Array.isArray(players) ? players : [];
+    players = Array.isArray(players) ? players : [];
 
-            const playerList = players.map((player, index) => `
-                <div class="flex justify-between items-center bg-slate-800 rounded-lg p-2 mb-2">
-                    <span class="font-bold text-white">
-                        ${index === 0 ? '👑' : '⚔️'}
-                        ${escapeOnlineRivalText(player.name || 'Játékos')}
-                    </span>
-                    <span class="text-cyan-300 font-bold">
-                        ${Number(player.cups ?? 10)} 🍷
-                    </span>
-                </div>
-            `).join('');
+    const playerList = players.map((player, index) => `
+        <div class="flex justify-between items-center bg-slate-800 rounded-lg p-2 mb-2">
+            <span class="font-bold text-white">
+                ${index === 0 ? '👑' : '⚔️'}
+                ${escapeOnlineRivalText(player.name || 'Játékos')}
+            </span>
+            <span class="text-cyan-300 font-bold">
+                ${Number(player.cups ?? 10)} 🍷
+            </span>
+        </div>
+    `).join('');
 
-            const isFull = players.length === 2;
+    const isFull = players.length === 2;
 
-            area.classList.remove('hidden');
-            area.innerHTML = `
-                <div class="text-cyan-300 font-black text-lg mb-2">
-                    🏠 ONLINE SZOBA
-                </div>
+    area.classList.remove('hidden');
+    area.innerHTML = `
+        <div class="text-cyan-300 font-black text-lg mb-2">
+            🏠 ONLINE SZOBA
+        </div>
 
-                <div class="text-xs text-slate-400 mb-1">
-                    SZOBAKÓD
-                </div>
+        <div class="text-xs text-slate-400 mb-1">
+            SZOBAKÓD
+        </div>
 
-                <div class="text-3xl font-black tracking-[0.3em] text-yellow-400 mb-3">
-                    ${escapeOnlineRivalText(onlineRivalRoomCode || '')}
-                </div>
+        <div class="text-3xl font-black tracking-[0.3em] text-yellow-400 mb-3">
+            ${escapeOnlineRivalText(onlineRivalRoomCode || '')}
+        </div>
 
-                <div class="text-left mb-3">
-                    ${playerList}
-                </div>
+        <div class="text-left mb-3">
+            ${playerList}
+        </div>
 
-                ${
-                    isFull
-                        ? onlineRivalIsHost
-                            ? `<button onclick="startOnlineRivalGame()"
-                                class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl">
-                                ▶️ JÁTÉK INDÍTÁSA
-                               </button>`
-                            : `<p class="text-cyan-300 font-bold">
-                                ⏳ Mindkét játékos csatlakozott! Várakozás a házigazdára...
-                               </p>`
-                        : `<p class="text-slate-300 font-bold">
-                            ⏳ Várakozás a másik játékosra...
-                           </p>`
-                }
-            `;
+        ${
+            isFull
+                ? onlineRivalIsHost
+                    ? `<button onclick="startOnlineRivalGame()"
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl">
+                        ▶️ JÁTÉK INDÍTÁSA
+                       </button>`
+                    : `<p class="text-cyan-300 font-bold">
+                        ⏳ Mindkét játékos csatlakozott! Várakozás a házigazdára...
+                       </p>`
+                : `<p class="text-slate-300 font-bold">
+                    ⏳ Várakozás a másik játékosra...
+                   </p>`
         }
+    `;
+}
         
 
         function connectOnlineRivalSocket() {
@@ -1660,7 +1665,7 @@ function setupOnlineRivalEvents() {
         }
 
         function createOnlineRoom() {
-            resetOnlineRivalSabotages();
+        resetOnlineRivalSabotages();
             const name = getOnlineRivalName();
             if (!name) return;
 
@@ -1711,7 +1716,7 @@ function setupOnlineRivalEvents() {
         }
 
         function joinOnlineRoom() {
-            resetOnlineRivalSabotages();
+        resetOnlineRivalSabotages();
             const name = getOnlineRivalName();
             if (!name) return;
 
