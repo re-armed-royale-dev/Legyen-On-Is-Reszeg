@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "reszeg-kviz-v1";
+const CACHE_NAME = "reszeg-kviz-v2";
 
 const FILES_TO_CACHE = [
   "./",
@@ -7,7 +7,8 @@ const FILES_TO_CACHE = [
   "./manifest.json",
   "./easy.json",
   "./normal.json",
-  "./hard.json"
+  "./hard.json",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", event => {
