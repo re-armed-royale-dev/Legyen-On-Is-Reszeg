@@ -1,11 +1,20 @@
+
 {
-  "name": "Legyen Ön is Részeg! – Party Kvíz Show",
-  "short_name": "Részeg Kvíz",
+  "name": "Legyen Ön is Részeg!",
+  "short_name": "LÖIR",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "landscape",
   "background_color": "#0b0f19",
   "theme_color": "#0b0f19",
-  "description": "Party kvíz játék"
+  "description": "Party kvíz játék",
+  "icons": [
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
