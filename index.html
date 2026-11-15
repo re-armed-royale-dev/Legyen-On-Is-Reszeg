@@ -357,7 +357,7 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>15 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.21 Code Input Rename Hotfix</span>
+                <span class="font-mono font-bold text-yellow-400">v2.22 Platform Restriction & Unlock</span>
             </div>
         </div>
     </main>
@@ -463,6 +463,26 @@
             <div id="feedback-actions" class="flex flex-col gap-2.5">
                 <button id="feedback-close-btn" onclick="closeFeedbackModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3.5 rounded-xl text-base cursor-pointer">
                     Rendben!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLATFORM RESTRICTION MODAL (ÚJ) -->
+    <div id="platform-restriction-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[150]">
+        <div class="bg-slate-900 border-2 border-red-500/60 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <div class="text-4xl mb-3">⚠️</div>
+            <h3 class="text-lg font-black text-red-400 mb-2">A te telefonod (Szoftvered) nem támogatott!</h3>
+            <p id="restriction-feature-name" class="text-sm text-slate-200 font-semibold mb-6 leading-relaxed">
+                (A funkció neve) Csak Androidon elérhető!
+            </p>
+            
+            <div class="flex flex-col gap-2.5">
+                <button onclick="requestTemporaryUnlock()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-3 rounded-xl text-sm cursor-pointer shadow-lg">
+                    🔓 1 perces feloldás
+                </button>
+                <button onclick="toggleModal('platform-restriction-modal', false)" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-sm cursor-pointer border border-slate-700">
+                    Rendben
                 </button>
             </div>
         </div>
@@ -702,6 +722,12 @@
         let onFeedbackCloseCallback = null;
         let shareDotsInterval = null;
 
+        // Ideiglenes feloldás állapota (óra alapú limit + 1 perc élettartam)
+        let restrictionUnlockTimers = {
+            code: { expiresAt: 0, lastUnlockedAt: 0 },
+            create: { expiresAt: 0, lastUnlockedAt: 0 }
+        };
+
         function shuffleArray(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -719,7 +745,12 @@
                 (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
 
-        // iPhone-on letiltjuk a kódmegadást és a saját kérdéssor készítését.
+        function isFeatureUnlocked(featureKey) {
+            const now = Date.now();
+            return restrictionUnlockTimers[featureKey] && restrictionUnlockTimers[featureKey].expiresAt > now;
+        }
+
+        // iPhone-on vizuális jelzés a gombokon
         function applyPlatformRestrictions() {
             if (!isAppleMobileDevice()) return;
 
@@ -728,14 +759,62 @@
 
             [codeButton, createButton].forEach(button => {
                 if (!button) return;
-                button.disabled = true;
-                button.classList.add('opacity-40', 'cursor-not-allowed');
-                button.classList.remove('cursor-pointer');
-                button.title = 'Ez a funkció iPhone-on nem érhető el.';
+                // Nem tiltjuk le a .disabled-del, hogy rákattintható maradjon a modális ablakhoz
+                button.classList.add('border-dashed', 'border-red-500/60');
             });
 
-            if (codeButton) codeButton.textContent = '🔒 Kód megadása – nem elérhető';
-            if (createButton) createButton.textContent = '🔒 Kérdés készítő – nem elérhető';
+            if (codeButton && !isFeatureUnlocked('code')) {
+                codeButton.textContent = '🔒 Kód megadása (Nem támogatott)';
+            }
+            if (createButton && !isFeatureUnlocked('create')) {
+                createButton.textContent = '🔒 Kérdés készítő (Nem támogatott)';
+            }
+        }
+
+        function handleRestrictedAction(featureKey, featureDisplayName, actionCallback) {
+            if (!isAppleMobileDevice() || isFeatureUnlocked(featureKey)) {
+                actionCallback();
+                return;
+            }
+
+            // Megjelenítjük a kért modális ablakot
+            const nameEl = document.getElementById('restriction-feature-name');
+            nameEl.innerHTML = `<strong>${featureDisplayName}</strong> Csak Androidon elérhető!`;
+            
+            // Eltároljuk, hogy melyik funkciót próbálta megnyitni a feloldáshoz
+            window.activeRestrictionKey = featureKey;
+            toggleModal('platform-restriction-modal', true);
+        }
+
+        function requestTemporaryUnlock() {
+            const featureKey = window.activeRestrictionKey;
+            if (!featureKey) return;
+
+            const now = Date.now();
+            const lastTime = restrictionUnlockTimers[featureKey].lastUnlockedAt;
+            const oneHour = 60 * 60 * 1000;
+
+            // Ellenőrizzük, hogy telt-e már el 1 óra az előző feloldás óta
+            if (lastTime && (now - lastTime < oneHour)) {
+                const minutesLeft = Math.ceil((oneHour - (now - lastTime)) / 60000);
+                toggleModal('platform-restriction-modal', false);
+                showFeedback("Már felhasználtad az óránkénti feloldást!", `Ezt a funkciót ebben az órában már feloldottad.<br>Kérlek várj még <strong>${minutesLeft} percet</strong> a következő ingyenes feloldásig!`, "⏳");
+                return;
+            }
+
+            // 1 perces feloldás megadása
+            restrictionUnlockTimers[featureKey].expiresAt = now + 60 * 1000;
+            restrictionUnlockTimers[featureKey].lastUnlockedAt = now;
+
+            toggleModal('platform-restriction-modal', false);
+            applyPlatformRestrictions();
+
+            showFeedback("Sikeres 1 perces feloldás!", "A tiltás ideiglenesen feloldódott <strong>1 percre</strong>!", "🔓", () => {
+                // Ha lejár az 1 perc, frissítjük a gombok állapotát
+                setTimeout(() => {
+                    applyPlatformRestrictions();
+                }, 60000);
+            });
         }
 
         function openSinglePlayerMenu() {
@@ -744,12 +823,10 @@
         }
 
         function openMultiplayerMenu() {
-            if (isAppleMobileDevice()) {
-                showFeedback("Ez a funkció nem elérhető", "A kód megadása iPhone-on nem használható.", "🔒");
-                return;
-            }
-            document.getElementById('multiplayer-menu').classList.remove('hidden');
-            document.getElementById('singleplayer-menu').classList.add('hidden');
+            handleRestrictedAction('code', 'Kód Megadása', () => {
+                document.getElementById('multiplayer-menu').classList.remove('hidden');
+                document.getElementById('singleplayer-menu').classList.add('hidden');
+            });
         }
 
         function backToMainStartMenu() {
@@ -1678,32 +1755,26 @@
            7. CREATE & LOAD MODÁLOK & MEGOSZTÁS ANIMÁLT PÖTTYÖKKEL
            ========================================================================== */
         function openCreateModal(editName = null) {
-            if (isAppleMobileDevice()) {
-                showFeedback("Ez a funkció nem elérhető", "A kérdéskészítő iPhone-on nem használható.", "🔒");
-                return;
-            }
-            const container = document.getElementById('questions-container');
-            const nameInput = document.getElementById('question-set-name');
-            container.innerHTML = '';
-            if (editName) {
-                const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
-                const set = saved[editName];
-                if (set) {
-                    nameInput.value = editName;
-                    set.forEach(q => addQuestionItem(q));
+            handleRestrictedAction('create', 'Kérdés készítő', () => {
+                const container = document.getElementById('questions-container');
+                const nameInput = document.getElementById('question-set-name');
+                container.innerHTML = '';
+                if (editName) {
+                    const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+                    const set = saved[editName];
+                    if (set) {
+                        nameInput.value = editName;
+                        set.forEach(q => addQuestionItem(q));
+                    }
+                } else {
+                    nameInput.value = '';
+                    addQuestionItem();
                 }
-            } else {
-                nameInput.value = '';
-                addQuestionItem();
-            }
-            toggleModal('create-modal', true);
+                toggleModal('create-modal', true);
+            });
         }
 
         function addQuestionItem(prefill = null) {
-            if (isAppleMobileDevice()) {
-                showFeedback("Ez a funkció nem elérhető", "iPhone-on nem lehet kérdéseket készíteni.", "🔒");
-                return;
-            }
             const container = document.getElementById('questions-container');
             const count = container.getElementsByClassName('question-item').length;
             if (count >= 15) return;
@@ -1736,10 +1807,6 @@
         }
 
         function saveQuestions() {
-            if (isAppleMobileDevice()) {
-                showFeedback("Ez a funkció nem elérhető", "iPhone-on nem lehet saját kérdéssort menteni.", "🔒");
-                return;
-            }
             const setName = document.getElementById('question-set-name').value.trim();
             if (!setName) {
                 showFeedback("Hiányzó név", "Add meg a kérdéssor nevét!", "⚠️");
@@ -1793,7 +1860,6 @@
             const set = saved[name];
             if (!set || !set.length) return;
 
-            // Bezárjuk a betöltés/kezelő ablakot és megnyitjuk a "kód generálása folyamatban" modalt
             toggleModal('load-modal', false);
             toggleModal('share-loading-modal', true);
             startShareDotsAnimation();
@@ -1816,7 +1882,6 @@
                 setCodes[name] = code;
                 localStorage.setItem('SavedSetCodes', JSON.stringify(setCodes));
 
-                // Megjelenítjük a kódos ablakot
                 showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.`, "📤");
             } catch (error) {
                 console.error('Megosztási hiba:', error);
