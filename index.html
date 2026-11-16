@@ -153,12 +153,12 @@
 </head>
 <body class="flex flex-col justify-between selection:bg-yellow-500 selection:text-slate-900" onclick="handleOutsideClick(event)">
 
-    <header class="w-full max-w-6xl mx-auto px-4 py-4 sm:py-3 flex flex-wrap items-center justify-between gap-y-3 z-20">
+    <header class="w-full max-w-6xl mx-auto px-4 py-4 sm:py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 z-20">
         <div class="flex items-center gap-2">
             <span class="inline-block w-3 h-3 rounded-full bg-red-600 animate-pulse"></span>
             <span class="text-xs sm:text-sm font-bold tracking-wider uppercase text-yellow-400">Legyen Ön is Részeg!</span>
         </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3 ml-auto">
             <button onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('updates-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
                 ✨ Újdonságok
             </button>
@@ -1013,19 +1013,57 @@
             const createButton = document.getElementById('create-questions-btn');
             const rivalButton = document.getElementById('rival-menu-btn');
 
-            [codeButton, createButton, rivalButton].forEach(button => {
-                if (!button) return;
-                button.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
-            });
-
-            if (codeButton) {
-                codeButton.textContent = '🔑 Kód Megadása';
-            }
-            if (createButton) {
-                createButton.textContent = '✍️ Kérdés készítő';
-            }
-            if (rivalButton) {
-                rivalButton.innerHTML = '⚔️ Rivális (1v1)';
+            if (isIOS) {
+                if (codeButton) {
+                    if (isFeatureUnlocked('code')) {
+                        codeButton.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400');
+                        codeButton.classList.add('border-yellow-500/60', 'text-yellow-300');
+                        codeButton.textContent = '🔓 Kód Megadása (Feloldva)';
+                    } else {
+                        codeButton.classList.remove('border-yellow-500/60', 'text-yellow-300');
+                        codeButton.classList.add('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400');
+                        codeButton.textContent = '🔒 Kód Megadása (Zárolva)';
+                    }
+                }
+                if (createButton) {
+                    if (isFeatureUnlocked('create')) {
+                        createButton.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400');
+                        createButton.classList.add('border-yellow-500/40', 'text-yellow-300');
+                        createButton.textContent = '🔓 Kérdés készítő (Feloldva)';
+                    } else {
+                        createButton.classList.remove('border-yellow-500/40', 'text-yellow-300');
+                        createButton.classList.add('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400');
+                        createButton.textContent = '🔒 Kérdés készítő (Zárolva)';
+                    }
+                }
+                if (rivalButton) {
+                    if (isFeatureUnlocked('rival')) {
+                        rivalButton.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'from-slate-700', 'via-slate-800', 'to-slate-900', 'text-slate-300');
+                        rivalButton.classList.add('from-purple-700', 'via-fuchsia-600', 'to-rose-600', 'border-fuchsia-400/50', 'text-white');
+                        rivalButton.innerHTML = '🔓 Rivális (1v1) (Feloldva)';
+                    } else {
+                        rivalButton.classList.remove('from-purple-700', 'via-fuchsia-600', 'to-rose-600', 'border-fuchsia-400/50', 'text-white');
+                        rivalButton.classList.add('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'from-slate-700', 'via-slate-800', 'to-slate-900', 'text-slate-300');
+                        rivalButton.innerHTML = '🔒 Rivális (1v1) (Zárolva)';
+                    }
+                }
+            } else {
+                [codeButton, createButton, rivalButton].forEach(button => {
+                    if (!button) return;
+                    button.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400', 'text-slate-300', 'from-slate-700', 'via-slate-800', 'to-slate-900');
+                });
+                if (codeButton) {
+                    codeButton.classList.add('border-yellow-500/60', 'text-yellow-300');
+                    codeButton.textContent = '🔑 Kód Megadása';
+                }
+                if (createButton) {
+                    createButton.classList.add('border-yellow-500/40', 'text-yellow-300');
+                    createButton.textContent = '✍️ Kérdés készítő';
+                }
+                if (rivalButton) {
+                    rivalButton.classList.add('from-purple-700', 'via-fuchsia-600', 'to-rose-600', 'border-fuchsia-400/50', 'text-white');
+                    rivalButton.innerHTML = '⚔️ Rivális (1v1)';
+                }
             }
         }
 
