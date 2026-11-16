@@ -392,6 +392,25 @@
                 </p>
                 <label for="online-rival-name" class="block text-xs font-bold text-slate-300 mb-1">Játékos neve</label>
                 <input id="online-rival-name" type="text" maxlength="20" placeholder="Add meg a neved" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-sm text-white outline-none focus:border-cyan-500">
+                
+                <div class="mb-3">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Kérdéssor / Szint választás:</p>
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <button id="online-btn-diff-easy" onclick="selectOnlineDifficulty('easy')" class="bg-emerald-950/75 hover:bg-emerald-900/90 border border-emerald-500/60 text-emerald-300 font-extrabold py-2 px-2 rounded-xl text-xs cursor-pointer ring-2 ring-yellow-400">
+                            🟢 Könnyű
+                        </button>
+                        <button id="online-btn-diff-normal" onclick="selectOnlineDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border border-amber-500/60 text-amber-300 font-extrabold py-2 px-2 rounded-xl text-xs cursor-pointer">
+                            🟡 Normál
+                        </button>
+                        <button id="online-btn-diff-hard" onclick="selectOnlineDifficulty('hard')" class="bg-red-950/75 hover:bg-red-900/90 border border-red-500/60 text-red-300 font-extrabold py-2 px-2 rounded-xl text-xs cursor-pointer">
+                            🔴 Nehéz
+                        </button>
+                    </div>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); showLoadModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2 px-3 rounded-xl text-xs cursor-pointer">
+                        📂 Saját kérdéssor betöltése (Aktív: <span id="online-active-set-label" class="text-white">🟢 Könnyű</span>)
+                    </button>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
                     <button onclick="createOnlineRoom()" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md cursor-pointer">
                         🏠 Szoba Létrehozása
@@ -715,6 +734,24 @@ let onlineRivalSubmitted = false;
 let onlineRivalResolved = false;
 let onlineRivalOpponent = "Ellenfél";
 let onlineRivalOpponentCups = 10;
+let onlineTotalQuestionsCount = 20;
+
+function selectOnlineDifficulty(diffKey) {
+    currentDifficultyKey = diffKey;
+    loadDifficulty(diffKey);
+    ['easy', 'normal', 'hard'].forEach(key => {
+        const btn = document.getElementById(`online-btn-diff-${key}`);
+        if (!btn) return;
+        if (key === diffKey) {
+            btn.classList.add('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+        } else {
+            btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+        }
+    });
+    const onlineLabel = document.getElementById('online-active-set-label');
+    if (onlineLabel) onlineLabel.textContent = activeSetName;
+    playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
+}
 
 function startOnlineRivalGame() {
     if (!onlineRivalSocket || !onlineRivalSocket.connected) {
@@ -775,17 +812,17 @@ function renderOnlineRivalQuestion(data) {
     rivalActiveBlind = !!data.effects?.blind;
     rivalActiveBlock5050 = !!data.effects?.block5050;
 
-    questions = [{
-        question: data.question.question,
-        answers: data.question.answers,
-        correct: data.question.correct
-    }];
+    if (data.totalQuestions) {
+        onlineTotalQuestionsCount = data.totalQuestions;
+    }
+
     currentQuestionIndex = data.index;
 
     showOnlineRivalGame();
 
     document.getElementById('rival-p1-glasses').textContent = `${totalGlasses} 🍷`;
     document.getElementById('rival-p2-glasses').textContent = `${onlineRivalOpponentCups} 🍷`;
+    document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${onlineTotalQuestionsCount}`;
 
     const mapped = data.question.answers.map((ansText, idx) => ({
         text: ansText,
@@ -813,6 +850,7 @@ function renderOnlineRivalQuestion(data) {
     document.getElementById('clear-bets-btn').classList.remove('hidden');
     document.getElementById('next-question-btn').classList.add('hidden');
 
+    document.getElementById('question-text').textContent = data.question.question;
     renderGameUI();
 
     if (data.effects?.timer) {
@@ -1267,6 +1305,8 @@ function leaveOnlineRivalGame() {
             document.getElementById('rival-menu').classList.add('hidden');
             document.getElementById('singleplayer-menu').classList.add('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
+            const onlineLabel = document.getElementById('online-active-set-label');
+            if (onlineLabel) onlineLabel.textContent = activeSetName;
         }
 
         function closeOnlineRivalMenu() {
@@ -1334,11 +1374,16 @@ function renderOnlineRivalLobby(players) {
             ${playerList}
         </div>
 
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-3 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-yellow-300">
+            <span>Aktív pakli:</span>
+            <strong class="text-white">${activeSetName} (${questions.length} kérdés)</strong>
+        </div>
+
         ${
             isFull
                 ? onlineRivalIsHost
                     ? `<button onclick="startOnlineRivalGame()"
-                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl">
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl cursor-pointer">
                         ▶️ JÁTÉK INDÍTÁSA
                        </button>`
                     : `<p class="text-cyan-300 font-bold">
@@ -1421,9 +1466,13 @@ function renderOnlineRivalLobby(players) {
         }
 
         function createOnlineRoom() {
-        resetOnlineRivalSabotages();
+            resetOnlineRivalSabotages();
             const name = getOnlineRivalName();
             if (!name) return;
+
+            if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
+                questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
+            }
 
             if (!Array.isArray(questions) || questions.length === 0) {
                 showFeedback("Nincs kérdéssor", "Előbb tölts be egy kérdéssort!", "⚠️");
@@ -1472,7 +1521,7 @@ function renderOnlineRivalLobby(players) {
         }
 
         function joinOnlineRoom() {
-        resetOnlineRivalSabotages();
+            resetOnlineRivalSabotages();
             const name = getOnlineRivalName();
             if (!name) return;
 
@@ -1560,6 +1609,10 @@ function renderOnlineRivalLobby(players) {
             const rivalLabelEl = document.getElementById('rival-active-set-label');
             if (rivalLabelEl) {
                 rivalLabelEl.textContent = `${activeSetName}`;
+            }
+            const onlineLabelEl = document.getElementById('online-active-set-label');
+            if (onlineLabelEl) {
+                onlineLabelEl.textContent = `${activeSetName}`;
             }
 
             ['easy', 'normal', 'hard'].forEach(key => {
@@ -2268,7 +2321,6 @@ function renderOnlineRivalLobby(players) {
                 ${extraNotes ? `<div class="mt-2 text-xs text-amber-300 font-semibold">${extraNotes}</div>` : ''}
             `;
 
-            // HOTFIX: Ha bármelyik játékos pohara elfogyott, bármelyikük visszatölthet, amíg mindketten nem pótolják a poharaikat[span_2](start_span)[span_2](end_span)
             if ((p1.glasses === 0 && p1.lifelines.refillCount < 2) || (p2.glasses === 0 && p2.lifelines.refillCount < 2)) {
                 let refillButtonsHTML = '';
                 if (p1.glasses === 0 && p1.lifelines.refillCount < 2) {
@@ -2313,11 +2365,9 @@ function renderOnlineRivalLobby(players) {
             const p1 = rivalPlayers[1];
             const p2 = rivalPlayers[2];
 
-            // Ellenőrizzük, hogy mindkét érintett játékosnak van-e még pohara vagy újratöltése
             let needMoreRefill = (p1.glasses === 0 && p1.lifelines.refillCount < 2) || (p2.glasses === 0 && p2.lifelines.refillCount < 2);
 
             if (needMoreRefill) {
-                // Újra megnyitjuk a dialógust a másik játékosnak is
                 evaluateRivalRound();
             } else {
                 showFeedback("Poharak újratöltve!", `<strong>${rivalPlayers[targetPNum].name}</strong> készlete újra <strong>10 darab piros pohár</strong>!`, "🍷", () => {
@@ -3121,6 +3171,7 @@ function renderOnlineRivalLobby(players) {
             toggleModal('load-modal', false);
             selectDifficulty(diffKey);
             selectRivalDifficulty(diffKey);
+            selectOnlineDifficulty(diffKey);
         }
 
         function loadCustomSet(name) {
@@ -3132,6 +3183,8 @@ function renderOnlineRivalLobby(players) {
                 document.getElementById('active-set-label').textContent = `${name} (${questions.length} kérdés)`;
                 const rivalLabelEl = document.getElementById('rival-active-set-label');
                 if (rivalLabelEl) rivalLabelEl.textContent = `${name}`;
+                const onlineLabelEl = document.getElementById('online-active-set-label');
+                if (onlineLabelEl) onlineLabelEl.textContent = `${name}`;
                 toggleModal('load-modal', false);
                 showFeedback("Betöltve!", `A(z) <strong>"${name}"</strong> aktív és összekeverve!`, "✅");
             }
