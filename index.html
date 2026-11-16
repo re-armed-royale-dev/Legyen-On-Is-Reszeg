@@ -159,6 +159,9 @@
             <span class="text-xs sm:text-sm font-bold tracking-wider uppercase text-yellow-400">Legyen Ön is Részeg!</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
+            <button onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('updates-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
+                ✨ Újdonságok
+            </button>
             <button onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
                 📜 Szabályok
             </button>
@@ -248,6 +251,31 @@
                     Bezárás
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ÚJDONSÁGOK MODÁL -->
+    <div id="updates-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('updates-modal', false)">
+        <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('updates-modal', false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-black text-yellow-400">✨ Újdonságok és Hotfixek</h2>
+            </div>
+            
+            <!-- IOS FIGYELMEZTETÉS -->
+            <div id="ios-updates-warning" class="hidden mb-4 bg-red-950/80 border border-red-500/60 rounded-2xl p-3 text-xs text-red-200 leading-relaxed">
+                ⚠️ <strong>iOS Figyelmeztetés:</strong> Az iOS NEM támogat különböző funkciókat, mint pl: a kérdések készítése, kód megadása vagy a rivális 1v1 mód. Ezeket egy percre feloldhatod kipróbálásként, de vigyázz: miután letelik az egy perc, egy óráig nem tudod újraaktíválni!
+            </div>
+
+            <ul class="space-y-3 text-sm sm:text-base text-slate-300">
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Új Újdonságok menüpont:</strong> Mostantól közvetlenül a fejlécből elérheted az aktuális verzió változásait.</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Hotfix - iOS letiltott gombok:</strong> A letiltott rivális gomb mostantól finoman szürke stílust kap iOS eszközökön.</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>1 perces ideiglenes feloldás:</strong> Korlátozott funkciók tesztelése biztonságos időkorláttal.</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Teljesítmény javítások:</strong> Stabilabb hangkezelés és reszponzívabb UI elemek.</span></li>
+            </ul>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('updates-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
+                Rendben, veszem a lapot!
+            </button>
         </div>
     </div>
 
@@ -904,7 +932,14 @@
         }
 
         function applyPlatformRestrictions() {
-            if (!isAppleMobileDevice()) return;
+            const isIOS = isAppleMobileDevice();
+            const iosWarningEl = document.getElementById('ios-updates-warning');
+            if (iosWarningEl) {
+                if (isIOS) iosWarningEl.classList.remove('hidden');
+                else iosWarningEl.classList.add('hidden');
+            }
+
+            if (!isIOS) return;
 
             const codeButton = document.getElementById('code-entry-btn');
             const createButton = document.getElementById('create-questions-btn');
@@ -934,9 +969,10 @@
             if (rivalButton) {
                 if (isFeatureUnlocked('rival')) {
                     rivalButton.innerHTML = '⚔️ Rivális (1v1) (Feloldva)';
-                    rivalButton.classList.remove('border-dashed', 'border-red-500/60');
+                    rivalButton.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
                 } else {
                     rivalButton.innerHTML = '🔒 Rivális 1v1 (Nem támogatott)';
+                    rivalButton.classList.add('opacity-50', 'grayscale-[30%]');
                 }
             }
         }
