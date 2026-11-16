@@ -271,22 +271,15 @@
                 Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
             </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-6">
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openRivalMenu()" class="bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/50 cursor-pointer flex items-center justify-center gap-2">
-                    ⚔️ Rivális (Helyi)
+                    ⚔️ Rivális (1v1)
                 </button>
                 <button id="code-entry-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
                     🔑 Kód Megadása
-                </button>
-            </div>
-
-            <!-- ONLINE RIVÁLIS GOMB A FŐMENÜBEN -->
-            <div class="mb-6 max-w-2xl mx-auto">
-                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openOnlineRivalMenu()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-cyan-600/30 border border-cyan-400/50 cursor-pointer flex items-center justify-center gap-2">
-                    🌐 Online Rivális – Két telefon
                 </button>
             </div>
 
@@ -332,15 +325,15 @@
                 </button>
             </div>
 
-            <!-- RIVÁLIS (1v1 HELYI) MENÜ -->
+            <!-- RIVÁLIS (1v1) MENÜ -->
             <div id="rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/85 border-2 border-fuchsia-500/50 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-black uppercase tracking-wider text-fuchsia-400">⚔️ Helyi Rivális Párbaj (1v1) Beállítások</span>
+                    <span class="text-xs font-black uppercase tracking-wider text-fuchsia-400">⚔️ Rivális Párbaj (1v1) Beállítások</span>
                     <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); backToMainStartMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">← Vissza</button>
                 </div>
 
                 <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-                    Ketten játszotok egymás ellen (10-10 pohárral) egy telefonon! Titokban rakjátok fel a téteket, és <strong>szivassátok egymást</strong> különleges képességekkel!
+                    Ketten játszotok egymás ellen (10-10 pohárral)! Titokban rakjátok fel a téteket, és <strong>szivassátok egymást</strong> különleges képességekkel!
                 </p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4 text-left">
@@ -373,49 +366,29 @@
                 </div>
 
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); startRivalGame()" class="w-full bg-gradient-to-r from-fuchsia-600 via-purple-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 text-white font-black py-3.5 rounded-xl shadow-lg shadow-fuchsia-600/30 cursor-pointer text-sm">
-                    ⚔️ Helyi Párbaj Indítása!
+                    ⚔️ Párbaj Indítása!
                 </button>
             </div>
 
-            <!-- ONLINE RIVÁLIS MENÜ (KÉT TELEFON) -->
-            <div id="online-rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/90 border-2 border-cyan-500/60 rounded-2xl p-4 mb-4 text-left">
+            <!-- ONLINE RIVÁLIS MENÜ -->
+            <!-- EXTERNAL ONLINE RIVAL MENU -->
+            <div id="online-rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/90 border-2 border-fuchsia-500/60 rounded-2xl p-4 mb-4 text-left">
                 <div class="flex items-center justify-between mb-3">
-                    <span class="text-sm font-black uppercase text-cyan-400">
-                        🌐 Online Rivális – Két telefon
+                    <span class="text-sm font-black uppercase text-fuchsia-400">
+                        🌐 Online Rivális 1v1
                     </span>
-                    <button onclick="closeOnlineRivalMenu()" class="text-xs text-slate-400 hover:text-white font-bold cursor-pointer">
+                    <button onclick="closeOnlineRivalMenu()" class="text-xs text-slate-400 hover:text-white font-bold">
                         ← Vissza
                     </button>
                 </div>
-                <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-                    Játssz barátoddal online két különböző telefonon! Hozz létre egy szobát, vagy csatlakozz egy meglévőhöz a 6 jegyű szobakóddal.
+                <p class="text-xs text-slate-300 mb-3">
+                    Játssz barátoddal online két különböző telefonon! Hozz létre egy szobát, vagy csatlakozz egy meglévőhöz.
                 </p>
-                <label for="online-rival-name" class="block text-xs font-bold text-slate-300 mb-1">Játékos neve</label>
-                <input id="online-rival-name" type="text" maxlength="20" placeholder="Add meg a neved" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 mb-3 text-sm text-white outline-none focus:border-cyan-500">
-                
-                <div class="mb-3">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Kérdéssor / Szint választás:</p>
-                    <div class="grid grid-cols-3 gap-2 mb-2">
-                        <button id="online-btn-diff-easy" onclick="selectOnlineDifficulty('easy')" class="bg-emerald-950/75 hover:bg-emerald-900/90 border border-emerald-500/60 text-emerald-300 font-extrabold py-2 px-2 rounded-xl text-xs cursor-pointer ring-2 ring-yellow-400">
-                            🟢 Könnyű
-                        </button>
-                        <button id="online-btn-diff-normal" onclick="selectOnlineDifficulty('normal')" class="bg-amber-950/75 hover:bg-amber-900/90 border border-amber-500/60 text-amber-300 font-extrabold py-2 px-2 rounded-xl text-xs cursor-pointer">
-                            🟡 Normál
-                        </button>
-                        <button id="online-btn-diff-hard" onclick="selectOnlineDifficulty('hard')" class="bg-red-950/75 hover:bg-red-900/90 border border-red-500/60 text-red-300 font-extrabold py-2 px-2 rounded-xl text-xs cursor-pointer">
-                            🔴 Nehéz
-                        </button>
-                    </div>
-                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); showLoadModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2 px-3 rounded-xl text-xs cursor-pointer">
-                        📂 Saját kérdéssor betöltése (Aktív: <span id="online-active-set-label" class="text-white">🟢 Könnyű</span>)
-                    </button>
-                </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
-                    <button onclick="createOnlineRoom()" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md cursor-pointer">
+                    <button onclick="createOnlineRoom()" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md">
                         🏠 Szoba Létrehozása
                     </button>
-                    <button onclick="showJoinRoomInput()" class="bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 font-bold py-3 px-4 rounded-xl text-xs cursor-pointer">
+                    <button onclick="showJoinRoomInput()" class="bg-slate-800 hover:bg-slate-700 border border-fuchsia-500/40 text-fuchsia-300 font-bold py-3 px-4 rounded-xl text-xs">
                         🔑 Csatlakozás Szobához
                     </button>
                 </div>
@@ -448,14 +421,14 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>20 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.32 Online & Helyi Rivális</span>
+                <span class="font-mono font-bold text-yellow-400">v2.31 Rivális + Újratöltés</span>
             </div>
         </div>
     </main>
 
     <section id="game-screen" class="hidden flex-1 flex flex-col justify-between max-w-5xl w-full mx-auto px-4 pb-6 pt-2">
         
-        <!-- RIVÁLIS 1v1 ÁLLAPOTSÁV (Csak helyi/online rivális módban látható) -->
+        <!-- RIVÁLIS 1v1 ÁLLAPOTSÁV (Csak 1v1 módban látható) -->
         <div id="rival-scoreboard" class="hidden bg-gradient-to-r from-sky-950/90 via-slate-900 to-rose-950/90 border-2 border-fuchsia-500/50 rounded-2xl p-3 mb-3 shadow-xl">
             <div class="grid grid-cols-3 items-center gap-2 text-center">
                 <div id="rival-p1-card" class="bg-sky-900/40 border border-sky-500/50 rounded-xl p-2 transition-all">
@@ -575,7 +548,7 @@
         </div>
     </section>
 
-    <!-- RIVÁLIS KÉSZÜLÉK-ÁTADÓ KÉPERNYŐ (Helyi 1v1 titkosítás) -->
+    <!-- RIVÁLIS KÉSZÜLÉK-ÁTADÓ KÉPERNYŐ (1v1 titkosítás) -->
     <div id="rival-handoff-modal" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-[120]">
         <div class="bg-slate-900 border-2 border-fuchsia-500/70 rounded-3xl max-w-md w-full p-7 text-center shadow-2xl">
             <div class="text-5xl mb-3">🙈📱</div>
@@ -648,7 +621,7 @@
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">2.</span> <span>Minden kérdésnél az <strong>összes megmaradt poharadat</strong> szét kell osztanod a 4 válaszlehetőség között.</span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">3.</span> <span>Az <strong>Ellenőrzés</strong> után a rossz válaszra tett poharak elvesznek – <strong>annyit kell innod, ahány poharat elveszítettél!</strong></span></li>
                 <li class="flex gap-2.5"><span class="text-red-500 font-bold">4.</span> <span>A helyes válaszra tett poharak megmaradnak a következő körre. Használhatod az <strong>ALL-IN</strong> gombot is!</span></li>
-                <li class="flex gap-2.5"><span class="text-fuchsia-400 font-bold">⚔️</span> <span><strong>Rivális mód:</strong> Játssz helyben vagy online két telefonon egymás ellen! Titokban rakjátok fel a téteket, és szivassátok egymást (Vakítás, 10 mp Időzavar, Felező tiltás, Pohár-sózás).</span></li>
+                <li class="flex gap-2.5"><span class="text-fuchsia-400 font-bold">⚔️</span> <span><strong>Rivális (1v1) mód:</strong> Ketten játszotok egymás ellen! Titokban rakjátok fel a téteket, és szivassátok egymást (Vakítás, 10 mp Időzavar, Felező tiltás, Pohár-sózás).</span></li>
                 <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">★</span> <span><strong>Segítségek:</strong> Felező, Közönség, Hülye Vagyok (10 mp-es chat), Poharak Újratöltése (2 alkalommal).</span></li>
             </ul>
             <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
@@ -722,260 +695,6 @@
     <audio id="custom-bg-audio" loop class="hidden"></audio>
 
     <script>
-/* ================= ONLINE RIVÁLIS JÁTÉKMENET ================= */
-
-// ONLINE RIVÁLIS – GLOBÁLIS VÁLTOZÓK
-let onlineRivalSocket = null;
-let onlineRivalRoomCode = null;
-let onlineRivalIsHost = false;
-
-let onlineRivalQuestion = null;
-let onlineRivalSubmitted = false;
-let onlineRivalResolved = false;
-let onlineRivalOpponent = "Ellenfél";
-let onlineRivalOpponentCups = 10;
-let onlineTotalQuestionsCount = 20;
-
-function selectOnlineDifficulty(diffKey) {
-    currentDifficultyKey = diffKey;
-    loadDifficulty(diffKey);
-    ['easy', 'normal', 'hard'].forEach(key => {
-        const btn = document.getElementById(`online-btn-diff-${key}`);
-        if (!btn) return;
-        if (key === diffKey) {
-            btn.classList.add('ring-2', 'ring-yellow-400', 'scale-[1.03]');
-        } else {
-            btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
-        }
-    });
-    const onlineLabel = document.getElementById('online-active-set-label');
-    if (onlineLabel) onlineLabel.textContent = activeSetName;
-    playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
-}
-
-function startOnlineRivalGame() {
-    if (!onlineRivalSocket || !onlineRivalSocket.connected) {
-        showFeedback("Kapcsolódási hiba", "Nincs kapcsolat a szerverrel.", "⚠️");
-        return;
-    }
-
-    onlineRivalSocket.emit('online-rival:start', response => {
-        if (!response || !response.success) {
-            showFeedback("Nem indítható", response?.error || "Hiba történt.", "⚠️");
-            return;
-        }
-    });
-}
-
-function showOnlineRivalGame() {
-    document.getElementById('online-rival-menu').classList.add('hidden');
-    document.getElementById('start-screen').classList.add('hidden');
-
-    isRivalMode = true;
-    rivalTurn = 1;
-
-    const myName = getOnlineRivalName() || "Játékos";
-    rivalPlayers = {
-        1: {
-            name: myName,
-            glasses: totalGlasses,
-            bets: [0, 0, 0, 0],
-            lifelines: { fiftyFifty: false, audience: false, hulyeVagyok: false, refillCount: 0 },
-            sabotagesUsed: { blind: false, timer: false, block5050: false, steal: false },
-            pendingStealActive: false
-        },
-        2: {
-            name: onlineRivalOpponent,
-            glasses: onlineRivalOpponentCups,
-            bets: [0, 0, 0, 0],
-            lifelines: { fiftyFifty: false, audience: false, hulyeVagyok: false, refillCount: 0 },
-            sabotagesUsed: { blind: false, timer: false, block5050: false, steal: false },
-            pendingStealActive: false
-        }
-    };
-
-    document.getElementById('rival-scoreboard').classList.remove('hidden');
-    document.getElementById('rival-p1-label').textContent = `🔵 ${myName}`;
-    document.getElementById('rival-p2-label').textContent = `🔴 ${onlineRivalOpponent}`;
-
-    document.getElementById('game-screen').classList.remove('hidden');
-}
-
-function renderOnlineRivalQuestion(data) {
-    onlineRivalQuestion = data;
-    totalGlasses = data.cups;
-    onlineRivalOpponent = data.opponent || "Ellenfél";
-    onlineRivalOpponentCups = data.opponentCups ?? 10;
-    onlineRivalSubmitted = false;
-    onlineRivalResolved = false;
-
-    rivalActiveBlind = !!data.effects?.blind;
-    rivalActiveBlock5050 = !!data.effects?.block5050;
-
-    if (data.totalQuestions) {
-        onlineTotalQuestionsCount = data.totalQuestions;
-    }
-
-    currentQuestionIndex = data.index;
-
-    showOnlineRivalGame();
-
-    document.getElementById('rival-p1-glasses').textContent = `${totalGlasses} 🍷`;
-    document.getElementById('rival-p2-glasses').textContent = `${onlineRivalOpponentCups} 🍷`;
-    document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${onlineTotalQuestionsCount}`;
-
-    // JAVÍTÁS: Pontos válasz-index párosítás és keverés az online módban is
-    const correctText = data.question.answers[data.question.correct];
-    const shuffledAnswers = shuffleArray([...data.question.answers]);
-    
-    const mapped = shuffledAnswers.map((ansText) => ({
-        text: ansText,
-        isCorrect: ansText === correctText,
-        hidden: false,
-        audiencePct: null
-    }));
-    displayedAnswers = mapped;
-
-    answerBets = [0, 0, 0, 0];
-    isAllInLocked = false;
-    isAllInUsedOnAnswer = [false, false, false, false];
-    isRoundChecked = false;
-
-    const blindBar = document.getElementById('rival-blind-reveal-bar');
-    if (rivalActiveBlind) {
-        blindBar.classList.remove('hidden');
-    } else {
-        blindBar.classList.add('hidden');
-    }
-
-    const checkBtn = document.getElementById('check-answer-btn');
-    checkBtn.classList.remove('hidden');
-    checkBtn.disabled = false;
-    checkBtn.textContent = '✅ VÁLASZ BEKÜLDÉSE';
-    document.getElementById('clear-bets-btn').classList.remove('hidden');
-    document.getElementById('next-question-btn').classList.add('hidden');
-
-    document.getElementById('question-text').textContent = data.question.question;
-    renderGameUI();
-
-    if (data.effects?.timer) {
-        startRivalSabotageTimer(10);
-    }
-}
-
-function submitOnlineRivalAnswer() {
-    if (!onlineRivalSocket || onlineRivalSubmitted || onlineRivalResolved) return;
-
-    const total = answerBets.reduce((a,b) => a+b, 0);
-
-    if (total !== totalGlasses) {
-        showFeedback("Hiányzó poharak", "Minden poharat el kell helyezned!", "⚠️");
-        return;
-    }
-
-    onlineRivalSocket.emit('online-rival:submit', {
-        bets: answerBets
-    }, response => {
-        if (!response || !response.success) {
-            showFeedback("Beküldési hiba", response?.error || "Nem sikerült beküldeni.", "⚠️");
-            return;
-        }
-
-        onlineRivalSubmitted = true;
-        stopRivalTimer();
-
-        document.getElementById('check-answer-btn').textContent = "⏳ Várakozás az ellenfélre...";
-        document.getElementById('check-answer-btn').disabled = true;
-    });
-}
-
-function triggerRivalSabotage(type) {
-    if (!onlineRivalSocket || onlineRivalSubmitted || onlineRivalResolved) return;
-
-    onlineRivalSocket.emit('online-rival:sabotage', {type}, response => {
-        if (!response || !response.success) {
-            showFeedback("Szabotázs hiba", response?.error || "Nem használható.", "⚠️");
-            return;
-        }
-
-        const button = document.getElementById('sabotage-' + type);
-        if (button) {
-            button.disabled = true;
-            button.classList.add('opacity-30');
-            button.textContent += ' ✓';
-        }
-
-        showFeedback("Szabotázs aktiválva!", "Az ellenfeled következő körére hatással lesz.", "😈");
-    });
-}
-
-function renderOnlineRivalResult(data) {
-    onlineRivalResolved = true;
-    stopRivalTimer();
-
-    totalGlasses = data.remainingGlasses;
-    onlineRivalOpponentCups = data.opponentCups;
-
-    document.getElementById('rival-p1-glasses').textContent = `${totalGlasses} 🍷`;
-    document.getElementById('rival-p2-glasses').textContent = `${onlineRivalOpponentCups} 🍷`;
-
-    isRoundChecked = true;
-    renderGameUI();
-
-    document.getElementById('check-answer-btn').classList.add('hidden');
-    document.getElementById('clear-bets-btn').classList.add('hidden');
-
-    const nextBtn = document.getElementById('next-question-btn');
-    nextBtn.classList.remove('hidden');
-    nextBtn.textContent = onlineRivalIsHost ? '➡️ Következő kérdés' : '⏳ Várakozás a házigazdára...';
-    nextBtn.disabled = !onlineRivalIsHost;
-
-    showFeedback("🏆 KÖR EREDMÉNYE", `
-        Helyes válasz megtalálva!<br>
-        Megmaradt poharaid: <strong>${data.remainingGlasses}</strong><br>
-        ${escapeOnlineRivalText(data.opponentName)} poharai: <strong>${data.opponentCups}</strong>
-    `, "🍻");
-}
-
-function nextOnlineRivalQuestion() {
-    if (!onlineRivalSocket || !onlineRivalIsHost) return;
-
-    onlineRivalSocket.emit('online-rival:next', response => {
-        if (!response || !response.success) {
-            if (response?.finished) return;
-            showFeedback("Hiba", response?.error || "Nem sikerült továbblépni.", "⚠️");
-        }
-    });
-}
-
-// ONLINE RIVÁLIS – SZABOTÁZSGOMBOK VISSZAÁLLÍTÁSA
-function resetOnlineRivalSabotages() {
-    onlineRivalUsedSabotages = [];
-    ['blind', 'timer', 'block5050', 'steal'].forEach(type => {
-        const button = document.getElementById('sabotage-' + type);
-        if (!button) return;
-        button.disabled = false;
-        button.classList.remove('opacity-30');
-    });
-}
-
-function leaveOnlineRivalGame() {
-    stopRivalTimer();
-
-    if (onlineRivalSocket) {
-        onlineRivalSocket.disconnect();
-        onlineRivalSocket = null;
-    }
-
-    onlineRivalRoomCode = null;
-    onlineRivalIsHost = false;
-
-    document.getElementById('game-screen').classList.add('hidden');
-    document.getElementById('rival-scoreboard').classList.add('hidden');
-    document.getElementById('start-screen').classList.remove('hidden');
-    document.getElementById('online-rival-menu').classList.remove('hidden');
-}
-
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         }, { passive: false });
@@ -1109,7 +828,7 @@ function leaveOnlineRivalGame() {
             refillCount: 0
         };
 
-        /* ================= RIVÁLIS (1v1 HELYI) ÁLLAPOT ================= */
+        /* ================= RIVÁLIS (1v1) ÁLLAPOT ================= */
         let isRivalMode = false;
         let rivalTurn = 1; // 1 = Player 1, 2 = Player 2
         let rivalPlayers = {
@@ -1310,256 +1029,41 @@ function leaveOnlineRivalGame() {
             document.getElementById('rival-menu').classList.add('hidden');
             document.getElementById('singleplayer-menu').classList.add('hidden');
             document.getElementById('multiplayer-menu').classList.add('hidden');
-            const onlineLabel = document.getElementById('online-active-set-label');
-            if (onlineLabel) onlineLabel.textContent = activeSetName;
         }
 
         function closeOnlineRivalMenu() {
             document.getElementById('online-rival-menu').classList.add('hidden');
-        }
-
-        function escapeOnlineRivalText(value) {
-            return String(value).replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            })[char]);
-        }
-
-        function getOnlineRivalName() {
-            const field = document.getElementById('online-rival-name');
-            const name = field ? field.value.trim().slice(0, 20) : '';
-
-            if (!name) {
-                showFeedback("Hiányzó név", "Írd be a játékosnevedet!", "⚠️");
-                return null;
-            }
-
-            return name;
-        }
-        
-        // ONLINE RIVÁLIS – VÁRÓSZOBA MEGJELENÍTÉSE
-function renderOnlineRivalLobby(players) {
-    const area = document.getElementById('online-room-status-area');
-    if (!area) return;
-
-    players = Array.isArray(players) ? players : [];
-
-    const playerList = players.map((player, index) => `
-        <div class="flex justify-between items-center bg-slate-800 rounded-lg p-2 mb-2">
-            <span class="font-bold text-white">
-                ${index === 0 ? '👑' : '⚔️'}
-                ${escapeOnlineRivalText(player.name || 'Játékos')}
-            </span>
-            <span class="text-cyan-300 font-bold">
-                ${Number(player.cups ?? 10)} 🍷
-            </span>
-        </div>
-    `).join('');
-
-    const isFull = players.length === 2;
-
-    area.classList.remove('hidden');
-    area.innerHTML = `
-        <div class="text-cyan-300 font-black text-lg mb-2">
-            🏠 ONLINE SZOBA
-        </div>
-
-        <div class="text-xs text-slate-400 mb-1">
-            SZOBAKÓD
-        </div>
-
-        <div class="text-3xl font-black tracking-[0.3em] text-yellow-400 mb-3">
-            ${escapeOnlineRivalText(onlineRivalRoomCode || '')}
-        </div>
-
-        <div class="text-left mb-3">
-            ${playerList}
-        </div>
-
-        <div class="flex flex-wrap items-center justify-center gap-2 mb-3 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-yellow-300">
-            <span>Aktív pakli:</span>
-            <strong class="text-white">${activeSetName} (${questions.length} kérdés)</strong>
-        </div>
-
-        ${
-            isFull
-                ? onlineRivalIsHost
-                    ? `<button onclick="startOnlineRivalGame()"
-                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl cursor-pointer">
-                        ▶️ JÁTÉK INDÍTÁSA
-                       </button>`
-                    : `<p class="text-cyan-300 font-bold">
-                        ⏳ Mindkét játékos csatlakozott! Várakozás a házigazdára...
-                       </p>`
-                : `<p class="text-slate-300 font-bold">
-                    ⏳ Várakozás a másik játékosra...
-                   </p>`
-        }
-    `;
-}
-        
-
-        function connectOnlineRivalSocket() {
-            if (typeof io !== 'function') {
-                throw new Error("A Socket.IO nem töltődött be.");
-            }
-
-            if (!onlineRivalSocket) {
-                onlineRivalSocket = io(QUIZ_API_BASE, {
-                    transports: ['websocket', 'polling']
-                });
-
-                onlineRivalSocket.on('connect_error', () => {
-                    const area = document.getElementById('online-room-status-area');
-                    area.classList.remove('hidden');
-                    area.textContent = "❌ Nem sikerült kapcsolódni a szerverrel.";
-                });
-
-                onlineRivalSocket.on('online-rival:players', data => {
-                    renderOnlineRivalLobby(data.players || []);
-                });
-
-                onlineRivalSocket.on('online-rival:opponent-left', () => {
-                    showFeedback("A játékos kilépett", "Az ellenfeled elhagyta a szobát.", "⚠️");
-                });
-
-                onlineRivalSocket.on('online-rival:error', data => {
-                    showFeedback("Online hiba", data.message || "Ismeretlen hiba.", "⚠️");
-                });
-            }
-
-            if (!onlineRivalSocket.__onlineEventsReady) {
-                onlineRivalSocket.__onlineEventsReady = true;
-
-                onlineRivalSocket.on('online-rival:question', renderOnlineRivalQuestion);
-                onlineRivalSocket.on('online-rival:result', renderOnlineRivalResult);
-
-                onlineRivalSocket.on('online-rival:submitted', data => {
-                    const info = document.getElementById('question-text');
-                    if (info) {
-                        // Frissíthetjük az info szöveget ha szükséges
-                    }
-                });
-
-                onlineRivalSocket.on('online-rival:timeout', data => {
-                    onlineRivalSubmitted = true;
-                    showFeedback("Lejárt az idő!", data.message || "Automatikus válasz.", "⏰");
-                });
-
-                onlineRivalSocket.on('online-rival:effect', data => {
-                    if (data.type === 'blind') {
-                        rivalActiveBlind = true;
-                        renderGameUI();
-                        document.getElementById('rival-blind-reveal-bar').classList.remove('hidden');
-                    }
-                    if (data.type === 'block5050') {
-                        rivalActiveBlock5050 = true;
-                    }
-                    if (data.type === 'timer') startRivalSabotageTimer(10);
-                });
-
-                onlineRivalSocket.on('online-rival:finished', data => {
-                    stopRivalTimer();
-                    showFeedback("🏆 A JÁTÉK VÉGET ÉRT!", (data.players || []).map(p => `${p.name}: ${p.cups} pohár`).join(' | '), "🏆", () => exitToMenu());
-                });
-            }
-
-            return onlineRivalSocket;
+            document.getElementById('rival-menu').classList.remove('hidden');
         }
 
         function createOnlineRoom() {
-            resetOnlineRivalSabotages();
-            const name = getOnlineRivalName();
-            if (!name) return;
-
-            if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
-                questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
-            }
-
-            if (!Array.isArray(questions) || questions.length === 0) {
-                showFeedback("Nincs kérdéssor", "Előbb tölts be egy kérdéssort!", "⚠️");
-                return;
-            }
-
-            try {
-                const socket = connectOnlineRivalSocket();
-                const area = document.getElementById('online-room-status-area');
-                area.classList.remove('hidden');
-                area.textContent = "🔄 Szoba létrehozása...";
-
-                socket.emit('online-rival:create', {
-                    name,
-                    questions
-                }, response => {
-                    if (!response || !response.success) {
-                        area.textContent = "❌ " + (response?.error || "Nem sikerült létrehozni a szobát.");
-                        return;
-                    }
-
-                    onlineRivalRoomCode = response.code;
-                    onlineRivalIsHost = true;
-                    renderOnlineRivalLobby(response.players || []);
-                });
-            } catch (error) {
-                showFeedback("Kapcsolódási hiba", error.message, "⚠️");
-            }
+            const statusArea = document.getElementById('online-room-status-area');
+            statusArea.classList.remove('hidden');
+            statusArea.innerHTML = "🔄 Szoba létrehozása a szerveren...";
+            setTimeout(() => {
+                const roomCode = Math.floor(100000 + Math.random() * 900000);
+                statusArea.innerHTML = `✅ Szoba létrehozva!<br>Szobakód: <strong class="text-yellow-400 text-lg">${roomCode}</strong><br><span class="text-xs text-slate-400">Várakozás a csatlakozóra...</span>`;
+            }, 800);
         }
 
         function showJoinRoomInput() {
             const statusArea = document.getElementById('online-room-status-area');
             statusArea.classList.remove('hidden');
-
             statusArea.innerHTML = `
                 <div class="flex gap-2 mt-1">
-                    <input type="text" id="join-room-code" maxlength="6"
-                        inputmode="numeric" placeholder="6 jegyű szobakód"
-                        class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-cyan-300 outline-none">
-                    <button onclick="joinOnlineRoom()"
-                        class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs cursor-pointer">
-                        Csatlakozás
-                    </button>
+                    <input type="text" id="join-room-code" maxlength="6" placeholder="Szobakód" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-center font-mono text-yellow-300 outline-none">
+                    <button onclick="joinOnlineRoom()" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold px-4 py-1.5 rounded-lg text-xs">Csatlakozás</button>
                 </div>
             `;
         }
 
         function joinOnlineRoom() {
-            resetOnlineRivalSabotages();
-            const name = getOnlineRivalName();
-            if (!name) return;
-
-            const field = document.getElementById('join-room-code');
-            const code = field ? field.value.trim() : '';
-
-            if (!/^\d{6}$/.test(code)) {
-                showFeedback("Hibás szobakód", "A kódnak pontosan 6 számjegyűnek kell lennie!", "⚠️");
+            const code = document.getElementById('join-room-code').value.trim();
+            if (code.length !== 6) {
+                showFeedback("Hibás szobakód", "A szobakódnak 6 jegyűnek kell lennie!", "⚠️");
                 return;
             }
-
-            try {
-                const socket = connectOnlineRivalSocket();
-                const area = document.getElementById('online-room-status-area');
-                area.classList.remove('hidden');
-                area.textContent = "🔄 Csatlakozás a szobához...";
-
-                socket.emit('online-rival:join', {
-                    code,
-                    name
-                }, response => {
-                    if (!response || !response.success) {
-                        area.textContent = "❌ " + (response?.error || "Nem sikerült csatlakozni.");
-                        return;
-                    }
-
-                    onlineRivalRoomCode = response.code;
-                    onlineRivalIsHost = false;
-                    renderOnlineRivalLobby(response.players || []);
-                });
-            } catch (error) {
-                showFeedback("Kapcsolódási hiba", error.message, "⚠️");
-            }
+            showFeedback("Csatlakozás", `Csatlakozás a(z) ${code} szobához...`, "🌐");
         }
 
         function openMultiplayerMenu() {
@@ -1614,10 +1118,6 @@ function renderOnlineRivalLobby(players) {
             const rivalLabelEl = document.getElementById('rival-active-set-label');
             if (rivalLabelEl) {
                 rivalLabelEl.textContent = `${activeSetName}`;
-            }
-            const onlineLabelEl = document.getElementById('online-active-set-label');
-            if (onlineLabelEl) {
-                onlineLabelEl.textContent = `${activeSetName}`;
             }
 
             ['easy', 'normal', 'hard'].forEach(key => {
@@ -2042,7 +1542,7 @@ function renderOnlineRivalLobby(players) {
             prepareQuestion();
         }
 
-        /* ================= RIVÁLIS (1v1 HELYI) LOGIKA ================= */
+        /* ================= RIVÁLIS (1v1) LOGIKA ================= */
         function startRivalGame() {
             if (currentDifficultyKey !== 'custom' && ALL_BUILTIN_QUESTIONS[currentDifficultyKey]) {
                 questions = shuffleArray(ALL_BUILTIN_QUESTIONS[currentDifficultyKey]);
@@ -2249,6 +1749,39 @@ function renderOnlineRivalLobby(players) {
             renderGameUI();
         }
 
+        function triggerRivalSabotage(type) {
+            if (!isRivalMode || isRoundChecked) return;
+            const activePlayer = rivalPlayers[rivalTurn];
+            const opponentNum = rivalTurn === 1 ? 2 : 1;
+            const opponentName = rivalPlayers[opponentNum].name;
+
+            if (activePlayer.sabotagesUsed[type]) return;
+
+            activePlayer.sabotagesUsed[type] = true;
+            const btn = document.getElementById(`sabotage-${type}`);
+            if (btn) {
+                btn.classList.add('lifeline-used');
+                btn.disabled = true;
+            }
+
+            playDrinkSound();
+
+            if (type === 'steal') {
+                activePlayer.pendingStealActive = true;
+                showFeedback("🍺 Pohár-sózás aktiválva!", `Ha ebben a körben legalább 1 poharat a helyes válaszra raksz, <strong>${opponentName}</strong> +1 büntetőpoharat kap (és meg kell innia)!`, "😈");
+            } else {
+                const targetObj = opponentNum === 1 ? rivalPendingSabotages.forP1 : rivalPendingSabotages.forP2;
+                targetObj[type] = true;
+
+                const descMap = {
+                    blind: `<strong>${opponentName}</strong> következő körében el lesznek homályosítva a válaszok!`,
+                    timer: `<strong>${opponentName}</strong> következő körében csak 10 másodperce lesz tippelni!`,
+                    block5050: `<strong>${opponentName}</strong> nem használhatja a Felező segítségét a következő körében!`
+                };
+                showFeedback("😈 Szívatás elküldve!", descMap[type], "🔥");
+            }
+        }
+
         function startRivalPlayer2Turn() {
             toggleModal('rival-handoff-modal', false);
             rivalTurn = 2;
@@ -2326,40 +1859,43 @@ function renderOnlineRivalLobby(players) {
                 ${extraNotes ? `<div class="mt-2 text-xs text-amber-300 font-semibold">${extraNotes}</div>` : ''}
             `;
 
-            if ((p1.glasses === 0 && p1.lifelines.refillCount < 2) || (p2.glasses === 0 && p2.lifelines.refillCount < 2)) {
-                let refillButtonsHTML = '';
-                if (p1.glasses === 0 && p1.lifelines.refillCount < 2) {
-                    refillButtonsHTML += `
-                        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeSpecificRivalRefill(1)" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 text-white font-black py-3 rounded-xl text-sm cursor-pointer mb-2">
-                            🍷 ${p1.name} Poharak Újratöltése (10 db) (${2 - p1.lifelines.refillCount} maradt)
-                        </button>
-                    `;
-                }
-                if (p2.glasses === 0 && p2.lifelines.refillCount < 2) {
-                    refillButtonsHTML += `
-                        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeSpecificRivalRefill(2)" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 text-white font-black py-3 rounded-xl text-sm cursor-pointer mb-2">
-                            🍷 ${p2.name} Poharak Újratöltése (10 db) (${2 - p2.lifelines.refillCount} maradt)
-                        </button>
-                    `;
-                }
-
-                refillButtonsHTML += `
-                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal(); proceedAfterRivalCheck(${currentQuestionIndex >= questions.length - 1})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
-                        Tovább újratöltés nélkül
+            if (p1.glasses === 0 && p1.lifelines.refillCount < 2) {
+                window.rivalRefillTargetPlayer = 1;
+                const refillActionsHTML = `
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeRivalModalRefill()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
+                        🍷 ${p1.name} Poharak Újratöltése (10 db) (${2 - p1.lifelines.refillCount} maradt)
+                    </button>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal(); proceedAfterRivalCheck(${p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                        Kihagyás / Tovább
                     </button>
                 `;
-
-                showFeedback(`ELFOGYTAK POHARAK!`, summaryHTML + `<br>Valamelyik játékosnak elfogytak a poharai! Töltsétek vissza őket, mielőtt folytatódna a játék!`, "🍷", null, refillButtonsHTML);
+                showFeedback(`ELFOGYTAK A POHARAI: ${p1.name}!`, summaryHTML + `<br><strong>${p1.name}</strong> elveszítette az összes poharát, de van még újratöltése!`, "🍷", null, refillActionsHTML);
                 nextBtn.textContent = '➡️ Következő kérdés';
                 return;
             }
 
-            const isMatchOver = (p1.glasses === 0 && p1.lifelines.refillCount >= 2) || (p2.glasses === 0 && p2.lifelines.refillCount >= 2) || currentQuestionIndex >= questions.length - 1;
+            if (p2.glasses === 0 && p2.lifelines.refillCount < 2) {
+                window.rivalRefillTargetPlayer = 2;
+                const refillActionsHTML = `
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeRivalModalRefill()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
+                        🍷 ${p2.name} Poharak Újratöltése (10 db) (${2 - p2.lifelines.refillCount} maradt)
+                    </button>
+                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal(); proceedAfterRivalCheck(${p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                        Kihagyás / Tovább
+                    </button>
+                `;
+                showFeedback(`ELFOGYTAK A POHARAI: ${p2.name}!`, summaryHTML + `<br><strong>${p2.name}</strong> elveszítette az összes poharát, de van még újratöltése!`, "🍷", null, refillActionsHTML);
+                nextBtn.textContent = '➡️ Következő kérdés';
+                return;
+            }
+
+            const isMatchOver = (p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1);
             nextBtn.textContent = isMatchOver ? '🏆 Párbaj Végeredménye' : '➡️ Következő kérdés';
             showFeedback("⚔️ Párbaj Felfedés!", summaryHTML, "🍻");
         }
 
-        function executeSpecificRivalRefill(targetPNum) {
+        function executeRivalModalRefill() {
+            const targetPNum = window.rivalRefillTargetPlayer || 1;
             rivalPlayers[targetPNum].glasses = 10;
             rivalPlayers[targetPNum].lifelines.refillCount++;
             
@@ -2367,24 +1903,17 @@ function renderOnlineRivalLobby(players) {
             playSuccessSound();
             closeFeedbackModal();
 
-            const p1 = rivalPlayers[1];
-            const p2 = rivalPlayers[2];
-
-            let needMoreRefill = (p1.glasses === 0 && p1.lifelines.refillCount < 2) || (p2.glasses === 0 && p2.lifelines.refillCount < 2);
-
-            if (needMoreRefill) {
-                evaluateRivalRound();
-            } else {
-                showFeedback("Poharak újratöltve!", `<strong>${rivalPlayers[targetPNum].name}</strong> készlete újra <strong>10 darab piros pohár</strong>!`, "🍷", () => {
-                    const isMatchOver = currentQuestionIndex >= questions.length - 1;
-                    if (isMatchOver) {
-                        endRivalMatch();
-                    } else {
-                        currentQuestionIndex++;
-                        prepareQuestion();
-                    }
-                });
-            }
+            showFeedback("Poharak újratöltve!", `<strong>${rivalPlayers[targetPNum].name}</strong> készlete újra <strong>10 darab piros pohár</strong>! (${2 - rivalPlayers[targetPNum].lifelines.refillCount} újratöltés maradt)`, "🍷", () => {
+                const p1 = rivalPlayers[1];
+                const p2 = rivalPlayers[2];
+                const isMatchOver = (p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1);
+                if (isMatchOver) {
+                    endRivalMatch();
+                } else {
+                    currentQuestionIndex++;
+                    prepareQuestion();
+                }
+            });
         }
 
         function proceedAfterRivalCheck(isMatchOver) {
@@ -2420,21 +1949,20 @@ function renderOnlineRivalLobby(players) {
             document.getElementById('audience-chart-box').classList.add('hidden');
 
             const currentQ = questions[currentQuestionIndex];
-            
-            // Helyes válasz text alapú párosítás, hogy a keverés után se csússzon el
-            const correctText = currentQ.answers[currentQ.correct];
-            const shuffledAnswers = shuffleArray([...currentQ.answers]);
-            
-            const mapped = shuffledAnswers.map((ansText) => ({
+            const mapped = currentQ.answers.map((ansText, idx) => ({
                 text: ansText,
-                isCorrect: ansText === correctText,
+                isCorrect: idx === currentQ.correct,
                 hidden: false,
                 audiencePct: null
             }));
 
+            for (let i = mapped.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
+            }
             displayedAnswers = mapped;
 
-            if (isRivalMode && !onlineRivalSocket) {
+            if (isRivalMode) {
                 rivalTurn = 1;
                 setupRivalTurnUI();
                 return;
@@ -2482,7 +2010,7 @@ function renderOnlineRivalLobby(players) {
                 cupTray.innerHTML = trayHTML;
             } else {
                 const doneMsg = isRivalMode
-                    ? (onlineRivalSocket ? '✅ Minden pohár elhelyezve! Kattints a Válasz beküldésére!' : (rivalTurn === 1 ? '✅ Minden pohár elhelyezve! Kattints a Tétek rögzítésére!' : '✅ Minden pohár elhelyezve! Kattints a Párbaj Felfedésére!'))
+                    ? (rivalTurn === 1 ? '✅ Minden pohár elhelyezve! Kattints a Tétek rögzítésére!' : '✅ Minden pohár elhelyezve! Kattints a Párbaj Felfedésére!')
                     : '✅ Minden pohár elhelyezve! Kattints az Ellenőrzésre!';
                 cupTray.innerHTML = `<span class="text-emerald-400 text-xs sm:text-sm font-bold">${doneMsg}</span>`;
             }
@@ -2511,7 +2039,7 @@ function renderOnlineRivalLobby(players) {
                 }
 
                 let placedCupsHTML = '';
-                if (isRivalMode && isRoundChecked && !onlineRivalSocket) {
+                if (isRivalMode && isRoundChecked) {
                     const p1Count = rivalPlayers[1].bets[index] || 0;
                     const p2Count = rivalPlayers[2].bets[index] || 0;
                     if (p1Count > 0) {
@@ -2667,11 +2195,6 @@ function renderOnlineRivalLobby(players) {
                 return;
             }
 
-            if (onlineRivalSocket) {
-                submitOnlineRivalAnswer();
-                return;
-            }
-
             if (isRivalMode) {
                 stopRivalTimer();
                 rivalPlayers[rivalTurn].bets = [...answerBets];
@@ -2759,15 +2282,10 @@ function renderOnlineRivalLobby(players) {
         }
 
         function nextQuestion() {
-            if (onlineRivalSocket) {
-                nextOnlineRivalQuestion();
-                return;
-            }
-
             if (isRivalMode) {
                 const p1 = rivalPlayers[1];
                 const p2 = rivalPlayers[2];
-                const isMatchOver = (p1.glasses === 0 && p1.lifelines.refillCount >= 2) || (p2.glasses === 0 && p2.lifelines.refillCount >= 2) || currentQuestionIndex >= questions.length - 1;
+                const isMatchOver = (p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1);
 
                 if (isMatchOver) {
                     playSuccessSound();
@@ -3177,7 +2695,6 @@ function renderOnlineRivalLobby(players) {
             toggleModal('load-modal', false);
             selectDifficulty(diffKey);
             selectRivalDifficulty(diffKey);
-            selectOnlineDifficulty(diffKey);
         }
 
         function loadCustomSet(name) {
@@ -3189,8 +2706,6 @@ function renderOnlineRivalLobby(players) {
                 document.getElementById('active-set-label').textContent = `${name} (${questions.length} kérdés)`;
                 const rivalLabelEl = document.getElementById('rival-active-set-label');
                 if (rivalLabelEl) rivalLabelEl.textContent = `${name}`;
-                const onlineLabelEl = document.getElementById('online-active-set-label');
-                if (onlineLabelEl) onlineLabelEl.textContent = `${name}`;
                 toggleModal('load-modal', false);
                 showFeedback("Betöltve!", `A(z) <strong>"${name}"</strong> aktív és összekeverve!`, "✅");
             }
