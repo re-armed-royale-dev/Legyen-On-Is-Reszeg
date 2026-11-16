@@ -986,89 +986,73 @@
     const iosWarningEl = document.getElementById('ios-updates-warning');
     const activateKeyBtn = document.getElementById('ios-activate-key-btn');
 
-    if (isIOS) {
-        if (iosWarningEl) iosWarningEl.classList.remove('hidden');
-        if (activateKeyBtn) {
+    if (iosWarningEl) {
+        if (isIOS && !isKeyFullyUnlocked()) iosWarningEl.classList.remove('hidden');
+        else iosWarningEl.classList.add('hidden');
+    }
+
+    if (activateKeyBtn) {
+        if (isIOS) {
+            activateKeyBtn.classList.remove('hidden');
             if (isKeyFullyUnlocked()) {
                 activateKeyBtn.textContent = '🔑 Aktiválva (Full)';
                 activateKeyBtn.classList.add('opacity-75');
-                activateKeyBtn.classList.remove('hidden');
             } else {
-                activateKeyBtn.classList.remove('hidden');
+                activateKeyBtn.textContent = '🔑 Activate Key';
+                activateKeyBtn.classList.remove('opacity-75');
             }
+        } else {
+            activateKeyBtn.classList.add('hidden');
         }
-    } else {
-        if (iosWarningEl) iosWarningEl.classList.add('hidden');
-        if (activateKeyBtn) activateKeyBtn.classList.add('hidden');
     }
 
     const codeButton = document.getElementById('code-entry-btn');
     const createButton = document.getElementById('create-questions-btn');
     const rivalButton = document.getElementById('rival-menu-btn');
 
-    // Ha nem iOS eszköz, vagy teljes kulcsos feloldás van, mindenhol alapértelmezett aktív állapot
+    // Ha nem iOS, vagy teljes kulcsos feloldás van, minden simán aktív
     if (!isIOS || isKeyFullyUnlocked()) {
-        if (isKeyFullyUnlocked() && activateKeyBtn) {
-            activateKeyBtn.textContent = '🔑 Aktiválva (Full)';
-            activateKeyBtn.classList.add('opacity-75');
-        }
-
         [codeButton, createButton, rivalButton].forEach(button => {
             if (!button) return;
-            button.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400', 'text-slate-300', 'from-slate-700', 'via-slate-800', 'to-slate-900');
+            button.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
         });
 
-        if (codeButton) {
-            codeButton.classList.add('border-yellow-500/60', 'text-yellow-300');
-            codeButton.textContent = '🔑 Kód Megadása';
-        }
-        if (createButton) {
-            createButton.classList.add('border-yellow-500/40', 'text-yellow-300');
-            createButton.textContent = '✍️ Kérdés készítő';
-        }
-        if (rivalButton) {
-            rivalButton.classList.add('from-purple-700', 'via-fuchsia-600', 'to-rose-600', 'border-fuchsia-400/50', 'text-white');
-            rivalButton.innerHTML = '⚔️ Rivális (1v1)';
-        }
+        if (codeButton) codeButton.textContent = '🔑 Kód Megadása';
+        if (createButton) createButton.textContent = '✍️ Kérdés készítő';
+        if (rivalButton) rivalButton.innerHTML = '⚔️ Rivális (1v1)';
         return;
     }
 
-    // iOS korlátozott és zárolt/ideiglenesen feloldott állapotok kezelése
+    // Alapértelmezett iOS zárolt stílus mindegyikre
     [codeButton, createButton, rivalButton].forEach(button => {
         if (!button) return;
-        button.classList.add('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600');
+        button.classList.add('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
     });
 
     if (codeButton) {
         if (isFeatureUnlocked('code')) {
             codeButton.textContent = '🔓 Kód Megadása (Feloldva)';
-            codeButton.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400');
-            codeButton.classList.add('border-yellow-500/60', 'text-yellow-300');
+            codeButton.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
         } else {
-            codeButton.textContent = '🔒 Kód Megadása (Zárolva)';
-            codeButton.classList.add('text-slate-400');
+            codeButton.textContent = '🔒 Kód megadása (Nem támogatott)';
         }
     }
 
     if (createButton) {
         if (isFeatureUnlocked('create')) {
             createButton.textContent = '✍️ Kérdés készítő (Feloldva)';
-            createButton.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'text-slate-400');
-            createButton.classList.add('border-yellow-500/40', 'text-yellow-300');
+            createButton.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
         } else {
-            createButton.textContent = '🔒 Kérdés készítő (Zárolva)';
-            createButton.classList.add('text-slate-400');
+            createButton.textContent = '🔒 Kérdés készítő (Nem támogatott)';
         }
     }
 
     if (rivalButton) {
         if (isFeatureUnlocked('rival')) {
-            rivalButton.innerHTML = '🔓 Rivális (1v1) (Feloldva)';
-            rivalButton.classList.remove('opacity-60', 'grayscale', 'border-dashed', 'border-slate-600', 'from-slate-700', 'via-slate-800', 'to-slate-900', 'text-slate-300');
-            rivalButton.classList.add('from-purple-700', 'via-fuchsia-600', 'to-rose-600', 'border-fuchsia-400/50', 'text-white');
+            rivalButton.innerHTML = '⚔️ Rivális (1v1) (Feloldva)';
+            rivalButton.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
         } else {
-            rivalButton.innerHTML = '🔒 Rivális (1v1) (Zárolva)';
-            rivalButton.classList.add('from-slate-700', 'via-slate-800', 'to-slate-900', 'text-slate-300');
+            rivalButton.innerHTML = '🔒 Rivális 1v1 (Nem támogatott)';
         }
     }
 }
