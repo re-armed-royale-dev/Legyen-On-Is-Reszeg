@@ -824,9 +824,13 @@ function renderOnlineRivalQuestion(data) {
     document.getElementById('rival-p2-glasses').textContent = `${onlineRivalOpponentCups} 🍷`;
     document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${onlineTotalQuestionsCount}`;
 
-    const mapped = data.question.answers.map((ansText, idx) => ({
+    // JAVÍTÁS: Pontos válasz-index párosítás és keverés az online módban is
+    const correctText = data.question.answers[data.question.correct];
+    const shuffledAnswers = shuffleArray([...data.question.answers]);
+    
+    const mapped = shuffledAnswers.map((ansText) => ({
         text: ansText,
-        isCorrect: idx === data.question.correct,
+        isCorrect: ansText === correctText,
         hidden: false,
         audiencePct: null
     }));
@@ -846,6 +850,7 @@ function renderOnlineRivalQuestion(data) {
 
     const checkBtn = document.getElementById('check-answer-btn');
     checkBtn.classList.remove('hidden');
+    checkBtn.disabled = false;
     checkBtn.textContent = '✅ VÁLASZ BEKÜLDÉSE';
     document.getElementById('clear-bets-btn').classList.remove('hidden');
     document.getElementById('next-question-btn').classList.add('hidden');
@@ -926,7 +931,7 @@ function renderOnlineRivalResult(data) {
     nextBtn.disabled = !onlineRivalIsHost;
 
     showFeedback("🏆 KÖR EREDMÉNYE", `
-        Helyes válasz: <strong>${String.fromCharCode(65 + data.correctIndex)}</strong><br>
+        Helyes válasz megtalálva!<br>
         Megmaradt poharaid: <strong>${data.remainingGlasses}</strong><br>
         ${escapeOnlineRivalText(data.opponentName)} poharai: <strong>${data.opponentCups}</strong>
     `, "🍻");
@@ -1410,7 +1415,7 @@ function renderOnlineRivalLobby(players) {
                 onlineRivalSocket.on('connect_error', () => {
                     const area = document.getElementById('online-room-status-area');
                     area.classList.remove('hidden');
-                    area.textContent = "❌ Nem sikerült kapcsolódni a szerverhez.";
+                    area.textContent = "❌ Nem sikerült kapcsolódni a szerverrel.";
                 });
 
                 onlineRivalSocket.on('online-rival:players', data => {
@@ -2415,17 +2420,18 @@ function renderOnlineRivalLobby(players) {
             document.getElementById('audience-chart-box').classList.add('hidden');
 
             const currentQ = questions[currentQuestionIndex];
-            const mapped = currentQ.answers.map((ansText, idx) => ({
+            
+            // Helyes válasz text alapú párosítás, hogy a keverés után se csússzon el
+            const correctText = currentQ.answers[currentQ.correct];
+            const shuffledAnswers = shuffleArray([...currentQ.answers]);
+            
+            const mapped = shuffledAnswers.map((ansText) => ({
                 text: ansText,
-                isCorrect: idx === currentQ.correct,
+                isCorrect: ansText === correctText,
                 hidden: false,
                 audiencePct: null
             }));
 
-            for (let i = mapped.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
-            }
             displayedAnswers = mapped;
 
             if (isRivalMode && !onlineRivalSocket) {
