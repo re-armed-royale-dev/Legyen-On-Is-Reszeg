@@ -275,7 +275,7 @@
                 <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
-                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openRivalMenu()" class="bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/50 cursor-pointer flex items-center justify-center gap-2">
+                <button id="rival-menu-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openRivalMenu()" class="bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/50 cursor-pointer flex items-center justify-center gap-2">
                     ⚔️ Rivális (1v1)
                 </button>
                 <button id="code-entry-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openMultiplayerMenu()" class="bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2">
@@ -371,7 +371,6 @@
             </div>
 
             <!-- ONLINE RIVÁLIS MENÜ -->
-            <!-- EXTERNAL ONLINE RIVAL MENU -->
             <div id="online-rival-menu" class="hidden max-w-xl mx-auto bg-slate-950/90 border-2 border-fuchsia-500/60 rounded-2xl p-4 mb-4 text-left">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-black uppercase text-fuchsia-400">
@@ -421,7 +420,7 @@
 
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>20 kérdéses paklik (Automatikusan keverve belépéskor)</span>
-                <span class="font-mono font-bold text-yellow-400">v2.31 Rivális + Újratöltés</span>
+                <span class="font-mono font-bold text-yellow-400">v2.32 iOS Korlátozások</span>
             </div>
         </div>
     </main>
@@ -871,7 +870,8 @@
             } catch (e) {}
             return {
                 code: { expiresAt: 0, lastUnlockedAt: 0 },
-                create: { expiresAt: 0, lastUnlockedAt: 0 }
+                create: { expiresAt: 0, lastUnlockedAt: 0 },
+                rival: { expiresAt: 0, lastUnlockedAt: 0 }
             };
         }
 
@@ -908,8 +908,9 @@
 
             const codeButton = document.getElementById('code-entry-btn');
             const createButton = document.getElementById('create-questions-btn');
+            const rivalButton = document.getElementById('rival-menu-btn');
 
-            [codeButton, createButton].forEach(button => {
+            [codeButton, createButton, rivalButton].forEach(button => {
                 if (!button) return;
                 button.classList.add('border-dashed', 'border-red-500/60');
             });
@@ -928,6 +929,14 @@
                     createButton.classList.remove('border-dashed', 'border-red-500/60');
                 } else {
                     createButton.textContent = '🔒 Kérdés készítő (Nem támogatott)';
+                }
+            }
+            if (rivalButton) {
+                if (isFeatureUnlocked('rival')) {
+                    rivalButton.innerHTML = '⚔️ Rivális (1v1) (Feloldva)';
+                    rivalButton.classList.remove('border-dashed', 'border-red-500/60');
+                } else {
+                    rivalButton.innerHTML = '🔒 Rivális 1v1 (Nem támogatott)';
                 }
             }
         }
@@ -1016,12 +1025,14 @@
         }
 
         function openRivalMenu() {
-            document.getElementById('rival-menu').classList.remove('hidden');
-            document.getElementById('singleplayer-menu').classList.add('hidden');
-            document.getElementById('multiplayer-menu').classList.add('hidden');
-            document.getElementById('online-rival-menu').classList.add('hidden');
-            const rivalLabel = document.getElementById('rival-active-set-label');
-            if (rivalLabel) rivalLabel.textContent = activeSetName;
+            handleRestrictedAction('rival', 'Rivális (1v1)', () => {
+                document.getElementById('rival-menu').classList.remove('hidden');
+                document.getElementById('singleplayer-menu').classList.add('hidden');
+                document.getElementById('multiplayer-menu').classList.add('hidden');
+                document.getElementById('online-rival-menu').classList.add('hidden');
+                const rivalLabel = document.getElementById('rival-active-set-label');
+                if (rivalLabel) rivalLabel.textContent = activeSetName;
+            });
         }
 
         function openOnlineRivalMenu() {
