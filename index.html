@@ -982,78 +982,50 @@
         }
 
         function applyPlatformRestrictions() {
-    const isIOS = isAppleMobileDevice();
-    const iosWarningEl = document.getElementById('ios-updates-warning');
-    const activateKeyBtn = document.getElementById('ios-activate-key-btn');
+            const isIOS = isAppleMobileDevice();
+            const iosWarningEl = document.getElementById('ios-updates-warning');
+            if (iosWarningEl) {
+                if (isIOS) iosWarningEl.classList.remove('hidden');
+                else iosWarningEl.classList.add('hidden');
+            }
 
-    if (isIOS) {
-        if (iosWarningEl) iosWarningEl.classList.remove('hidden');
-        if (activateKeyBtn) {
-            if (isKeyFullyUnlocked()) {
-                activateKeyBtn.textContent = '🔑 Aktiválva (Full)';
-                activateKeyBtn.classList.add('opacity-75');
-                activateKeyBtn.classList.remove('hidden');
-            } else {
-                activateKeyBtn.classList.remove('hidden');
+            if (!isIOS) return;
+
+            const codeButton = document.getElementById('code-entry-btn');
+            const createButton = document.getElementById('create-questions-btn');
+            const rivalButton = document.getElementById('rival-menu-btn');
+
+            [codeButton, createButton, rivalButton].forEach(button => {
+                if (!button) return;
+                button.classList.add('border-dashed', 'border-red-500/60');
+            });
+
+            if (codeButton) {
+                if (isFeatureUnlocked('code')) {
+                    codeButton.textContent = '🔑 Kód Megadása (Feloldva)';
+                    codeButton.classList.remove('border-dashed', 'border-red-500/60');
+                } else {
+                    codeButton.textContent = '🔒 Kód megadása (Nem támogatott)';
+                }
+            }
+            if (createButton) {
+                if (isFeatureUnlocked('create')) {
+                    createButton.textContent = '✍️ Kérdés készítő (Feloldva)';
+                    createButton.classList.remove('border-dashed', 'border-red-500/60');
+                } else {
+                    createButton.textContent = '🔒 Kérdés készítő (Nem támogatott)';
+                }
+            }
+            if (rivalButton) {
+                if (isFeatureUnlocked('rival')) {
+                    rivalButton.innerHTML = '⚔️ Rivális (1v1) (Feloldva)';
+                    rivalButton.classList.remove('border-dashed', 'border-red-500/60', 'opacity-50', 'grayscale-[30%]');
+                } else {
+                    rivalButton.innerHTML = '🔒 Rivális 1v1 (Nem támogatott)';
+                    rivalButton.classList.add('opacity-50', 'grayscale-[30%]');
+                }
             }
         }
-    } else {
-        if (iosWarningEl) iosWarningEl.classList.add('hidden');
-        if (activateKeyBtn) activateKeyBtn.classList.add('hidden');
-    }
-
-    const codeButton = document.getElementById('code-entry-btn');
-    const createButton = document.getElementById('create-questions-btn');
-    const rivalButton = document.getElementById('rival-menu-btn');
-
-    if (!isIOS) {
-        if (codeButton) {
-            codeButton.className = 'bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2';
-            codeButton.textContent = '🔑 Kód Megadása';
-        }
-        if (createButton) {
-            createButton.className = 'bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer';
-            createButton.textContent = '✍️ Kérdés készítő';
-        }
-        if (rivalButton) {
-            rivalButton.className = 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/50 cursor-pointer flex items-center justify-center gap-2';
-            rivalButton.innerHTML = '⚔️ Rivális (1v1)';
-        }
-        return;
-    }
-
-    // iOS stílus (Zárolva vs Feloldva)
-    if (rivalButton) {
-        if (isFeatureUnlocked('rival')) {
-            rivalButton.className = 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border-2 border-fuchsia-400/70 cursor-pointer flex items-center justify-center gap-2';
-            rivalButton.innerHTML = '🔓 Rivális (1v1) (Feloldva)';
-        } else {
-            rivalButton.className = 'bg-slate-800/80 border-2 border-dashed border-slate-500 text-slate-400 opacity-60 grayscale font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2';
-            rivalButton.innerHTML = '🔒 Rivális (1v1) (Zárolva)';
-        }
-    }
-
-    if (codeButton) {
-        if (isFeatureUnlocked('code')) {
-            codeButton.className = 'bg-slate-800 hover:bg-slate-700 border-2 border-yellow-500/60 text-yellow-300 font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2';
-            codeButton.textContent = '🔓 Kód Megadása (Feloldva)';
-        } else {
-            codeButton.className = 'bg-slate-800/80 border-2 border-dashed border-slate-500 text-slate-400 opacity-60 grayscale font-black text-base sm:text-lg py-4 px-4 rounded-2xl cursor-pointer flex items-center justify-center gap-2';
-            codeButton.textContent = '🔒 Kód Megadása (Zárolva)';
-        }
-    }
-
-    if (createButton) {
-        if (isFeatureUnlocked('create')) {
-            createButton.className = 'bg-slate-800 hover:bg-slate-700 border border-yellow-500/40 text-yellow-300 font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer';
-            createButton.textContent = '🔓 Kérdés készítő (Feloldva)';
-        } else {
-            createButton.className = 'bg-slate-800/80 border border-dashed border-slate-500 text-slate-400 opacity-60 grayscale font-bold py-2.5 px-3 rounded-xl text-xs cursor-pointer';
-            createButton.textContent = '🔒 Kérdés készítő (Zárolva)';
-        }
-    }
-}
-
 
         function startRestrictionCountdown(featureKey) {
             if (restrictionCountdownInterval) clearInterval(restrictionCountdownInterval);
