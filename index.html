@@ -809,6 +809,36 @@
 
         const QUESTIONS_PER_GAME = 20;
 
+        // Biztonságos localStorage segédfüggvények (hiba esetén sem omlik össze).
+        function lsGetJSON(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null) return fallback;
+                const value = JSON.parse(raw);
+                return (value === null || value === undefined) ? fallback : value;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function lsSet(key, value) {
+            try {
+                localStorage.setItem(key, value);
+                return true;
+            } catch (e) {
+                console.warn('localStorage mentési hiba (' + key + '):', e);
+                return false;
+            }
+        }
+
+        function lsSetJSON(key, value) {
+            return lsSet(key, JSON.stringify(value));
+        }
+
+        function lsRemove(key) {
+            try { localStorage.removeItem(key); } catch (e) {}
+        }
+
         const ALL_BUILTIN_QUESTIONS = {
             easy: [],
             normal: [],
@@ -1315,6 +1345,7 @@ async function loadDifficulty(diffKey) {
 
         currentDifficultyKey = diffKey;
         questions = newQuestions;
+        lsSetJSON('LastSelection', { type: 'builtin', key: diffKey });
 
         if (diffKey === "easy") {
             activeSetName = "🟢 Könnyű";
@@ -1381,7 +1412,7 @@ async function loadDifficulty(diffKey) {
                 return;
             }
 
-            const savedCodes = JSON.parse(localStorage.getItem('SavedQuizCodes')) || {};
+            const savedCodes = lsGetJSON('SavedQuizCodes', {});
             if (savedCodes[codeInput]) {
                 try {
                     const decodedQuestions = JSON.parse(decodeURIComponent(escape(atob(savedCodes[codeInput]))));
@@ -1394,6 +1425,8 @@ async function loadDifficulty(diffKey) {
                 } catch (e) { console.warn('Helyi kód olvasási hiba:', e); }
             }
 
+            document.getElementById('loading-modal-title').textContent = "Betöltés...";
+            document.getElementById('loading-modal-text').textContent = "Kérdéssor letöltése a szerverről";
             toggleModal('share-loading-modal', true);
             startShareDotsAnimation();
 
@@ -1408,6 +1441,11 @@ async function loadDifficulty(diffKey) {
                     showFeedback("Ismeretlen kód", `Nem található megosztott kérdéssor ezzel a kóddal: <strong>${codeInput}</strong>.`, "❌");
                     return;
                 }
+                try {
+                    const cachedCodes = lsGetJSON('SavedQuizCodes', {});
+                    cachedCodes[codeInput] = btoa(unescape(encodeURIComponent(JSON.stringify(data.questions))));
+                    lsSetJSON('SavedQuizCodes', cachedCodes);
+                } catch (e) { console.warn('Kód mentési hiba:', e); }
                 questions = shuffleArray(data.questions);
                 activeSetName = `🔑 Megosztott kvíz (#${codeInput})`;
                 startGameFromCode();
@@ -1450,6 +1488,9 @@ async function loadDifficulty(diffKey) {
         let bgBeatStep = 0;
         let customAudioData = localStorage.getItem('customAudioData') || null;
         let customAudioName = localStorage.getItem('customAudioName') || null;
+        // Egymáshoz igazítjuk a két mentett értéket, hogy a felirat mindig stimmeljen.
+        if (!customAudioData) customAudioName = null;
+        else if (!customAudioName) customAudioName = 'Saját zene';
 
         function initAudioSettingsUI() {
             const musicBtn = document.getElementById('music-toggle-btn');
@@ -1628,14 +1669,25 @@ async function loadDifficulty(diffKey) {
             reader.onload = function(e) {
                 customAudioData = e.target.result;
                 customAudioName = file.name;
-                localStorage.setItem('customAudioData', customAudioData);
-                localStorage.setItem('customAudioName', customAudioName);
+                const dataSaved = lsSet('customAudioData', customAudioData);
+                const nameSaved = dataSaved && lsSet('customAudioName', customAudioName);
+                if (!dataSaved || !nameSaved) {
+                    lsRemove('customAudioData');
+                    lsRemove('customAudioName');
+                }
 
                 updateCustomMusicLabelUI();
                 if (isMusicEnabled) {
                     startBackgroundMusic();
                 }
-                showFeedback("Saját zene beállítva!", `A(z) <strong>"${file.name}"</strong> sikeresen feltöltve és beállítva háttérzenének!`, "🎵");
+                if (dataSaved && nameSaved) {
+                    showFeedback("Saját zene beállítva!", `A(z) <strong>"${file.name}"</strong> sikeresen feltöltve és beállítva háttérzenének!`, "🎵");
+                } else {
+                    showFeedback("Saját zene beállítva!", `A(z) <strong>"${file.name}"</strong> szól háttérzeneként, de a fájl túl nagy a mentéshez, ezért az oldal újratöltése után nem marad meg.`, "🎵");
+                }
+            };
+            reader.onerror = function() {
+                showFeedback("Hiba", "A zenefájlt nem sikerült beolvasni.", "⚠️");
             };
             reader.readAsDataURL(file);
         }
@@ -1705,6 +1757,7 @@ async function loadDifficulty(diffKey) {
 
         function openCustomMusicModal() {
             toggleSettingsMenu();
+            updateCustomMusicLabelUI();
             toggleModal('custom-music-modal', true);
         }
 
@@ -1810,6 +1863,7 @@ async function loadDifficulty(diffKey) {
 
             const p1Name = document.getElementById('rival-p1-name').value.trim() || '1. Játékos';
             const p2Name = document.getElementById('rival-p2-name').value.trim() || '2. Játékos';
+            lsSetJSON('RivalNames', { p1: p1Name, p2: p2Name });
 
             isRivalMode = true;
             rivalTurn = 1;
@@ -2764,7 +2818,7 @@ async function loadDifficulty(diffKey) {
                 const nameInput = document.getElementById('question-set-name');
                 container.innerHTML = '';
                 if (editName) {
-                    const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+                    const saved = lsGetJSON('SavedQuestions', {});
                     const set = saved[editName];
                     if (set) {
                         nameInput.value = editName;
@@ -2832,9 +2886,12 @@ async function loadDifficulty(diffKey) {
                 parsedQuestions.push({ question: qText, answers: [a1, a2, a3, a4], correct: correctIdx });
             }
 
-            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const saved = lsGetJSON('SavedQuestions', {});
             saved[setName] = parsedQuestions;
-            localStorage.setItem('SavedQuestions', JSON.stringify(saved));
+            if (!lsSetJSON('SavedQuestions', saved)) {
+                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva).", "⚠️");
+                return;
+            }
 
             toggleModal('create-modal', false);
             showFeedback("Sikeres mentés!", `A(z) <strong>"${setName}"</strong> kérdéssor sikeresen elmentve ezen a készüléken. Ha módosítottad a már megosztott kérdéseket, nyomd meg újra a 📤 Megosztás gombot, és küldd el az új kódot!`, "🎉");
@@ -2860,7 +2917,7 @@ async function loadDifficulty(diffKey) {
         }
 
         async function shareCustomSet(name) {
-            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const saved = lsGetJSON('SavedQuestions', {});
             const set = saved[name];
             if (!set || !set.length) return;
 
@@ -2885,9 +2942,9 @@ async function loadDifficulty(diffKey) {
                     throw new Error(data.error || 'A szerver nem adott megosztási kódot.');
                 }
                 const code = String(data.code);
-                const setCodes = JSON.parse(localStorage.getItem('SavedSetCodes')) || {};
+                const setCodes = lsGetJSON('SavedSetCodes', {});
                 setCodes[name] = code;
-                localStorage.setItem('SavedSetCodes', JSON.stringify(setCodes));
+                lsSetJSON('SavedSetCodes', setCodes);
 
                 showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.`, "📤");
             } catch (error) {
@@ -2904,7 +2961,7 @@ async function loadDifficulty(diffKey) {
 
             ['easy', 'normal', 'hard'].forEach(diffKey => {
                 const label = diffKey === 'easy' ? '🟢 Könnyű' : (diffKey === 'normal' ? '🟡 Normál' : '🔴 Nehéz');
-                const count = ALL_BUILTIN_QUESTIONS[diffKey].length;
+                const count = QUESTIONS_PER_GAME;
                 listEl.innerHTML += `
                     <div class="bg-slate-800/90 border border-yellow-500/40 rounded-2xl p-4 flex items-center justify-between gap-3">
                         <div>
@@ -2919,7 +2976,7 @@ async function loadDifficulty(diffKey) {
             });
 
             listEl.innerHTML += `<p class="text-xs font-bold uppercase tracking-wider text-slate-400 pt-2 mb-1">Saját mentett kérdéssorok:</p>`;
-            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const saved = lsGetJSON('SavedQuestions', {});
             const names = Object.keys(saved);
             if (names.length === 0) {
                 listEl.innerHTML += `<p class="text-center text-slate-500 text-xs py-3">Nincs saját mentett kérdéssor.</p>`;
@@ -2953,10 +3010,11 @@ async function loadDifficulty(diffKey) {
         }
 
         function loadCustomSet(name) {
-            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const saved = lsGetJSON('SavedQuestions', {});
             if (saved[name]) {
                 currentDifficultyKey = 'custom';
                 activeSetName = name;
+                lsSetJSON('LastSelection', { type: 'custom', name: name });
                 questions = shuffleArray(saved[name]);
                 document.getElementById('active-set-label').textContent = `${name} (${questions.length} kérdés)`;
                 const rivalLabelEl = document.getElementById('rival-active-set-label');
@@ -2967,9 +3025,9 @@ async function loadDifficulty(diffKey) {
         }
 
         function deleteCustomSet(name) {
-            const saved = JSON.parse(localStorage.getItem('SavedQuestions')) || {};
+            const saved = lsGetJSON('SavedQuestions', {});
             delete saved[name];
-            localStorage.setItem('SavedQuestions', JSON.stringify(saved));
+            lsSetJSON('SavedQuestions', saved);
             showLoadModal();
         }
 
@@ -3004,7 +3062,34 @@ async function loadDifficulty(diffKey) {
         document.addEventListener("DOMContentLoaded", async () => {
             try {
                 await loadBuiltinQuestionFiles();
-                await loadDifficulty("easy");
+
+                // Utoljára használt szint / kérdéssor visszaállítása.
+                const last = lsGetJSON('LastSelection', null);
+                const savedSets = lsGetJSON('SavedQuestions', {});
+                if (last && last.type === 'custom' && Array.isArray(savedSets[last.name]) && savedSets[last.name].length) {
+                    currentDifficultyKey = 'custom';
+                    activeSetName = last.name;
+                    questions = shuffleArray(savedSets[last.name]);
+                    const labelEl = document.getElementById('active-set-label');
+                    if (labelEl) labelEl.textContent = `${last.name} (${questions.length} kérdés)`;
+                    const rivalLabelEl = document.getElementById('rival-active-set-label');
+                    if (rivalLabelEl) rivalLabelEl.textContent = last.name;
+                    ['easy', 'normal', 'hard'].forEach(key => {
+                        const b = document.getElementById(`btn-diff-${key}`);
+                        if (b) b.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                        const rb = document.getElementById(`rival-btn-diff-${key}`);
+                        if (rb) rb.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                    });
+                } else {
+                    const startKey = (last && last.type === 'builtin' && ALL_BUILTIN_QUESTIONS[last.key]) ? last.key : 'easy';
+                    await loadDifficulty(startKey);
+                    ['easy', 'normal', 'hard'].forEach(key => {
+                        const rb = document.getElementById(`rival-btn-diff-${key}`);
+                        if (!rb) return;
+                        if (key === startKey) rb.classList.add('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                        else rb.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+                    });
+                }
             } catch (error) {
                 showFeedback(
                     "Kérdésbetöltési hiba",
@@ -3015,6 +3100,19 @@ async function loadDifficulty(diffKey) {
 
             applyPlatformRestrictions();
             initAudioSettingsUI();
+
+            // Rivális játékosnevek visszaállítása és mentése módosításkor.
+            const rivalNames = lsGetJSON('RivalNames', null);
+            const p1Input = document.getElementById('rival-p1-name');
+            const p2Input = document.getElementById('rival-p2-name');
+            if (rivalNames && p1Input && typeof rivalNames.p1 === 'string') p1Input.value = rivalNames.p1;
+            if (rivalNames && p2Input && typeof rivalNames.p2 === 'string') p2Input.value = rivalNames.p2;
+            const saveRivalNames = () => lsSetJSON('RivalNames', {
+                p1: (p1Input ? p1Input.value.trim() : '') || '1. Játékos',
+                p2: (p2Input ? p2Input.value.trim() : '') || '2. Játékos'
+            });
+            if (p1Input) p1Input.addEventListener('input', saveRivalNames);
+            if (p2Input) p2Input.addEventListener('input', saveRivalNames);
 
             const savedColor = localStorage.getItem("backgroundColor");
 
