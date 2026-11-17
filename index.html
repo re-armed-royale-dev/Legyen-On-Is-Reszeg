@@ -1268,86 +1268,109 @@
             document.getElementById('online-rival-menu').classList.add('hidden');
         }
 
-        function selectDifficulty(diffKey) {
-            currentDifficultyKey = diffKey;
-            loadDifficulty(diffKey);
-            playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
+        // A betöltések sorrendjének kezelése.
+// Gyors egymás utáni kattintásnál mindig az utoljára kiválasztott szint marad aktív.
+let difficultyLoadRequestId = 0;
+
+async function selectDifficulty(diffKey) {
+    await loadDifficulty(diffKey);
+    playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
+}
+
+async function selectRivalDifficulty(diffKey) {
+    await loadDifficulty(diffKey);
+
+    ['easy', 'normal', 'hard'].forEach(key => {
+        const btn = document.getElementById(`rival-btn-diff-${key}`);
+        if (!btn) return;
+
+        if (key === diffKey) {
+            btn.classList.add('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+        } else {
+            btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
+        }
+    });
+
+    playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
+}
+
+async function loadDifficulty(diffKey) {
+    const requestId = ++difficultyLoadRequestId;
+
+    try {
+        // Megvárjuk a három JSON-fájl betöltését.
+        await loadBuiltinQuestionFiles();
+
+        // Ha közben másik szintet választottak, ezt a kérést már nem alkalmazzuk.
+        if (requestId !== difficultyLoadRequestId) return;
+
+        if (!ALL_BUILTIN_QUESTIONS[diffKey]) {
+            diffKey = "easy";
         }
 
-        function selectRivalDifficulty(diffKey) {
-            currentDifficultyKey = diffKey;
-            loadDifficulty(diffKey);
-            ['easy', 'normal', 'hard'].forEach(key => {
-                const btn = document.getElementById(`rival-btn-diff-${key}`);
-                if (!btn) return;
-                if (key === diffKey) {
-                    btn.classList.add('ring-2', 'ring-yellow-400', 'scale-[1.03]');
-                } else {
-                    btn.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
-                }
-            });
-            playTone(587.33, 'sine', 0.14, 0.12, 'sfx');
+        const newQuestions = createNewQuestionSet(diffKey);
+
+        // Újabb ellenőrzés a biztonság kedvéért.
+        if (requestId !== difficultyLoadRequestId) return;
+
+        currentDifficultyKey = diffKey;
+        questions = newQuestions;
+
+        if (diffKey === "easy") {
+            activeSetName = "🟢 Könnyű";
+        } else if (diffKey === "normal") {
+            activeSetName = "🟡 Normál";
+        } else if (diffKey === "hard") {
+            activeSetName = "🔴 Nehéz";
         }
 
-        async function loadDifficulty(diffKey) {
-            try {
-                await loadBuiltinQuestionFiles();
+        const labelEl = document.getElementById("active-set-label");
 
-                if (!ALL_BUILTIN_QUESTIONS[diffKey]) {
-                    diffKey = "easy";
-                }
+        if (labelEl) {
+            labelEl.textContent =
+                `${activeSetName} (${questions.length} kérdés)`;
+        }
 
-                currentDifficultyKey = diffKey;
-                questions = createNewQuestionSet(diffKey);
+        const rivalLabelEl =
+            document.getElementById("rival-active-set-label");
 
-                if (diffKey === "easy") activeSetName = "🟢 Könnyű";
-                else if (diffKey === "normal") activeSetName = "🟡 Normál";
-                else if (diffKey === "hard") activeSetName = "🔴 Nehéz";
+        if (rivalLabelEl) {
+            rivalLabelEl.textContent = activeSetName;
+        }
 
-                const labelEl = document.getElementById("active-set-label");
+        // Normál játékmód gombjainak frissítése.
+        ["easy", "normal", "hard"].forEach(key => {
+            const btn = document.getElementById(`btn-diff-${key}`);
+            if (!btn) return;
 
-                if (labelEl) {
-                    labelEl.textContent =
-                        `${activeSetName} (${questions.length} kérdés)`;
-                }
-
-                const rivalLabelEl =
-                    document.getElementById("rival-active-set-label");
-
-                if (rivalLabelEl) {
-                    rivalLabelEl.textContent = activeSetName;
-                }
-
-                ["easy", "normal", "hard"].forEach(key => {
-                    const btn = document.getElementById(`btn-diff-${key}`);
-
-                    if (!btn) return;
-
-                    if (key === diffKey) {
-                        btn.classList.add(
-                            "ring-2",
-                            "ring-yellow-400",
-                            "scale-[1.03]"
-                        );
-                    } else {
-                        btn.classList.remove(
-                            "ring-2",
-                            "ring-yellow-400",
-                            "scale-[1.03]"
-                        );
-                    }
-                });
-
-            } catch (error) {
-                console.error(error);
-
-                showFeedback(
-                    "Betöltési hiba",
-                    error.message,
-                    "⚠️"
+            if (key === diffKey) {
+                btn.classList.add(
+                    "ring-2",
+                    "ring-yellow-400",
+                    "scale-[1.03]"
+                );
+            } else {
+                btn.classList.remove(
+                    "ring-2",
+                    "ring-yellow-400",
+                    "scale-[1.03]"
                 );
             }
-        }
+        });
+
+    } catch (error) {
+        console.error("Nehézségi szint betöltési hiba:", error);
+
+        // Régebbi, már felülírt kérés ne jelenítsen meg hibát.
+        if (requestId !== difficultyLoadRequestId) return;
+
+        showFeedback(
+            "Betöltési hiba",
+            error.message || "Nem sikerült betölteni a kérdéseket.",
+            "⚠️"
+        );
+    }
+}
 
         const QUIZ_API_BASE = 'https://legyen-on-is-reszeg.onrender.com';
 
