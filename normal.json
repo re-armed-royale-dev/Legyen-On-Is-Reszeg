@@ -1,251 +1,601 @@
 [
     {
-        "question": "Melyik kémiai elem vegyjele az 'Au'?",
+        "question": "Melyik ország fővárosa Ottawa?",
         "answers": [
-            "Arany",
-            "Ezüst",
-            "Alumínium",
-            "Réz"
+            "Kanada",
+            "Ausztrália",
+            "Új-Zéland",
+            "Írország"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik sörfőzési eljárásra jellemző az alsóerjesztés?",
+        "question": "Ki írta az 'Egri csillagok' című történelmi regényt?",
         "answers": [
-            "Lager",
-            "Ale",
-            "Stout",
-            "Weissbier"
+            "Gárdonyi Géza",
+            "Jókai Mór",
+            "Mikszáth Kálmán",
+            "Móricz Zsigmond"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik filmben hangzik el a híres mondat: 'Én vagyok az apád'?",
+        "question": "Melyik kémiai elem vegyjele a 'Fe'?",
         "answers": [
-            "Star Wars: A Birodalom visszavág",
-            "A Gyűrűk Ura",
-            "Mátrix",
-            "Indiana Jones"
+            "Vas",
+            "Foszfor",
+            "Fluor",
+            "Fermium"
         ],
         "correct": 0
     },
     {
-        "question": "Hány százalékos alkoholtartalom felett nevezünk egy italt klasszikusan tömény szesznek?",
+        "question": "Melyik évben ért véget a második világháború Európában?",
         "answers": [
-            "15–20% felett",
-            "5% felett",
-            "50% felett",
-            "80% felett"
+            "1945",
+            "1944",
+            "1939",
+            "1947"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik évben tört ki a magyar forradalom és szabadságharc?",
+        "question": "Melyik bolygó kering a legközelebb a Naphoz?",
         "answers": [
-            "1848",
-            "1867",
-            "1956",
-            "1849"
+            "Merkúr",
+            "Vénusz",
+            "Mars",
+            "Föld"
         ],
         "correct": 0
     },
     {
-        "question": "Ki festette a híres 'Mona Lisa' című portrét?",
+        "question": "Ki festette a 'Csillagos éj' című világhírű festményt?",
         "answers": [
-            "Leonardo da Vinci",
-            "Michelangelo",
-            "Raffaello",
-            "Vincent van Gogh"
+            "Vincent van Gogh",
+            "Claude Monet",
+            "Salvador Dalí",
+            "Pierre-Auguste Renoir"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik ország nemzeti itala a szaké?",
+        "question": "Melyik városban rendezték a 2024-es nyári olimpiai játékokat?",
         "answers": [
+            "Párizs",
+            "Tokió",
+            "Los Angeles",
+            "London"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a neve az emberi test legnagyobb szervének?",
+        "answers": [
+            "Bőr",
+            "Máj",
+            "Tüdő",
+            "Vékonybél"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik kontinensen folyik a Nílus?",
+        "answers": [
+            "Afrika",
+            "Ázsia",
+            "Dél-Amerika",
+            "Európa"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki alkotta meg a relativitáselméletet?",
+        "answers": [
+            "Albert Einstein",
+            "Isaac Newton",
+            "Nikola Tesla",
+            "Stephen Hawking"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik hangszeren játszott világhírűen Louis Armstrong?",
+        "answers": [
+            "Trombita",
+            "Szaxofon",
+            "Zongora",
+            "Klarinét"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik országból származik a paella nevű nemzeti étel?",
+        "answers": [
+            "Spanyolország",
+            "Portugália",
+            "Mexikó",
+            "Argentína"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány fokos a derékszög?",
+        "answers": [
+            "90 fokos",
+            "45 fokos",
+            "180 fokos",
+            "360 fokos"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik görög isten volt a tengerek ura?",
+        "answers": [
+            "Poszeidón",
+            "Zeusz",
+            "Hádész",
+            "Apollón"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben csatlakozott Magyarország az Európai Unióhoz?",
+        "answers": [
+            "2004",
+            "1999",
+            "2007",
+            "2000"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a 'Rómeó és Júlia' című tragédiát?",
+        "answers": [
+            "William Shakespeare",
+            "Charles Dickens",
+            "Oscar Wilde",
+            "Molière"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik hegycsúcs a Föld legmagasabb pontja a tengerszint felett?",
+        "answers": [
+            "Mount Everest",
+            "K2",
+            "Kilimandzsáró",
+            "Mont Blanc"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen típusú hangszer a cselló?",
+        "answers": [
+            "Vonós hangszer",
+            "Fúvós hangszer",
+            "Ütőhangszer",
+            "Billentyűs hangszer"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik magyar feltaláló nevéhez fűződik a C-vitamin izolálása?",
+        "answers": [
+            "Szent-Györgyi Albert",
+            "Semmelweis Ignác",
+            "Neumann János",
+            "Eötvös Loránd"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik városban található a híres Brandenburgi kapu?",
+        "answers": [
+            "Berlin",
+            "München",
+            "Hamburg",
+            "Frankfurt"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány színe van az olimpiai ötkarikának (a fehér háttér nélkül)?",
+        "answers": [
+            "5",
+            "6",
+            "4",
+            "7"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik állatcsoportba tartozik a delfin?",
+        "answers": [
+            "Emlősök",
+            "Halak",
+            "Hüllők",
+            "Kétéltűek"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a hivatalos fizetőeszköz Svájcban?",
+        "answers": [
+            "Svájci frank",
+            "Euró",
+            "Korona",
+            "Font"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik rendező készítette a 'Ponyvaregény' és a 'Kill Bill' című filmeket?",
+        "answers": [
+            "Quentin Tarantino",
+            "Martin Scorsese",
+            "Ridley Scott",
+            "James Cameron"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik magyar városban található a Nagytemplom, a református egyház jelképe?",
+        "answers": [
+            "Debrecen",
+            "Szeged",
+            "Kecskemét",
+            "Nyíregyháza"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen gáz szükséges az égéshez a levegőből?",
+        "answers": [
+            "Oxigén",
+            "Nitrogén",
+            "Hidrogén",
+            "Argon"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki volt az első ember, aki űrrepülést hajtott végre 1961-ben?",
+        "answers": [
+            "Jurij Gagarin",
+            "Neil Armstrong",
+            "Buzz Aldrin",
+            "Alan Shepard"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország nemzeti zászlajában található egy vörös juharlevél?",
+        "answers": [
+            "Kanada",
             "Japán",
-            "Kína",
-            "Dél-Korea",
-            "Thaiföld"
+            "Dánia",
+            "Lengyelország"
         ],
         "correct": 0
     },
     {
-        "question": "Hány csontból áll nagyjából egy felnőtt emberi csontváz?",
+        "question": "Hány bábuval játszik egy játékos egy sakkparti elején?",
         "answers": [
-            "206",
-            "154",
-            "256",
-            "312"
+            "16",
+            "12",
+            "18",
+            "20"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik együttes frontembere volt Freddie Mercury?",
+        "question": "Melyik sportágban versenyeznek a Tour de France résztvevői?",
         "answers": [
-            "Queen",
-            "The Beatles",
-            "Led Zeppelin",
-            "Pink Floyd"
+            "Országúti kerékpározás",
+            "Autóversenyzés",
+            "Hosszútávfutás",
+            "Triatlon"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik magyar borvidékről származik az Egri Bikavér?",
+        "question": "Melyik magyar királyt koronázták meg 1000-ben?",
         "answers": [
-            "Egri borvidék",
-            "Villányi borvidék",
-            "Szekszárdi borvidék",
-            "Badacsonyi borvidék"
+            "I. (Szent) István",
+            "I. (Szent) László",
+            "Könyves Kálmán",
+            "IV. Béla"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik világvárosban található a Big Ben harangtorony?",
+        "question": "Mi a kémiai képlete a tiszta víznek?",
         "answers": [
-            "London",
-            "New York",
-            "Dublin",
-            "Edinburgh"
+            "H2O",
+            "CO2",
+            "NaCl",
+            "O2"
         ],
         "correct": 0
     },
     {
-        "question": "Milyen állat a dingo?",
+        "question": "Melyik kontinens a Föld legkisebb területű kontinense?",
         "answers": [
-            "Vadon élő kutya Ausztráliában",
-            "Dél-amerikai macskaféle",
-            "Afrikai antilop",
-            "Ázsiai majomfaj"
+            "Ausztrália",
+            "Európa",
+            "Antarktisz",
+            "Dél-Amerika"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik évben lépett ember először a Holdra?",
+        "question": "Ki írta 'Az ember tragédiája' című drámai költeményt?",
         "answers": [
-            "1969",
-            "1965",
-            "1972",
-            "1959"
+            "Madách Imre",
+            "Arany János",
+            "Petőfi Sándor",
+            "Vörösmarty Mihály"
         ],
         "correct": 0
     },
     {
-        "question": "Mi a golyóstoll magyar feltalálójának a neve?",
+        "question": "Melyik városban található a Sagrada Família templom?",
         "answers": [
-            "Bíró László József",
-            "Jedlik Ányos",
-            "Irinyi János",
-            "Teller Ede"
+            "Barcelona",
+            "Madrid",
+            "Sevilla",
+            "Lisszabon"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik sportágban nyerte legtöbb olimpiai aranyérmét Michael Phelps?",
+        "question": "Hány húrja van egy hagyományos hegedűnek?",
+        "answers": [
+            "4",
+            "6",
+            "5",
+            "3"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik bolygónak van a leglátványosabb gyűrűrendszere a Naprendszerben?",
+        "answers": [
+            "Szaturnusz",
+            "Uránusz",
+            "Jupiter",
+            "Neptunusz"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a fő alapanyaga a hagyományos japán miszó levesnek?",
+        "answers": [
+            "Erjesztett szójababpaszta",
+            "Kókusztej",
+            "Paradicsompüré",
+            "Sajtkrém"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik magyar folyó ömlik a Dunába Szegednél?",
+        "answers": [
+            "Tisza",
+            "Rába",
+            "Zala",
+            "Sajó"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki alakította Jack Sparrow kapitányt 'A Karib-tenger kalózai' filmekben?",
+        "answers": [
+            "Johnny Depp",
+            "Orlando Bloom",
+            "Brad Pitt",
+            "Leonardo DiCaprio"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben süllyedt el az RMS Titanic?",
+        "answers": [
+            "1912",
+            "1905",
+            "1918",
+            "1921"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen vitamin termelődik az emberi bőrben a napfény hatására?",
+        "answers": [
+            "D-vitamin",
+            "C-vitamin",
+            "B12-vitamin",
+            "K-vitamin"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország fővárosa Buenos Aires?",
+        "answers": [
+            "Argentína",
+            "Chile",
+            "Brazília",
+            "Peru"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány játékos alkot egy kosárlabdacsapatot egyszerre a pályán?",
+        "answers": [
+            "5",
+            "6",
+            "7",
+            "9"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik zeneszerző komponálta a 'Négy évszak' című hegedűverseny-sorozatot?",
+        "answers": [
+            "Antonio Vivaldi",
+            "Johann Sebastian Bach",
+            "Joseph Haydn",
+            "Georg Friedrich Händel"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a neve a kávéban található élénkítő hatású vegyületnek?",
+        "answers": [
+            "Koffein",
+            "Nikotin",
+            "Teobromin",
+            "Taurin"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik hegységben található Magyarország legmagasabb pontja, a Kékes?",
+        "answers": [
+            "Mátra",
+            "Bükk",
+            "Pilis",
+            "Mecsek"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország találmánya a szauna?",
+        "answers": [
+            "Finnország",
+            "Svédország",
+            "Norvégia",
+            "Észtország"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány százalékos a tiszta 24 karátos arany?",
+        "answers": [
+            "99,9% (közel 100%)",
+            "75%",
+            "58,5%",
+            "50%"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a 'Harry Potter' könyvsorozatot?",
+        "answers": [
+            "J. K. Rowling",
+            "J. R. R. Tolkien",
+            "C. S. Lewis",
+            "George R. R. Martin"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tenger választja el Olaszországot a Balkán-félszigettől?",
+        "answers": [
+            "Adriai-tenger",
+            "Égei-tenger",
+            "Tirrén-tenger",
+            "Jón-tenger"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a fotoszintézis egyik fő mellékterméke, amelyet a növények a levegőbe bocsátanak?",
+        "answers": [
+            "Oxigén",
+            "Szén-monoxid",
+            "Metán",
+            "Ammónia"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik országban található a Machu Picchu ősi inka romváros?",
+        "answers": [
+            "Peru",
+            "Bolívia",
+            "Kolumbia",
+            "Ecuador"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány bájt van egy kilobájtban (SI-előtag szerint)?",
+        "answers": [
+            "1000",
+            "100",
+            "512",
+            "10 000"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik magyar festő alkotta a 'Magányos cédrus' című képet?",
+        "answers": [
+            "Csontváry Kosztka Tivadar",
+            "Munkácsy Mihály",
+            "Szinyei Merse Pál",
+            "Rippl-Rónai József"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik édesség készül hagyományosan tojásfehérje habból és cukorból?",
+        "answers": [
+            "Habcsók",
+            "Marcipán",
+            "Nugát",
+            "Karamell"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik sportágban nyerte meg Egerszegi Krisztina öt olimpiai aranyérmét?",
         "answers": [
             "Úszás",
-            "Atlétika",
-            "Torna",
-            "Evezés"
+            "Kajak-kenu",
+            "Vívás",
+            "Torna"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik növény bogyója adja a gin jellegzetes fűszeres ízét?",
+        "question": "Mi a hivatalos nyelv Brazíliában?",
         "answers": [
-            "Boróka",
-            "Komló",
-            "Ánizs",
-            "Koriander"
+            "Portugál",
+            "Spanyol",
+            "Francia",
+            "Angol"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik ország fővárosa Reykjavík?",
+        "question": "Melyik állat szimbóluma látható a Porsche emblémájának közepén?",
         "answers": [
-            "Izland",
-            "Norvégia",
-            "Finnország",
-            "Dánia"
+            "Ágaskodó ló",
+            "Bika",
+            "Párduc",
+            "Sólyom"
         ],
         "correct": 0
     },
     {
-        "question": "Ki írta a 'Pál utcai fiúk' című regényt?",
+        "question": "Melyik magyar város híres a tűzzománcról és a Hírös Hét fesztiválról, valamint itt született Kodály Zoltán?",
         "answers": [
-            "Molnár Ferenc",
-            "Móra Ferenc",
-            "Jókai Mór",
-            "Gárdonyi Géza"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik bolygót nevezik a 'Vörös bolygónak'?",
-        "answers": [
-            "Mars",
-            "Vénusz",
-            "Jupiter",
-            "Merkúr"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Hány négyzetből áll egy hagyományos sakktábla?",
-        "answers": [
-            "64",
-            "32",
-            "81",
-            "100"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik olasz városból származik a világhírű Margherita pizza?",
-        "answers": [
-            "Nápoly",
-            "Róma",
-            "Velence",
-            "Firenze"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Milyen gázt lélegeznek be a növények a fotoszintézis során?",
-        "answers": [
-            "Szén-dioxidot",
-            "Oxigént",
-            "Nitrogént",
-            "Héliumot"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik óceán választja el Európát Észak-Amerikától?",
-        "answers": [
-            "Atlanti-óceán",
-            "Csendes-óceán",
-            "Indiai-óceán",
-            "Jeges-tenger"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Ki rendezte az 'Eredet' és a 'Csillagok között' filmeket?",
-        "answers": [
-            "Christopher Nolan",
-            "Steven Spielberg",
-            "Quentin Tarantino",
-            "Martin Scorsese"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik magyar tó Közép-Európa legnagyobb édesvizű tava?",
-        "answers": [
-            "Balaton",
-            "Velencei-tó",
-            "Tisza-tó",
-            "Fertő tó"
+            "Kecskemét",
+            "Szolnok",
+            "Békéscsaba",
+            "Veszprém"
         ],
         "correct": 0
     }
