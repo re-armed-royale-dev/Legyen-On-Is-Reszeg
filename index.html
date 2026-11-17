@@ -657,7 +657,7 @@
     <div id="share-loading-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-[110]">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-amber-500/10 rounded-full border border-amber-400/40 animate-pulse">
-                <span class="text-3xl">📤</span>
+                <span id="loading-modal-icon" class="text-3xl">📤</span>
             </div>
             <h3 id="loading-modal-title" class="text-lg font-black text-amber-400 mb-2">Betöltés...</h3>
             <p class="text-sm text-slate-300 font-semibold">
@@ -845,7 +845,7 @@
             hard: []
         };
 
-        let builtinQuestionsPromise = null;
+        const builtinFilePromises = {};
 
         // Kérdések és válaszok véletlenszerű keverése.
         function shuffleArray(array) {
@@ -895,60 +895,74 @@
             });
         }
 
-        // A JSON-fájlok betöltése.
-        async function loadBuiltinQuestionFiles() {
-            if (!builtinQuestionsPromise) {
-                builtinQuestionsPromise = (async () => {
-                    const loadedQuestions = {};
+        // Egy szint JSON-fájljának betöltése (szintenként külön, így a hibaüzenet
+        // mindig a kiválasztott szint fájlját nevezi meg).
+        async function loadBuiltinQuestionFile(difficulty) {
+            const fileName = QUESTION_FILES[difficulty];
 
-                    for (const [difficulty, fileName] of Object.entries(QUESTION_FILES)) {
-                        const fileUrl = new URL(fileName, document.baseURI);
+            if (!fileName) {
+                throw new Error("Ismeretlen nehézségi szint: " + difficulty);
+            }
 
-                        const response = await fetch(fileUrl.href, {
-                            cache: "no-store"
-                        });
+            if (!builtinFilePromises[difficulty]) {
+                builtinFilePromises[difficulty] = (async () => {
+                    const fileUrl = new URL(fileName, document.baseURI);
 
-                        if (!response.ok) {
-                            throw new Error(
-                                fileName + " betöltése sikertelen. HTTP: " +
-                                response.status
-                            );
-                        }
+                    const response = await fetch(fileUrl.href, {
+                        cache: "no-store"
+                    });
 
-                        const data = await response.json();
-
-                        if (
-                            !Array.isArray(data) ||
-                            data.length < QUESTIONS_PER_GAME ||
-                            !data.every(question =>
-                                question &&
-                                typeof question.question === "string" &&
-                                Array.isArray(question.answers) &&
-                                question.answers.length === 4 &&
-                                Number.isInteger(question.correct) &&
-                                question.correct >= 0 &&
-                                question.correct < 4
-                            )
-                        ) {
-                            throw new Error(
-                                fileName + " hibás kérdésadatokat tartalmaz."
-                            );
-                        }
-
-                        loadedQuestions[difficulty] = data;
+                    if (!response.ok) {
+                        throw new Error(
+                            fileName + " betöltése sikertelen. HTTP: " +
+                            response.status
+                        );
                     }
 
-                    Object.assign(ALL_BUILTIN_QUESTIONS, loadedQuestions);
+                    const data = await response.json();
 
-                    return ALL_BUILTIN_QUESTIONS;
+                    if (
+                        !Array.isArray(data) ||
+                        data.length < QUESTIONS_PER_GAME ||
+                        !data.every(question =>
+                            question &&
+                            typeof question.question === "string" &&
+                            Array.isArray(question.answers) &&
+                            question.answers.length === 4 &&
+                            Number.isInteger(question.correct) &&
+                            question.correct >= 0 &&
+                            question.correct < 4
+                        )
+                    ) {
+                        throw new Error(
+                            fileName + " hibás kérdésadatokat tartalmaz."
+                        );
+                    }
+
+                    ALL_BUILTIN_QUESTIONS[difficulty] = data;
+
+                    return data;
                 })().catch(error => {
-                    builtinQuestionsPromise = null;
-                    console.error("Kérdések betöltési hibája:", error);
+                    builtinFilePromises[difficulty] = null;
+                    console.error("Kérdések betöltési hibája (" + fileName + "):", error);
                     throw error;
                 });
             }
 
-            return builtinQuestionsPromise;
+            return builtinFilePromises[difficulty];
+        }
+
+        // Megadott szint (vagy szint nélkül mindhárom) JSON-fájljainak betöltése.
+        async function loadBuiltinQuestionFiles(difficulty) {
+            if (difficulty) {
+                await loadBuiltinQuestionFile(difficulty);
+            } else {
+                for (const key of Object.keys(QUESTION_FILES)) {
+                    await loadBuiltinQuestionFile(key);
+                }
+            }
+
+            return ALL_BUILTIN_QUESTIONS;
         }
 
         // Új véletlenszerű 20 kérdés előállítása.
@@ -1327,16 +1341,16 @@ async function selectRivalDifficulty(diffKey) {
 async function loadDifficulty(diffKey) {
     const requestId = ++difficultyLoadRequestId;
 
+    if (!QUESTION_FILES[diffKey]) {
+        diffKey = "easy";
+    }
+
     try {
-        // Megvárjuk a három JSON-fájl betöltését.
-        await loadBuiltinQuestionFiles();
+        // Megvárjuk a kiválasztott szint JSON-fájljának betöltését.
+        await loadBuiltinQuestionFiles(diffKey);
 
         // Ha közben másik szintet választottak, ezt a kérést már nem alkalmazzuk.
         if (requestId !== difficultyLoadRequestId) return;
-
-        if (!ALL_BUILTIN_QUESTIONS[diffKey]) {
-            diffKey = "easy";
-        }
 
         const newQuestions = createNewQuestionSet(diffKey);
 
@@ -1395,6 +1409,32 @@ async function loadDifficulty(diffKey) {
         // Régebbi, már felülírt kérés ne jelenítsen meg hibát.
         if (requestId !== difficultyLoadRequestId) return;
 
+        // Hiba esetén is a megnyomott szint legyen kijelölve (körvonallal és névvel).
+        currentDifficultyKey = diffKey;
+        const difficultyNames = { easy: "🟢 Könnyű", normal: "🟡 Normál", hard: "🔴 Nehéz" };
+        activeSetName = difficultyNames[diffKey] || activeSetName;
+
+        const failLabelEl = document.getElementById("active-set-label");
+        if (failLabelEl) {
+            failLabelEl.textContent = `${activeSetName} (${QUESTIONS_PER_GAME} kérdés)`;
+        }
+
+        const failRivalLabelEl = document.getElementById("rival-active-set-label");
+        if (failRivalLabelEl) {
+            failRivalLabelEl.textContent = activeSetName;
+        }
+
+        ["easy", "normal", "hard"].forEach(key => {
+            const btn = document.getElementById(`btn-diff-${key}`);
+            if (!btn) return;
+
+            if (key === diffKey) {
+                btn.classList.add("ring-2", "ring-yellow-400", "scale-[1.03]");
+            } else {
+                btn.classList.remove("ring-2", "ring-yellow-400", "scale-[1.03]");
+            }
+        });
+
         showFeedback(
             "Betöltési hiba",
             error.message || "Nem sikerült betölteni a kérdéseket.",
@@ -1425,6 +1465,7 @@ async function loadDifficulty(diffKey) {
                 } catch (e) { console.warn('Helyi kód olvasási hiba:', e); }
             }
 
+            document.getElementById('loading-modal-icon').textContent = "📥";
             document.getElementById('loading-modal-title').textContent = "Betöltés...";
             document.getElementById('loading-modal-text').textContent = "Kérdéssor letöltése a szerverről";
             toggleModal('share-loading-modal', true);
@@ -1806,9 +1847,8 @@ async function loadDifficulty(diffKey) {
 
         async function startGame() {
             try {
-                await loadBuiltinQuestionFiles();
-
                 if (currentDifficultyKey !== "custom") {
+                    await loadBuiltinQuestionFiles(currentDifficultyKey);
                     questions = createNewQuestionSet(currentDifficultyKey);
                 }
             } catch (error) {
@@ -1846,9 +1886,8 @@ async function loadDifficulty(diffKey) {
         /* ================= RIVÁLIS (1v1) LOGIKA ================= */
         async function startRivalGame() {
             try {
-                await loadBuiltinQuestionFiles();
-
                 if (currentDifficultyKey !== "custom") {
+                    await loadBuiltinQuestionFiles(currentDifficultyKey);
                     questions = createNewQuestionSet(currentDifficultyKey);
                 }
             } catch (error) {
@@ -2921,6 +2960,7 @@ async function loadDifficulty(diffKey) {
             const set = saved[name];
             if (!set || !set.length) return;
 
+            document.getElementById('loading-modal-icon').textContent = "📤";
             document.getElementById('loading-modal-title').textContent = "Megosztás";
             document.getElementById('loading-modal-text').textContent = "A kód generálása folyamatban van";
 
@@ -3061,8 +3101,6 @@ async function loadDifficulty(diffKey) {
 
         document.addEventListener("DOMContentLoaded", async () => {
             try {
-                await loadBuiltinQuestionFiles();
-
                 // Utoljára használt szint / kérdéssor visszaállítása.
                 const last = lsGetJSON('LastSelection', null);
                 const savedSets = lsGetJSON('SavedQuestions', {});
@@ -3081,7 +3119,7 @@ async function loadDifficulty(diffKey) {
                         if (rb) rb.classList.remove('ring-2', 'ring-yellow-400', 'scale-[1.03]');
                     });
                 } else {
-                    const startKey = (last && last.type === 'builtin' && ALL_BUILTIN_QUESTIONS[last.key]) ? last.key : 'easy';
+                    const startKey = (last && last.type === 'builtin' && QUESTION_FILES[last.key]) ? last.key : 'easy';
                     await loadDifficulty(startKey);
                     ['easy', 'normal', 'hard'].forEach(key => {
                         const rb = document.getElementById(`rival-btn-diff-${key}`);
