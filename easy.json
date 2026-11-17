@@ -1,146 +1,166 @@
 [
     {
-        "question": "Melyik országból származik a világhírű Tokaji aszú?",
+        "question": "Milyen színű a banán, amikor teljesen megérett?",
         "answers": [
-            "Magyarország",
-            "Franciaország",
-            "Olaszország",
-            "Spanyolország"
+            "Sárga",
+            "Kék",
+            "Lila",
+            "Fekete"
         ],
         "correct": 0
     },
     {
-        "question": "Hány lapból áll egy hagyományos magyar kártyapakli?",
+        "question": "Hány lába van egy átlagos kutyának?",
         "answers": [
-            "32 lapból",
-            "52 lapból",
-            "24 lapból",
-            "36 lapból"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik bolygó a Naprendszer legnagyobb bolygója?",
-        "answers": [
-            "Jupiter",
-            "Szaturnusz",
-            "Neptunusz",
-            "Föld"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Mi a klasszikus Mojito koktél alkoholos alapja?",
-        "answers": [
-            "Fehér rum",
-            "Vodka",
-            "Tequila",
-            "Whisky"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik városban található a híres Colosseum?",
-        "answers": [
-            "Róma",
-            "Athén",
-            "Milánó",
-            "Nápoly"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Hány percig tart egy rendes játékidejű labdarúgó-mérkőzés?",
-        "answers": [
-            "90 perc",
-            "80 perc",
-            "100 perc",
-            "60 perc"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik kontinensen található a Szahara sivatag?",
-        "answers": [
-            "Afrika",
-            "Ázsia",
-            "Dél-Amerika",
-            "Ausztrália"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Hány húrja van egy klasszikus akusztikus gitárnak?",
-        "answers": [
-            "6",
             "4",
-            "5",
+            "2",
+            "6",
             "8"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik magyar város híres a busójárásról?",
+        "question": "Melyik évszakban esik a legtöbb hó Magyarországon?",
         "answers": [
-            "Mohács",
+            "Tél",
+            "Nyár",
+            "Tavasz",
+            "Ősz"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Magyarország fővárosa?",
+        "answers": [
+            "Budapest",
             "Debrecen",
-            "Sopron",
-            "Eger"
+            "Szeged",
+            "Pécs"
         ],
         "correct": 0
     },
     {
-        "question": "Milyen színű a smaragd drágakő?",
+        "question": "Melyik állat adja a tejet, amiből a legtöbb sajtot készítik?",
         "answers": [
-            "Zöld",
-            "Kék",
-            "Piros",
-            "Sárga"
+            "Tehén",
+            "Tyúk",
+            "Sertés",
+            "Ló"
         ],
         "correct": 0
     },
     {
-        "question": "Hány napból áll egy szökőév?",
+        "question": "Hány perce van egy órának?",
         "answers": [
-            "366 napból",
-            "365 napból",
-            "364 napból",
-            "360 napból"
+            "60",
+            "30",
+            "100",
+            "24"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik állat látható a Ferrari logójában?",
+        "question": "Melyik gyümölcsből készül a klasszikus narancslé?",
         "answers": [
-            "Ágaskodó ló",
-            "Bika",
-            "Oroszlán",
-            "Sas"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Mi Japán fővárosa?",
-        "answers": [
-            "Tokió",
-            "Kiotó",
-            "Oszaka",
-            "Szöul"
-        ],
-        "correct": 0
-    },
-    {
-        "question": "Melyik gyümölcsből készül hagyományosan a valódi cider?",
-        "answers": [
+            "Narancs",
+            "Citrom",
             "Alma",
-            "Szőlő",
-            "Szilva",
-            "Barack"
+            "Körte"
         ],
         "correct": 0
     },
     {
-        "question": "Hány színe van a szivárványnak a hagyományos felosztás szerint?",
+        "question": "Milyen sportágban használják a korongot és az ütőt a jégen?",
+        "answers": [
+            "Jégkorong",
+            "Kosárlabda",
+            "Tenisz",
+            "Kézilabda"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik irányban kel fel a Nap?",
+        "answers": [
+            "Kelet",
+            "Nyugat",
+            "Észak",
+            "Dél"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány ujja van egy embernek összesen a két kezén?",
+        "answers": [
+            "10",
+            "8",
+            "12",
+            "5"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország zászlaja piros, fehér és zöld vízszintes csíkokból áll?",
+        "answers": [
+            "Magyarország",
+            "Németország",
+            "Franciaország",
+            "Ausztria"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a víz halmazállapota, amikor megfagy?",
+        "answers": [
+            "Jég (szilárd)",
+            "Gőz (légnemű)",
+            "Folyékony",
+            "Plazma"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik mesebeli figura orra nő meg, ha hazudik?",
+        "answers": [
+            "Pinokkió",
+            "Hófehérke",
+            "Hamupipőke",
+            "Pán Péter"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány kereke van egy hagyományos személyautónak (pótkerék nélkül)?",
+        "answers": [
+            "4",
+            "2",
+            "3",
+            "6"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik városban található az Eiffel-torony?",
+        "answers": [
+            "Párizs",
+            "Berlin",
+            "Madrid",
+            "Bécs"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen állat a Némó a híres rajzfilmben?",
+        "answers": [
+            "Bohóchal",
+            "Cápa",
+            "Bálna",
+            "Teknős"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány napból áll egy hét?",
         "answers": [
             "7",
             "5",
@@ -150,102 +170,432 @@
         "correct": 0
     },
     {
-        "question": "Melyik évszak következik a tavasz után?",
+        "question": "Melyik hangszeren játszik egy dobos?",
         "answers": [
-            "Nyár",
-            "Ősz",
-            "Tél",
-            "Előősz"
+            "Dob",
+            "Gitár",
+            "Trombita",
+            "Cselló"
         ],
         "correct": 0
     },
     {
-        "question": "Hány lába van egy pókeknek?",
+        "question": "Milyen színű a fű tavasszal?",
         "answers": [
-            "8",
-            "6",
-            "10",
+            "Zöld",
+            "Kék",
+            "Piros",
+            "Fehér"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik égitest adja a Földnek a legtöbb fényt és meleget nappal?",
+        "answers": [
+            "Nap",
+            "Hold",
+            "Szaturnusz",
+            "Sarkcsillag"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Miből készítik a hagyományos sült krumplit?",
+        "answers": [
+            "Burgonyából",
+            "Sárgarépából",
+            "Uborkából",
+            "Paradicsomból"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány oldala van egy háromszögnek?",
+        "answers": [
+            "3",
+            "4",
+            "5",
+            "6"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ünnepet tartjuk december 25-én és 26-án?",
+        "answers": [
+            "Karácsony",
+            "Húsvét",
+            "Pünkösd",
+            "Szilveszter"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik rovar készíti a mézet?",
+        "answers": [
+            "Méh",
+            "Hangya",
+            "Szúnyog",
+            "Katicabogár"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen nyelven beszélnek hivatalosan Ausztriában?",
+        "answers": [
+            "Németül",
+            "Angolul",
+            "Olaszul",
+            "Spanyolul"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik sporteszközt rúgják a focisták?",
+        "answers": [
+            "Labda",
+            "Korong",
+            "Tollaslabda",
+            "Golyó"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány másodperc van egy percben?",
+        "answers": [
+            "60",
+            "100",
+            "50",
+            "12"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik kontinensen található Magyarország?",
+        "answers": [
+            "Európa",
+            "Ázsia",
+            "Afrika",
+            "Dél-Amerika"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen színű a közlekedési lámpa 'állj' jelzése?",
+        "answers": [
+            "Piros",
+            "Zöld",
+            "Kék",
+            "Lila"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik állat ugat?",
+        "answers": [
+            "Kutya",
+            "Macska",
+            "Hal",
+            "Kígyó"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évszakban hullanak le a falevelek a fákról?",
+        "answers": [
+            "Ősz",
+            "Tavasz",
+            "Nyár",
+            "Tél"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi a neve a híres brit titkosügynöknek, akinek a kódneve 007?",
+        "answers": [
+            "James Bond",
+            "Sherlock Holmes",
+            "Harry Potter",
+            "Robin Hood"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány foga van alaphelyzetben egy dobókockának az oldalain (1-től meddig vannak a pöttyök)?",
+        "answers": [
+            "6-ig",
+            "4-ig",
+            "8-ig",
+            "10-ig"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik zöldség narancssárga és a nyulak kedvence a mesékben?",
+        "answers": [
+            "Sárgarépa",
+            "Káposzta",
+            "Hagyma",
+            "Retek"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik hónap az év legelső hónapja?",
+        "answers": [
+            "Január",
+            "Február",
+            "Március",
+            "December"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen alakú a Föld bolygó?",
+        "answers": [
+            "Gömb alakú",
+            "Kocka alakú",
+            "Piramis alakú",
+            "Henger alakú"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik állatnak van nagyon hosszú nyaka?",
+        "answers": [
+            "Zsiráf",
+            "Víziló",
+            "Pingvin",
+            "Sün"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Miből főzik a klasszikus feketekávét?",
+        "answers": [
+            "Kávébabból",
+            "Tealevélből",
+            "Kakaóbabból",
+            "Búzából"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány játékos van egyszerre a pályán egy focicsapatban (kapussal együtt)?",
+        "answers": [
+            "11",
+            "7",
+            "5",
+            "15"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tenger mossa Horvátország partjait?",
+        "answers": [
+            "Adriai-tenger",
+            "Északi-tenger",
+            "Balti-tenger",
+            "Fekete-tenger"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen színű a tiszta hó?",
+        "answers": [
+            "Fehér",
+            "Fekete",
+            "Narancssárga",
+            "Barna"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik édesség alapanyaga a kakaóbab?",
+        "answers": [
+            "Csokoládé",
+            "Gumicukor",
+            "Vattacukor",
+            "Pattogatott kukorica"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány oldala van egy négyzetnek?",
+        "answers": [
+            "4",
+            "3",
+            "5",
+            "2"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik szuperhős visel piros-kék pókjelmezt?",
+        "answers": [
+            "Pókember",
+            "Batman",
+            "Superman",
+            "Vasember"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik állat a 'dzsungel királya'?",
+        "answers": [
+            "Oroszlán",
+            "Zebra",
+            "Majom",
+            "Papagáj"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik irányba nézünk, ha a hátunk mögött van Észak?",
+        "answers": [
+            "Dél",
+            "Kelet",
+            "Nyugat",
+            "Északkelet"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mivel írunk hagyományosan a füzetbe vagy papírra?",
+        "answers": [
+            "Tollal vagy ceruzával",
+            "Ecsettel",
+            "Kréta helyett villával",
+            "Ollóval"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország híres a piramisairól és a fáraóiról?",
+        "answers": [
+            "Egyiptom",
+            "Görögország",
+            "Svédország",
+            "Brazília"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány keréken gurul egy hagyományos kerékpár?",
+        "answers": [
+            "2",
+            "1",
+            "3",
             "4"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik ital készül hagyományosan agávéból Mexikóban?",
+        "question": "Milyen színű a paradicsom, amikor érett?",
         "answers": [
-            "Tequila",
-            "Gin",
-            "Whisky",
-            "Konyak"
+            "Piros",
+            "Kék",
+            "Fehér",
+            "Szürke"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik Magyarország leghosszabb folyója?",
+        "question": "Melyik hónap a legrövidebb az évben?",
         "answers": [
-            "Duna",
-            "Tisza",
-            "Rába",
-            "Dráva"
+            "Február",
+            "Április",
+            "Június",
+            "Szeptember"
         ],
         "correct": 0
     },
     {
-        "question": "Hány órából áll egy teljes nap?",
+        "question": "Melyik állat tud repülni az alábbiak közül?",
         "answers": [
-            "24 órából",
-            "12 órából",
-            "48 órából",
-            "36 órából"
+            "Sas",
+            "Elefánt",
+            "Krokodil",
+            "Bálna"
         ],
         "correct": 0
     },
     {
-        "question": "Milyen színű a klasszikus Pina Colada koktél?",
+        "question": "Melyik magyar városban található a Hősök tere?",
         "answers": [
-            "Fehéres-krémszínű",
-            "Élénkpiros",
-            "Mélykék",
-            "Fekete"
+            "Budapest",
+            "Győr",
+            "Miskolc",
+            "Székesfehérvár"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik kontinensen élnek vadon a kenguruk?",
+        "question": "Mi a neve annak a sportnak, ahol ütővel és kis sárga labdával játszanak háló felett?",
         "answers": [
-            "Ausztrália",
-            "Európa",
-            "Észak-Amerika",
-            "Afrika"
+            "Tenisz",
+            "Golf",
+            "Birkózás",
+            "Úszás"
         ],
         "correct": 0
     },
     {
-        "question": "Hány hónapból áll egy naptári év?",
+        "question": "Milyen színű a citrom héja?",
         "answers": [
-            "12",
-            "10",
-            "11",
-            "13"
+            "Sárga",
+            "Piros",
+            "Kék",
+            "Barna"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik hangszer fekete-fehér billentyűin játszik a zongorista?",
+        "question": "Hány évszak van egy évben Magyarországon?",
         "answers": [
-            "Zongora",
-            "Hegedű",
-            "Fuvola",
-            "Dob"
+            "4",
+            "2",
+            "3",
+            "5"
         ],
         "correct": 0
     },
     {
-        "question": "Melyik égitest kering közvetlenül a Föld körül?",
+        "question": "Melyik testrészünkkel hallunk?",
         "answers": [
-            "Hold",
-            "Mars",
-            "Vénusz",
-            "Merkúr"
+            "Fül",
+            "Szem",
+            "Orr",
+            "Kéz"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tésztaétel származik Olaszországból?",
+        "answers": [
+            "Spagetti",
+            "Gulyásleves",
+            "Szusi",
+            "Tacos"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen állat a Micimackó?",
+        "answers": [
+            "Medve",
+            "Malac",
+            "Tigris",
+            "Szamár"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány óra van éjfélkor a 24 órás órán?",
+        "answers": [
+            "00:00",
+            "12:00",
+            "18:00",
+            "06:00"
         ],
         "correct": 0
     }
