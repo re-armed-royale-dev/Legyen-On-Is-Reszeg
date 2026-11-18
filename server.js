@@ -1,4 +1,3 @@
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -10,6 +9,12 @@ const {
   registerLicenseRoutes,
   initializeLicenseTables
 } = require("./license-system");
+
+// iOS AKTIVÁLÓRENDSZER
+const {
+  registerIosActivationRoutes,
+  initializeIosActivationTables
+} = require("./ios-activation");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -47,6 +52,9 @@ const pool = process.env.DATABASE_URL
 
 // LICENCKULCS-KEZELŐ API-VÉGPONTOK REGISZTRÁLÁSA
 registerLicenseRoutes(app, pool);
+
+// iOS AKTIVÁLÁSI API-VÉGPONTOK REGISZTRÁLÁSA
+registerIosActivationRoutes(app, pool);
 
 // ANDROID ALKALMAZÁS FRISSÍTÉSI BEÁLLÍTÁSAI
 const APP_VERSION_CODE = Number(process.env.APP_VERSION_CODE || 2);
@@ -265,9 +273,13 @@ async function initializeDatabase() {
   // LICENCRENDSZER ADATBÁZISTÁBLÁINAK LÉTREHOZÁSA
   await initializeLicenseTables(pool);
 
+  // iOS AKTIVÁLÁSI ADATBÁZISTÁBLÁK LÉTREHOZÁSA
+  await initializeIosActivationTables(pool);
+
   console.log("Supabase adatbázis csatlakoztatva!");
   console.log("quiz_shares tábla ellenőrizve!");
   console.log("Licencrendszer adatbázistáblái ellenőrizve!");
+  console.log("iOS aktiválási adatbázistáblái ellenőrizve!");
 }
 
 // FŐOLDAL
@@ -976,6 +988,7 @@ initializeDatabase()
       console.log("Alkalmazás verzió: " + APP_VERSION_NAME);
       console.log("Minimális verzió: " + MIN_SUPPORTED_VERSION_CODE);
       console.log("Licencrendszer elindult.");
+      console.log("iOS aktiválási rendszer elindult!");
     });
   })
   .catch((error) => {
