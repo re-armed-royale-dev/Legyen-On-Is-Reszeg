@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Legyen Ön is Részeg! – Party Kvíz Show</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         html, body {
@@ -40,17 +40,6 @@
         .red-cup-shadow {
             filter: drop-shadow(0 4px 6px rgba(220, 38, 38, 0.55));
         }
-        /* A játék poharai (SVG) szűrő nélkül: sokkal gyorsabb renderelés. */
-        svg.red-cup-shadow {
-            filter: none;
-        }
-
-        /* A teljes képernyős háttérelmosás (backdrop-filter) mobilon nagyon költséges. */
-        .backdrop-blur-sm,
-        .backdrop-blur-md {
-            -webkit-backdrop-filter: none !important;
-            backdrop-filter: none !important;
-        }
 
         @keyframes titleRgbGradientFlow {
             0% { background-position: 0% 50%; }
@@ -75,37 +64,21 @@
         }
 
         @keyframes allinGlow {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
+            0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), 0 0 25px rgba(239, 68, 68, 0.7); }
+            100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4); }
         }
         .all-in-btn {
-            position: relative;
-            box-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4);
+            animation: allinGlow 1.5s infinite ease-in-out;
             background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
             color: #ffffff;
             border: 1px solid #fca5a5;
-        }
-        /* Az erősebb ragyogás külön rétegen pulzál (csak opacitás, így GPU-barát). */
-        .all-in-btn::after {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), 0 0 25px rgba(239, 68, 68, 0.7);
-            opacity: 0;
-            pointer-events: none;
-            will-change: opacity;
-            animation: allinGlow 1.5s infinite ease-in-out;
-        }
-        .all-in-btn:disabled::after {
-            animation: none;
         }
 
         .answer-card {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
             border: 2px solid rgba(234, 179, 8, 0.35);
-            transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .answer-card:hover:not(.disabled-card) {
             border-color: #eab308;
