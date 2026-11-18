@@ -1169,10 +1169,29 @@
         const ACTIVATE_MAX_FAILS = 3;
         let activateBanInterval = null;
 
+        // A tiltás végét a készüléken is eltároljuk, mert a szerver állapot-lekérdezése frissítés után
+        // nem mindig adja vissza. Így az oldal újratöltése után sem tűnik el a tiltás.
+        const ACTIVATE_BAN_STORAGE_KEY = 'iosActivationBanUntil';
+
+        function getStoredBanUntil() {
+            const value = Number(localStorage.getItem(ACTIVATE_BAN_STORAGE_KEY)) || 0;
+            if (value && value <= Date.now()) {
+                localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
+                return 0;
+            }
+            return value;
+        }
+
+        function storeBanUntil(ms) {
+            if (ms && ms > Date.now()) lsSet(ACTIVATE_BAN_STORAGE_KEY, String(ms));
+        }
+
         function getActivateLock() {
+            const serverUntil = iosAttemptState.lockedUntil ? (new Date(iosAttemptState.lockedUntil).getTime() || 0) : 0;
+            if (serverUntil > Date.now()) storeBanUntil(serverUntil);
             return {
                 fails: Number(iosAttemptState.failedAttempts) || 0,
-                lockedUntil: iosAttemptState.lockedUntil ? new Date(iosAttemptState.lockedUntil).getTime() : 0
+                lockedUntil: Math.max(serverUntil, getStoredBanUntil())
             };
         }
 
@@ -1184,6 +1203,7 @@
             } catch (error) {
                 console.warn('iOS próbálkozási állapot nem érhető el:', error);
             }
+            getActivateLock(); // ha a szerver tiltást jelez, elmenti helyben is
             return iosAttemptState;
         }
 
@@ -1287,6 +1307,7 @@
                     localStorage.setItem('iosActivationToken', data.token);
                     iosActivationActive = true;
                     iosAttemptState = { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
+                    localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
                     input.value = '';
                     toggleModal('activate-key-modal', false);
                     playSuccessSound();
