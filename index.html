@@ -1119,8 +1119,25 @@
                 (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
 
+        // iOS Activate Key: a jogosultságot a szerver igazolja, nem a HTML.
+        let iosActivationActive = false;
+        let iosActivationToken = '';
+        let iosAttemptState = { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
+
+        function getIosInstallId() {
+            let id = localStorage.getItem('iosActivationInstallId');
+            if (!id) {
+                const bytes = new Uint8Array(16);
+                if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+                else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+                id = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                localStorage.setItem('iosActivationInstallId', id);
+            }
+            return id;
+        }
+
         function isKeyFullyUnlocked() {
-            return localStorage.getItem('iosKeyFullyUnlocked') === 'true';
+            return iosActivationActive;
         }
 
         function isFeatureUnlocked(featureKey) {
@@ -1130,70 +1147,84 @@
             return states[featureKey] && states[featureKey].expiresAt > now;
         }
 
-        // ===== Activate Key tiltás (3 hibás próbálkozás = 30 nap) =====
+        // ===== Szerveroldali Activate Key és 30 napos tiltás =====
         const ACTIVATE_MAX_FAILS = 3;
-        const ACTIVATE_BAN_MS = 30 * 24 * 60 * 60 * 1000;
         let activateBanInterval = null;
 
         function getActivateLock() {
-            const data = lsGetJSON('ActivateKeyLock', {});
             return {
-                fails: Number(data.fails) || 0,
-                lockedUntil: Number(data.lockedUntil) || 0
+                fails: Number(iosAttemptState.failedAttempts) || 0,
+                lockedUntil: iosAttemptState.lockedUntil ? new Date(iosAttemptState.lockedUntil).getTime() : 0
             };
         }
 
-        function saveActivateLock(lock) {
-            lsSetJSON('ActivateKeyLock', lock);
+        async function refreshIosAttemptStatus() {
+            try {
+                const response = await fetch(`${QUIZ_API_BASE}/api/ios/attempt-status`, { cache: 'no-store' });
+                const data = await response.json();
+                if (response.ok && data.success) iosAttemptState = data;
+            } catch (error) {
+                console.warn('iOS próbálkozási állapot nem érhető el:', error);
+            }
+            return iosAttemptState;
         }
 
-        // Hátralévő tiltási idő ms-ban (0, ha nincs tiltás). Lejárt tiltást töröl.
+        async function syncIosActivation() {
+            iosActivationToken = localStorage.getItem('iosActivationToken') || '';
+            iosActivationActive = false;
+            if (iosActivationToken) {
+                try {
+                    const response = await fetch(`${QUIZ_API_BASE}/api/ios/status`, {
+                        headers: { Authorization: `Bearer ${iosActivationToken}` },
+                        cache: 'no-store'
+                    });
+                    const data = await response.json();
+                    iosActivationActive = Boolean(response.ok && data.success && data.active);
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('iosActivationToken');
+                        iosActivationToken = '';
+                    }
+                } catch (error) {
+                    // Átmeneti hálózati hiba esetén megtartjuk a tokent, de nem oldunk fel.
+                    console.warn('iOS aktiválás ellenőrzése nem sikerült:', error);
+                }
+            }
+            await refreshIosAttemptStatus();
+            return iosActivationActive;
+        }
+
         function getActivateBanRemainingMs() {
-            const lock = getActivateLock();
-            if (!lock.lockedUntil) return 0;
-            const remaining = lock.lockedUntil - Date.now();
-            if (remaining <= 0) {
-                saveActivateLock({ fails: 0, lockedUntil: 0 });
-                return 0;
-            }
-            return remaining;
+            const until = getActivateLock().lockedUntil;
+            return until ? Math.max(0, until - Date.now()) : 0;
         }
 
-        function openActivateKeyModal() {
-            if (getActivateBanRemainingMs() > 0) {
-                showActivateBanModal();
-            } else {
-                toggleModal('activate-key-modal', true);
-            }
+        async function openActivateKeyModal() {
+            await refreshIosAttemptStatus();
+            if (getActivateBanRemainingMs() > 0) showActivateBanModal();
+            else toggleModal('activate-key-modal', true);
         }
 
         function updateActivateBanCountdown() {
             const remaining = getActivateBanRemainingMs();
             if (remaining <= 0) {
-                closeActivateBanModal();
-                toggleModal('activate-key-modal', true);
+                if (activateBanInterval) clearInterval(activateBanInterval);
+                activateBanInterval = null;
+                toggleModal('activate-ban-modal', false);
                 return;
             }
-
             const totalSec = Math.floor(remaining / 1000);
             const days = Math.floor(totalSec / 86400);
             const hours = Math.floor((totalSec % 86400) / 3600);
             const minutes = Math.floor((totalSec % 3600) / 60);
             const seconds = totalSec % 60;
             const pad = n => String(n).padStart(2, '0');
-
-            const set = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
-            };
+            const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
             set('ban-days-val', days);
             set('ban-hours-val', pad(hours));
             set('ban-minutes-val', pad(minutes));
             set('ban-seconds-val', pad(seconds));
             set('ban-days-text', `${Math.ceil(remaining / 86400000)} nap`);
-
-            const lock = getActivateLock();
-            set('ban-until-date', new Date(lock.lockedUntil).toLocaleString('hu-HU'));
+            set('ban-until-date', new Date(getActivateLock().lockedUntil).toLocaleString('hu-HU'));
         }
 
         function showActivateBanModal() {
@@ -1201,47 +1232,53 @@
             toggleModal('activate-ban-modal', true);
             if (activateBanInterval) clearInterval(activateBanInterval);
             updateActivateBanCountdown();
-            activateBanInterval = setInterval(updateActivateBanCountdown, 500);
+            activateBanInterval = setInterval(updateActivateBanCountdown, 1000);
         }
 
         function closeActivateBanModal() {
-            if (activateBanInterval) {
-                clearInterval(activateBanInterval);
-                activateBanInterval = null;
-            }
+            if (activateBanInterval) { clearInterval(activateBanInterval); activateBanInterval = null; }
             toggleModal('activate-ban-modal', false);
         }
 
-        function verifyActivateKey() {
-            if (getActivateBanRemainingMs() > 0) {
-                showActivateBanModal();
+        async function verifyActivateKey() {
+            const input = document.getElementById('activate-key-input');
+            const inputVal = input.value.trim();
+            if (!/^\d{12}$/.test(inputVal)) {
+                showFeedback('Hibás kulcs', 'Pontosan 12 számjegyű aktiválókulcsot adj meg!', '❌');
                 return;
             }
-
-            const inputVal = document.getElementById('activate-key-input').value.trim();
-            if (inputVal === '172919382549') {
-                saveActivateLock({ fails: 0, lockedUntil: 0 });
-                localStorage.setItem('iosKeyFullyUnlocked', 'true');
-                toggleModal('activate-key-modal', true); // keep or close
-                toggleModal('activate-key-modal', false);
-                document.getElementById('activate-key-input').value = '';
-                playSuccessSound();
-                applyPlatformRestrictions();
-                showFeedback("Sikeres aktiválás!", "Gratulálunk! Az összes iOS-en korlátozott funkció <strong>véglegesen feloldásra került</strong> ezen a készüléken!", "🔓");
-            } else {
-                playDrinkSound();
-                const lock = getActivateLock();
-                lock.fails += 1;
-
-                if (lock.fails >= ACTIVATE_MAX_FAILS) {
-                    lock.lockedUntil = Date.now() + ACTIVATE_BAN_MS;
-                    saveActivateLock(lock);
-                    document.getElementById('activate-key-input').value = '';
-                    showActivateBanModal();
+            const activateButton = document.querySelector('#activate-key-modal button[onclick="verifyActivateKey()"]');
+            if (activateButton) { activateButton.disabled = true; activateButton.textContent = '⏳ Ellenőrzés...'; }
+            try {
+                const response = await fetch(`${QUIZ_API_BASE}/api/ios/activate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ activationKey: inputVal, installId: getIosInstallId() }),
+                    cache: 'no-store'
+                });
+                const data = await response.json();
+                if (response.ok && data.success && data.token) {
+                    iosActivationToken = data.token;
+                    localStorage.setItem('iosActivationToken', data.token);
+                    iosActivationActive = true;
+                    iosAttemptState = { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
+                    input.value = '';
+                    toggleModal('activate-key-modal', false);
+                    playSuccessSound();
+                    applyPlatformRestrictions();
+                    showFeedback('Sikeres aktiválás!', 'A szerver sikeresen ellenőrizte a kulcsot. Az iOS-en korlátozott funkciók feloldásra kerültek ezen a telepítésen.', '🔓');
                 } else {
-                    saveActivateLock(lock);
-                    showFeedback("Hibás kulcs", `A megadott biztonsági kulcs helytelen. Hátralévő próbálkozások: <strong>${ACTIVATE_MAX_FAILS - lock.fails}</strong>.<br>${ACTIVATE_MAX_FAILS} sikertelen aktiválás után a kulcs beírása 30 napra letiltásra kerül!`, "❌");
+                    playDrinkSound();
+                    input.value = '';
+                    if (data.lockedUntil) iosAttemptState = data;
+                    else await refreshIosAttemptStatus();
+                    if (getActivateBanRemainingMs() > 0 || response.status === 429) showActivateBanModal();
+                    else showFeedback('Hibás kulcs', `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts ?? 0}</strong>.`, '❌');
                 }
+            } catch (error) {
+                showFeedback('Kapcsolati hiba', 'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.', '⚠️');
+            } finally {
+                if (activateButton) { activateButton.disabled = false; activateButton.textContent = '✅ Kulcs aktiválása'; }
             }
         }
 
@@ -3510,6 +3547,7 @@ async function loadDifficulty(diffKey) {
                 );
             }
 
+            await syncIosActivation();
             applyPlatformRestrictions();
             initAudioSettingsUI();
 
