@@ -2207,33 +2207,16 @@ async function loadDifficulty(diffKey) {
                 ${extraNotes ? `<div class="mt-2 text-xs text-amber-300 font-semibold">${extraNotes}</div>` : ''}
             `;
 
-            if (p1.glasses === 0 && p1.lifelines.refillCount < 2) {
-                window.rivalRefillTargetPlayer = 1;
-                const refillActionsHTML = `
-                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeRivalModalRefill()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
-                        🍷 ${p1.name} Poharak Újratöltése (10 db) (${2 - p1.lifelines.refillCount} maradt)
-                    </button>
-                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal(); proceedAfterRivalCheck(${p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
-                        Kihagyás / Tovább
-                    </button>
-                `;
-                showFeedback(`ELFOGYTAK A POHARAI: ${p1.name}!`, summaryHTML + `<br><strong>${p1.name}</strong> elveszítette az összes poharát, de van még újratöltése!`, "🍷", null, refillActionsHTML);
-                nextBtn.textContent = '➡️ Következő kérdés';
-                return;
-            }
+            // Mindenki, akinek elfogytak a poharai és van még újratöltése, sorra megkapja a lehetőséget.
+            const refillQueue = [];
+            if (p1.glasses === 0 && p1.lifelines.refillCount < 2) refillQueue.push(1);
+            if (p2.glasses === 0 && p2.lifelines.refillCount < 2) refillQueue.push(2);
 
-            if (p2.glasses === 0 && p2.lifelines.refillCount < 2) {
-                window.rivalRefillTargetPlayer = 2;
-                const refillActionsHTML = `
-                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeRivalModalRefill()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
-                        🍷 ${p2.name} Poharak Újratöltése (10 db) (${2 - p2.lifelines.refillCount} maradt)
-                    </button>
-                    <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeFeedbackModal(); proceedAfterRivalCheck(${p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
-                        Kihagyás / Tovább
-                    </button>
-                `;
-                showFeedback(`ELFOGYTAK A POHARAI: ${p2.name}!`, summaryHTML + `<br><strong>${p2.name}</strong> elveszítette az összes poharát, de van még újratöltése!`, "🍷", null, refillActionsHTML);
+            if (refillQueue.length > 0) {
+                window.rivalRefillQueue = refillQueue;
+                window.rivalRefillSummary = summaryHTML;
                 nextBtn.textContent = '➡️ Következő kérdés';
+                showRivalRefillPrompt();
                 return;
             }
 
@@ -2242,24 +2225,68 @@ async function loadDifficulty(diffKey) {
             showFeedback("⚔️ Párbaj Felfedés!", summaryHTML, "🍻");
         }
 
+        // A sorban következő játékos újratöltési ablaka.
+        function showRivalRefillPrompt() {
+            const queue = window.rivalRefillQueue || [];
+            if (queue.length === 0) {
+                proceedAfterRivalCheck(isRivalMatchOver());
+                return;
+            }
+
+            const pNum = queue[0];
+            const pl = rivalPlayers[pNum];
+            window.rivalRefillTargetPlayer = pNum;
+
+            const summary = window.rivalRefillSummary || '';
+            window.rivalRefillSummary = null;
+
+            const refillActionsHTML = `
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); executeRivalModalRefill()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-black py-3.5 rounded-xl text-base cursor-pointer mb-2">
+                    🍷 ${pl.name} Poharak Újratöltése (10 db) (${2 - pl.lifelines.refillCount} maradt)
+                </button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); skipRivalRefill()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                    Kihagyás / Tovább
+                </button>
+            `;
+            showFeedback(`ELFOGYTAK A POHARAI: ${pl.name}!`, summary + `<br><strong>${pl.name}</strong> elveszítette az összes poharát, de van még újratöltése!`, "🍷", null, refillActionsHTML);
+        }
+
+        function skipRivalRefill() {
+            closeFeedbackModal();
+            const queue = window.rivalRefillQueue || [];
+            queue.shift();
+
+            if (queue.length > 0) {
+                showRivalRefillPrompt();
+            } else {
+                proceedAfterRivalCheck(isRivalMatchOver());
+            }
+        }
+
+        function isRivalMatchOver() {
+            const p1 = rivalPlayers[1];
+            const p2 = rivalPlayers[2];
+            return (p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1);
+        }
+
         function executeRivalModalRefill() {
             const targetPNum = window.rivalRefillTargetPlayer || 1;
             rivalPlayers[targetPNum].glasses = 10;
             rivalPlayers[targetPNum].lifelines.refillCount++;
-            
+
+            const queue = window.rivalRefillQueue || [];
+            const qIdx = queue.indexOf(targetPNum);
+            if (qIdx !== -1) queue.splice(qIdx, 1);
+
             document.getElementById(`rival-p${targetPNum}-glasses`).textContent = `10 🍷`;
             playSuccessSound();
             closeFeedbackModal();
 
             showFeedback("Poharak újratöltve!", `<strong>${rivalPlayers[targetPNum].name}</strong> készlete újra <strong>10 darab piros pohár</strong>! (${2 - rivalPlayers[targetPNum].lifelines.refillCount} újratöltés maradt)`, "🍷", () => {
-                const p1 = rivalPlayers[1];
-                const p2 = rivalPlayers[2];
-                const isMatchOver = (p1.glasses === 0 || p2.glasses === 0 || currentQuestionIndex >= questions.length - 1);
-                if (isMatchOver) {
-                    endRivalMatch();
+                if (queue.length > 0) {
+                    showRivalRefillPrompt();
                 } else {
-                    currentQuestionIndex++;
-                    prepareQuestion();
+                    proceedAfterRivalCheck(isRivalMatchOver());
                 }
             });
         }
