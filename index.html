@@ -162,7 +162,7 @@
             <button onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('updates-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
                 ✨ Újdonságok
             </button>
-            <button id="ios-activate-key-btn" onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('activate-key-modal', true)" class="hidden bg-amber-600/90 hover:bg-amber-500 border border-amber-400 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer shadow-md">
+            <button id="ios-activate-key-btn" onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openActivateKeyModal()" class="hidden bg-amber-600/90 hover:bg-amber-500 border border-amber-400 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer shadow-md">
                 🔑 Activate Key
             </button>
             <button onclick="event.stopPropagation(); playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('rules-modal', true)" class="bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer">
@@ -554,6 +554,11 @@
             <h2 id="question-text" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-snug">
                 Kérdés betöltése...
             </h2>
+            <div id="question-image-wrap" class="hidden mt-3 mx-auto w-full max-w-xl">
+                <div class="relative w-full aspect-video bg-black/60 rounded-2xl overflow-hidden border border-yellow-500/30">
+                    <img id="question-image" alt="" class="absolute inset-0 w-full h-full object-contain">
+                </div>
+            </div>
             <p id="instruction-hint" class="text-xs sm:text-sm text-yellow-400/90 mt-2">
                 Válassz ki egy választ (vagy használd az ALL-IN / + / − gombokat), és helyezd el az összes poharadat!
             </p>
@@ -685,6 +690,64 @@
             </button>
         </div>
     </div>
+
+    <!-- ACTIVATE KEY TILTÁS ABLAK -->
+    <div id="activate-ban-modal" class="hidden fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-[110]" onclick="closeActivateBanModal()">
+        <div class="bg-slate-900 border-2 border-red-500/70 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center" onclick="event.stopPropagation()">
+            <div class="text-5xl mb-3">⛔</div>
+            <h3 class="text-xl font-black text-red-400 mb-2">Aktiválás letiltva</h3>
+            <p class="text-sm text-slate-200 mb-5 leading-relaxed">
+                3 sikertelen aktiválás után a rendszer <strong>letiltotta a kulcs beírását 30 napra!</strong>
+            </p>
+            <div class="grid grid-cols-4 gap-2 mb-3">
+                <div class="bg-slate-950 border border-red-500/40 rounded-xl py-2">
+                    <div id="ban-days-val" class="text-2xl font-black font-mono text-yellow-300">30</div>
+                    <div class="text-[10px] uppercase text-slate-400 font-bold">Nap</div>
+                </div>
+                <div class="bg-slate-950 border border-red-500/40 rounded-xl py-2">
+                    <div id="ban-hours-val" class="text-2xl font-black font-mono text-yellow-300">00</div>
+                    <div class="text-[10px] uppercase text-slate-400 font-bold">Óra</div>
+                </div>
+                <div class="bg-slate-950 border border-red-500/40 rounded-xl py-2">
+                    <div id="ban-minutes-val" class="text-2xl font-black font-mono text-yellow-300">00</div>
+                    <div class="text-[10px] uppercase text-slate-400 font-bold">Perc</div>
+                </div>
+                <div class="bg-slate-950 border border-red-500/40 rounded-xl py-2">
+                    <div id="ban-seconds-val" class="text-2xl font-black font-mono text-yellow-300">00</div>
+                    <div class="text-[10px] uppercase text-slate-400 font-bold">Mp</div>
+                </div>
+            </div>
+            <p class="text-sm text-slate-200 mb-1">Újrapróbálkozhatsz kb. <strong id="ban-days-text" class="text-yellow-300">30 nap</strong> múlva.</p>
+            <p class="text-[11px] text-slate-500 mb-5">(<span id="ban-until-date"></span>)</p>
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeActivateBanModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-sm cursor-pointer">
+                Rendben
+            </button>
+        </div>
+    </div>
+
+    <!-- KÉP FELTÖLTÉSE ABLAK (kérdésekhez) -->
+    <div id="image-upload-modal" class="hidden fixed inset-0 bg-black/80 flex items-end sm:items-center justify-center z-[60]" onclick="closeImageUploadModal()">
+        <div class="bg-slate-900 border-t-2 sm:border-2 border-blue-500/60 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 shadow-2xl" onclick="event.stopPropagation()">
+            <h3 class="text-lg font-black text-blue-400 mb-3 text-center">🖼️ Kép a kérdéshez</h3>
+            <div class="relative w-full aspect-video bg-slate-950 border border-slate-700 rounded-2xl overflow-hidden mb-2 flex items-center justify-center">
+                <img id="image-upload-preview" alt="Előnézet" class="hidden absolute inset-0 w-full h-full object-contain">
+                <span id="image-upload-placeholder" class="text-xs text-slate-500 px-4 text-center">Még nincs kép feltöltve</span>
+            </div>
+            <p id="image-upload-info" class="text-[11px] text-slate-400 mb-3 text-center min-h-[1rem]"></p>
+            <div class="flex flex-col gap-2">
+                <button id="image-remove-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); removeQuestionImage()" class="hidden w-full bg-red-900/60 hover:bg-red-800/70 border border-red-500/50 text-red-200 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                    🗑️ Kép törlése
+                </button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); document.getElementById('image-file-input').click()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3.5 rounded-xl text-sm cursor-pointer">
+                    📁 Kép feltöltése
+                </button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeImageUploadModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                    Bezárás
+                </button>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="image-file-input" accept="image/*" class="hidden" onchange="handleQuestionImageSelected(event)">
 
     <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('create-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col relative" onclick="event.stopPropagation()">
@@ -1067,9 +1130,97 @@
             return states[featureKey] && states[featureKey].expiresAt > now;
         }
 
+        // ===== Activate Key tiltás (3 hibás próbálkozás = 30 nap) =====
+        const ACTIVATE_MAX_FAILS = 3;
+        const ACTIVATE_BAN_MS = 30 * 24 * 60 * 60 * 1000;
+        let activateBanInterval = null;
+
+        function getActivateLock() {
+            const data = lsGetJSON('ActivateKeyLock', {});
+            return {
+                fails: Number(data.fails) || 0,
+                lockedUntil: Number(data.lockedUntil) || 0
+            };
+        }
+
+        function saveActivateLock(lock) {
+            lsSetJSON('ActivateKeyLock', lock);
+        }
+
+        // Hátralévő tiltási idő ms-ban (0, ha nincs tiltás). Lejárt tiltást töröl.
+        function getActivateBanRemainingMs() {
+            const lock = getActivateLock();
+            if (!lock.lockedUntil) return 0;
+            const remaining = lock.lockedUntil - Date.now();
+            if (remaining <= 0) {
+                saveActivateLock({ fails: 0, lockedUntil: 0 });
+                return 0;
+            }
+            return remaining;
+        }
+
+        function openActivateKeyModal() {
+            if (getActivateBanRemainingMs() > 0) {
+                showActivateBanModal();
+            } else {
+                toggleModal('activate-key-modal', true);
+            }
+        }
+
+        function updateActivateBanCountdown() {
+            const remaining = getActivateBanRemainingMs();
+            if (remaining <= 0) {
+                closeActivateBanModal();
+                toggleModal('activate-key-modal', true);
+                return;
+            }
+
+            const totalSec = Math.floor(remaining / 1000);
+            const days = Math.floor(totalSec / 86400);
+            const hours = Math.floor((totalSec % 86400) / 3600);
+            const minutes = Math.floor((totalSec % 3600) / 60);
+            const seconds = totalSec % 60;
+            const pad = n => String(n).padStart(2, '0');
+
+            const set = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+            set('ban-days-val', days);
+            set('ban-hours-val', pad(hours));
+            set('ban-minutes-val', pad(minutes));
+            set('ban-seconds-val', pad(seconds));
+            set('ban-days-text', `${Math.ceil(remaining / 86400000)} nap`);
+
+            const lock = getActivateLock();
+            set('ban-until-date', new Date(lock.lockedUntil).toLocaleString('hu-HU'));
+        }
+
+        function showActivateBanModal() {
+            toggleModal('activate-key-modal', false);
+            toggleModal('activate-ban-modal', true);
+            if (activateBanInterval) clearInterval(activateBanInterval);
+            updateActivateBanCountdown();
+            activateBanInterval = setInterval(updateActivateBanCountdown, 500);
+        }
+
+        function closeActivateBanModal() {
+            if (activateBanInterval) {
+                clearInterval(activateBanInterval);
+                activateBanInterval = null;
+            }
+            toggleModal('activate-ban-modal', false);
+        }
+
         function verifyActivateKey() {
+            if (getActivateBanRemainingMs() > 0) {
+                showActivateBanModal();
+                return;
+            }
+
             const inputVal = document.getElementById('activate-key-input').value.trim();
             if (inputVal === '172919382549') {
+                saveActivateLock({ fails: 0, lockedUntil: 0 });
                 localStorage.setItem('iosKeyFullyUnlocked', 'true');
                 toggleModal('activate-key-modal', true); // keep or close
                 toggleModal('activate-key-modal', false);
@@ -1079,7 +1230,18 @@
                 showFeedback("Sikeres aktiválás!", "Gratulálunk! Az összes iOS-en korlátozott funkció <strong>véglegesen feloldásra került</strong> ezen a készüléken!", "🔓");
             } else {
                 playDrinkSound();
-                showFeedback("Hibás kulcs", "A megadott biztonsági kulcs helytelen. Kérlek, próbáld újra!", "❌");
+                const lock = getActivateLock();
+                lock.fails += 1;
+
+                if (lock.fails >= ACTIVATE_MAX_FAILS) {
+                    lock.lockedUntil = Date.now() + ACTIVATE_BAN_MS;
+                    saveActivateLock(lock);
+                    document.getElementById('activate-key-input').value = '';
+                    showActivateBanModal();
+                } else {
+                    saveActivateLock(lock);
+                    showFeedback("Hibás kulcs", `A megadott biztonsági kulcs helytelen. Hátralévő próbálkozások: <strong>${ACTIVATE_MAX_FAILS - lock.fails}</strong>.<br>${ACTIVATE_MAX_FAILS} sikertelen aktiválás után a kulcs beírása 30 napra letiltásra kerül!`, "❌");
+                }
             }
         }
 
@@ -1094,15 +1256,11 @@
     }
 
     if (activateKeyBtn) {
-        if (isIOS) {
+        // Csak iOS-en, és csak amíg a kulcs nincs aktiválva. Sikeres aktiválás után eltűnik.
+        if (isIOS && !isKeyFullyUnlocked()) {
             activateKeyBtn.classList.remove('hidden');
-            if (isKeyFullyUnlocked()) {
-                activateKeyBtn.textContent = '🔑 Aktiválva (Full)';
-                activateKeyBtn.classList.add('opacity-75');
-            } else {
-                activateKeyBtn.textContent = '🔑 Activate Key';
-                activateKeyBtn.classList.remove('opacity-75');
-            }
+            activateKeyBtn.textContent = '🔑 Activate Key';
+            activateKeyBtn.classList.remove('opacity-75');
         } else {
             activateKeyBtn.classList.add('hidden');
         }
@@ -1607,12 +1765,12 @@ async function loadDifficulty(diffKey) {
             if (isMusicEnabled) {
                 btn.textContent = 'BE';
                 btn.className = 'text-xs px-2.5 py-1 rounded-lg font-bold bg-emerald-600 text-white cursor-pointer';
-                startBackgroundMusic();
+                resumeBackgroundMusic();
                 playTone(523.25, 'sine', 0.12, 0.15, 'music');
             } else {
                 btn.textContent = 'KI';
                 btn.className = 'text-xs px-2.5 py-1 rounded-lg font-bold bg-red-600 text-white cursor-pointer';
-                stopBackgroundMusic();
+                muteBackgroundMusic();
             }
         }
 
@@ -1677,11 +1835,13 @@ async function loadDifficulty(diffKey) {
                 customAudioEl.src = customAudioData;
                 customAudioEl.volume = musicVolume;
                 customAudioEl.loop = true;
+                customAudioEl.muted = !isMusicEnabled;
                 customAudioEl.play().catch(e => console.log("Custom audio autoplay prevented:", e));
             } else {
                 const bassNotes = [146.83, 146.83, 174.61, 146.83, 220.00, 196.00, 174.61, 164.81];
                 bgMusicInterval = setInterval(() => {
-                    if (!isMusicEnabled || customAudioData) return;
+                    if (customAudioData) return;
+                    // Kikapcsolt zenénél is lépked a ritmus (hang nélkül), így visszakapcsoláskor onnan folytatódik.
                     const note = bassNotes[bgBeatStep % bassNotes.length];
                     playTone(note, 'triangle', 0.22, 0.25, 'music');
                     if (bgBeatStep % 2 === 0) playTone(note * 2, 'sine', 0.1, 0.15, 'music');
@@ -1699,6 +1859,36 @@ async function loadDifficulty(diffKey) {
             if (customAudioEl) {
                 customAudioEl.pause();
                 customAudioEl.currentTime = 0;
+                if (customAudioEl.getAttribute('src')) {
+                    customAudioEl.removeAttribute('src');
+                    customAudioEl.load();
+                }
+            }
+        }
+
+        // Zene visszakapcsolása: nem indul elölről, hanem onnan szól tovább, ahol a háttérben tartott.
+        function resumeBackgroundMusic() {
+            const customAudioEl = document.getElementById('custom-bg-audio');
+            if (customAudioData) {
+                if (!customAudioEl || !customAudioEl.getAttribute('src')) {
+                    startBackgroundMusic();
+                    return;
+                }
+                customAudioEl.muted = false;
+                customAudioEl.volume = musicVolume;
+                if (customAudioEl.paused) {
+                    customAudioEl.play().catch(e => console.log("Custom audio play prevented:", e));
+                }
+            } else if (!bgMusicInterval) {
+                startBackgroundMusic();
+            }
+        }
+
+        // Zene kikapcsolása: nem áll le, csak elnémul, és hang nélkül tovább pörög a háttérben.
+        function muteBackgroundMusic() {
+            const customAudioEl = document.getElementById('custom-bg-audio');
+            if (customAudioData && customAudioEl && customAudioEl.getAttribute('src')) {
+                customAudioEl.muted = true;
             }
         }
 
@@ -1720,6 +1910,8 @@ async function loadDifficulty(diffKey) {
                 updateCustomMusicLabelUI();
                 if (isMusicEnabled) {
                     startBackgroundMusic();
+                } else {
+                    stopBackgroundMusic();
                 }
                 if (dataSaved && nameSaved) {
                     showFeedback("Saját zene beállítva!", `A(z) <strong>"${file.name}"</strong> sikeresen feltöltve és beállítva háttérzenének!`, "🎵");
@@ -1744,6 +1936,8 @@ async function loadDifficulty(diffKey) {
             updateCustomMusicLabelUI();
             if (isMusicEnabled) {
                 startBackgroundMusic();
+            } else {
+                stopBackgroundMusic();
             }
             showFeedback("Alapértelmezett zene", "A saját zene törölve lett, visszatértünk az eredeti beépített háttérzenéhez.", "🔄");
         }
@@ -2357,6 +2551,18 @@ async function loadDifficulty(diffKey) {
             document.getElementById('total-glasses-badge').textContent = `${totalGlasses} db`;
             document.getElementById('question-text').textContent = currentQ.question;
 
+            const questionImageWrap = document.getElementById('question-image-wrap');
+            const questionImageEl = document.getElementById('question-image');
+            if (questionImageWrap && questionImageEl) {
+                if (typeof currentQ.image === 'string' && /^data:image\/(jpeg|png|webp|gif);base64,/.test(currentQ.image)) {
+                    if (questionImageEl.getAttribute('src') !== currentQ.image) questionImageEl.src = currentQ.image;
+                    questionImageWrap.classList.remove('hidden');
+                } else {
+                    questionImageEl.removeAttribute('src');
+                    questionImageWrap.classList.add('hidden');
+                }
+            }
+
             const placedTotal = answerBets.reduce((a, b) => a + b, 0);
             const unplaced = totalGlasses - placedTotal;
             document.getElementById('unplaced-count').textContent = unplaced;
@@ -2911,6 +3117,11 @@ async function loadDifficulty(diffKey) {
                     ${count > 0 ? `<button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); this.closest('.question-item').remove()" class="text-xs text-red-400 font-bold cursor-pointer">Törlés</button>` : ''}
                 </div>
                 <input type="text" class="q-text w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white mb-2.5" placeholder="Kérdés" value="${prefill ? prefill.question.replace(/"/g, '&quot;') : ''}">
+                <div class="flex items-center gap-2 mb-2.5">
+                    <button type="button" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openImageUploadModal(this)" class="q-image-btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">🖼️ Kép feltöltése</button>
+                    <span class="q-image-status hidden text-xs text-emerald-400 font-semibold">✅ Kép csatolva</span>
+                    <img class="q-image-thumb hidden h-9 w-16 object-cover rounded-md border border-slate-600" alt="">
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
                     <input type="text" class="q-ans-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 1" value="${prefill ? prefill.answers[0].replace(/"/g, '&quot;') : ''}">
                     <input type="text" class="q-ans-2 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 2" value="${prefill ? prefill.answers[1].replace(/"/g, '&quot;') : ''}">
@@ -2928,6 +3139,139 @@ async function loadDifficulty(diffKey) {
                 </div>
             `;
             container.appendChild(div);
+
+            if (prefill && typeof prefill.image === 'string' && prefill.image.startsWith('data:image/')) {
+                div.dataset.image = prefill.image;
+                updateQuestionImageUI(div);
+            }
+        }
+
+        // ===== Képek a kérdésekhez =====
+        const MAX_IMAGE_W = 1920;
+        const MAX_IMAGE_H = 1080;
+        let currentImageItem = null;
+
+        function updateQuestionImageUI(item) {
+            if (!item) return;
+            const data = item.dataset.image || '';
+            const status = item.querySelector('.q-image-status');
+            const thumb = item.querySelector('.q-image-thumb');
+            if (data) {
+                if (status) status.classList.remove('hidden');
+                if (thumb) {
+                    thumb.src = data;
+                    thumb.classList.remove('hidden');
+                }
+            } else {
+                if (status) status.classList.add('hidden');
+                if (thumb) {
+                    thumb.removeAttribute('src');
+                    thumb.classList.add('hidden');
+                }
+            }
+        }
+
+        function refreshImageModal() {
+            const item = currentImageItem;
+            const data = item ? (item.dataset.image || '') : '';
+            const preview = document.getElementById('image-upload-preview');
+            const placeholder = document.getElementById('image-upload-placeholder');
+            const info = document.getElementById('image-upload-info');
+            const removeBtn = document.getElementById('image-remove-btn');
+
+            if (data) {
+                preview.src = data;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                removeBtn.classList.remove('hidden');
+                info.textContent = item.dataset.imageInfo || '';
+            } else {
+                preview.removeAttribute('src');
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                removeBtn.classList.add('hidden');
+                info.textContent = '';
+            }
+        }
+
+        function openImageUploadModal(btn) {
+            currentImageItem = btn.closest('.question-item');
+            refreshImageModal();
+            toggleModal('image-upload-modal', true);
+        }
+
+        function closeImageUploadModal() {
+            toggleModal('image-upload-modal', false);
+            currentImageItem = null;
+        }
+
+        function removeQuestionImage() {
+            if (!currentImageItem) return;
+            delete currentImageItem.dataset.image;
+            delete currentImageItem.dataset.imageInfo;
+            updateQuestionImageUI(currentImageItem);
+            refreshImageModal();
+        }
+
+        // A képet 1920x1080-ba szűkíti (arány megtartásával), kisebbet nem nagyít.
+        function resizeImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const w = img.naturalWidth;
+                        const h = img.naturalHeight;
+                        if (!w || !h) throw new Error('Üres kép');
+                        const scale = Math.min(1, MAX_IMAGE_W / w, MAX_IMAGE_H / h);
+                        const tw = Math.max(1, Math.round(w * scale));
+                        const th = Math.max(1, Math.round(h * scale));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = tw;
+                        canvas.height = th;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(0, 0, tw, th);
+                        ctx.drawImage(img, 0, 0, tw, th);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        URL.revokeObjectURL(url);
+                        resolve({ dataUrl, width: tw, height: th });
+                    } catch (e) {
+                        URL.revokeObjectURL(url);
+                        reject(e);
+                    }
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('A kép nem tölthető be'));
+                };
+                img.src = url;
+            });
+        }
+
+        async function handleQuestionImageSelected(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file || !currentImageItem) return;
+
+            if (!file.type || !file.type.startsWith('image/')) {
+                showFeedback("Nem képfájl", "Csak képfájlt tölthetsz fel!", "⚠️");
+                return;
+            }
+
+            const item = currentImageItem;
+            try {
+                const result = await resizeImageFile(file);
+                item.dataset.image = result.dataUrl;
+                item.dataset.imageInfo = `${result.width}×${result.height} px • ${Math.round(result.dataUrl.length * 0.75 / 1024)} KB`;
+                updateQuestionImageUI(item);
+                if (currentImageItem === item) refreshImageModal();
+                playSuccessSound();
+            } catch (e) {
+                console.error('Képfeldolgozási hiba:', e);
+                showFeedback("Képhiba", "A képet nem sikerült feldolgozni. Próbálj meg egy másik képet!", "⚠️");
+            }
         }
 
         function saveQuestions() {
@@ -2949,13 +3293,16 @@ async function loadDifficulty(diffKey) {
                     showFeedback("Hiányzó adatok", `A(z) ${i + 1}. kérdésnél minden mezőt ki kell tölteni!`, "⚠️");
                     return;
                 }
-                parsedQuestions.push({ question: qText, answers: [a1, a2, a3, a4], correct: correctIdx });
+                const questionObj = { question: qText, answers: [a1, a2, a3, a4], correct: correctIdx };
+                if (items[i].dataset.image) questionObj.image = items[i].dataset.image;
+                parsedQuestions.push(questionObj);
             }
 
             const saved = lsGetJSON('SavedQuestions', {});
             saved[setName] = parsedQuestions;
             if (!lsSetJSON('SavedQuestions', saved)) {
-                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva).", "⚠️");
+                const hasImages = parsedQuestions.some(q => q.image);
+                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva)." + (hasImages ? " A képek sok helyet foglalnak, próbálj kevesebb képet használni." : ""), "⚠️");
                 return;
             }
 
