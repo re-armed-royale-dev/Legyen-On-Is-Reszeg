@@ -5,7 +5,15 @@ const { Server } = require("socket.io");
 const crypto = require("crypto");
 const { Pool } = require("pg");
 
+// LICENCRENDSZER
+const {
+  registerLicenseRoutes,
+  initializeLicenseTables
+} = require("./license-system");
+
 const app = express();
+app.set("trust proxy", 1);
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -17,7 +25,10 @@ app.use(express.json({ limit: "2mb" }));
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization,X-Admin-Api-Key"
+  );
 
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
@@ -33,6 +44,9 @@ const pool = process.env.DATABASE_URL
       ssl: { rejectUnauthorized: false }
     })
   : null;
+
+// LICENCKULCS-KEZELŐ API-VÉGPONTOK REGISZTRÁLÁSA
+registerLicenseRoutes(app, pool);
 
 // ANDROID ALKALMAZÁS FRISSÍTÉSI BEÁLLÍTÁSAI
 const APP_VERSION_CODE = Number(process.env.APP_VERSION_CODE || 2);
@@ -248,8 +262,12 @@ async function initializeDatabase() {
     )
   `);
 
+  // LICENCRENDSZER ADATBÁZISTÁBLÁINAK LÉTREHOZÁSA
+  await initializeLicenseTables(pool);
+
   console.log("Supabase adatbázis csatlakoztatva!");
   console.log("quiz_shares tábla ellenőrizve!");
+  console.log("Licencrendszer adatbázistáblái ellenőrizve!");
 }
 
 // FŐOLDAL
@@ -957,6 +975,7 @@ initializeDatabase()
       console.log("Szerver elindult a " + PORT + " porton.");
       console.log("Alkalmazás verzió: " + APP_VERSION_NAME);
       console.log("Minimális verzió: " + MIN_SUPPORTED_VERSION_CODE);
+      console.log("Licencrendszer elindult.");
     });
   })
   .catch((error) => {
