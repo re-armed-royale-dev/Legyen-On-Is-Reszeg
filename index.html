@@ -107,6 +107,24 @@
             transition: filter 0.3s ease;
         }
 
+        /* Egyes telefonokon a backdrop-filter elrejti a szövegkurzort (|) a beviteli mezőkben.
+           Ezért azokon az elemeken, amelyekben írni lehet, kikapcsoljuk az elmosást. */
+        #activate-key-modal,
+        #create-modal,
+        .caret-fix {
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+        }
+        .backdrop-blur-sm:has(input[type="text"]),
+        .backdrop-blur-md:has(input[type="text"]) {
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+        }
+        input[type="text"],
+        textarea {
+            caret-color: #fde047;
+        }
+
         .lifeline-used {
             opacity: 0.48;
             cursor: not-allowed !important;
@@ -309,7 +327,7 @@
     </div>
 
     <main id="start-screen" class="flex-1 flex flex-col items-center justify-center px-4 py-8 text-center">
-        <div class="max-w-2xl w-full bg-slate-900/85 backdrop-blur-md border-2 border-yellow-500/40 rounded-3xl p-6 sm:p-10 gold-glow relative">
+        <div class="caret-fix max-w-2xl w-full bg-slate-900/85 backdrop-blur-md border-2 border-yellow-500/40 rounded-3xl p-6 sm:p-10 gold-glow relative">
             <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-red-950/60 rounded-full border-2 border-red-500/50 red-cup-shadow">
                 <svg class="w-12 h-12" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 12H50L44 56C43.7 58.2 41.8 60 39.6 60H24.4C22.2 60 20.3 58.2 20 56L14 12Z" fill="#DC2626"/>
@@ -1160,7 +1178,7 @@
 
         async function refreshIosAttemptStatus() {
             try {
-                const response = await fetch(`${QUIZ_API_BASE}/api/ios/attempt-status`, { cache: 'no-store' });
+                const response = await fetch(`${QUIZ_API_BASE}/api/ios/attempt-status?installId=${encodeURIComponent(getIosInstallId())}`, { cache: 'no-store' });
                 const data = await response.json();
                 if (response.ok && data.success) iosAttemptState = data;
             } catch (error) {
@@ -1200,8 +1218,15 @@
 
         async function openActivateKeyModal() {
             await refreshIosAttemptStatus();
-            if (getActivateBanRemainingMs() > 0) showActivateBanModal();
-            else toggleModal('activate-key-modal', true);
+            if (getActivateBanRemainingMs() > 0) {
+                showActivateBanModal();
+            } else {
+                toggleModal('activate-key-modal', true);
+                setTimeout(() => {
+                    const keyInput = document.getElementById('activate-key-input');
+                    if (keyInput) keyInput.focus();
+                }, 80);
+            }
         }
 
         function updateActivateBanCountdown() {
@@ -1270,8 +1295,38 @@
                 } else {
                     playDrinkSound();
                     input.value = '';
-                    if (data.lockedUntil) iosAttemptState = data;
-                    else await refreshIosAttemptStatus();
+                    const asCount = v => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
+                    const previousRemaining = asCount(iosAttemptState.remainingAttempts) ?? ACTIVATE_MAX_FAILS;
+
+                    if (data.lockedUntil) {
+                        iosAttemptState = data;
+                    } else {
+                        // A kulcs-ellenőrzés válasza a legfrissebb adat, ezt használjuk elsőként.
+                        let remaining = asCount(data.remainingAttempts);
+                        if (remaining === null) {
+                            const failed = asCount(data.failedAttempts);
+                            if (failed !== null) remaining = Math.max(0, ACTIVATE_MAX_FAILS - failed);
+                        }
+                        if (remaining === null) {
+                            await refreshIosAttemptStatus();
+                            remaining = asCount(iosAttemptState.remainingAttempts);
+                        }
+                        // Hibás próbálkozás után a szám nem maradhat ugyanannyi: helyben is levonjuk.
+                        if (remaining === null || (previousRemaining > 0 && remaining >= previousRemaining)) {
+                            remaining = Math.max(0, previousRemaining - 1);
+                        }
+                        iosAttemptState = {
+                            ...iosAttemptState,
+                            remainingAttempts: remaining,
+                            failedAttempts: Math.max(0, ACTIVATE_MAX_FAILS - remaining)
+                        };
+                        // Ha elfogyott a próbálkozás, kérjük le a tiltás idejét a szervertől.
+                        if (remaining === 0 && !iosAttemptState.lockedUntil) {
+                            const kept = iosAttemptState;
+                            await refreshIosAttemptStatus();
+                            if (!iosAttemptState.lockedUntil) iosAttemptState = kept;
+                        }
+                    }
                     if (getActivateBanRemainingMs() > 0 || response.status === 429) showActivateBanModal();
                     else showFeedback('Hibás kulcs', `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts ?? 0}</strong>.`, '❌');
                 }
@@ -1424,11 +1479,34 @@
             toggleModal('platform-restriction-modal', false);
             applyPlatformRestrictions();
 
-            showFeedback("Sikeres 1 perces feloldás!", "A tiltás ideiglenesen feloldódott <strong>1 percre</strong>!", "🔓", () => {
-                setTimeout(() => {
-                    applyPlatformRestrictions();
-                }, 60000);
+            scheduleRestrictionRefresh();
+
+            showFeedback("Sikeres 1 perces feloldás!", "A tiltás ideiglenesen feloldódott <strong>1 percre</strong>!", "🔓");
+        }
+
+        // A lejárati időponthoz igazított frissítés: a gombok pontosan a lejáratkor visszasötétülnek,
+        // nem függ attól, mikor zárja be a felhasználó az ablakot.
+        let unlockExpiryTimer = null;
+        function scheduleRestrictionRefresh() {
+            if (unlockExpiryTimer) {
+                clearTimeout(unlockExpiryTimer);
+                unlockExpiryTimer = null;
+            }
+            if (!isAppleMobileDevice() || isKeyFullyUnlocked()) return;
+
+            const states = getStoredUnlocks();
+            const now = Date.now();
+            let nextExpiry = 0;
+            Object.keys(states).forEach(key => {
+                const exp = states[key] && states[key].expiresAt;
+                if (exp > now && (!nextExpiry || exp < nextExpiry)) nextExpiry = exp;
             });
+            if (!nextExpiry) return;
+
+            unlockExpiryTimer = setTimeout(() => {
+                applyPlatformRestrictions();
+                scheduleRestrictionRefresh();
+            }, Math.max(50, nextExpiry - now + 50));
         }
 
         function openSinglePlayerMenu() {
@@ -3549,6 +3627,15 @@ async function loadDifficulty(diffKey) {
 
             await syncIosActivation();
             applyPlatformRestrictions();
+            scheduleRestrictionRefresh();
+
+            // Ha a készülék háttérben volt (az időzítők ilyenkor lassulhatnak), visszatéréskor azonnal frissítünk.
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    applyPlatformRestrictions();
+                    scheduleRestrictionRefresh();
+                }
+            });
             initAudioSettingsUI();
 
             // Rivális játékosnevek visszaállítása és mentése módosításkor.
