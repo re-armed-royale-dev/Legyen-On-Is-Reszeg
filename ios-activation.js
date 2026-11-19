@@ -410,6 +410,10 @@ hr {
     🔓 Tiltás feloldása
   </button>
 
+  <button class="secondary" onclick="unbanCurrentIp()">
+    🔓 Saját aktuális IP-címem feloldása
+  </button>
+
   <p class="small">
     Az IP-címek titkosítva vannak tárolva.
     Csak admin jogosultsággal jeleníthetők meg.
@@ -534,6 +538,37 @@ async function unbanIp(ip) {
   }
 }
 
+// ÚJ: aktuális IP-cím feloldása
+async function unbanCurrentIp() {
+  if (!getKey()) {
+    showResult('Először add meg az admin API kulcsot!', false);
+    return;
+  }
+
+  if (!confirm('Biztosan feloldod azt az IP-címet, amelyet a szerver most érzékel?')) {
+    return;
+  }
+
+  try {
+    const response = await api('/api/admin/ios-unban-current', {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+
+    showResult(
+      data.message || data.error || 'Szerverválasz érkezett.',
+      data.success && data.unbanned
+    );
+
+    if (data.success && data.unbanned) {
+      await loadBans();
+    }
+  } catch (error) {
+    showResult('Nem sikerült kapcsolódni a szerverhez.', false);
+  }
+}
+
 async function manualUnban() {
   const ip = document.getElementById('ip').value.trim();
 
@@ -589,7 +624,7 @@ async function manualUnban() {
     }
   });
 
-  // ADMIN: iOS tiltás feloldása
+  // ADMIN: iOS tiltás feloldása IP alapján
   app.post('/api/admin/ios-unban', rateReady, async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
@@ -624,6 +659,45 @@ async function manualUnban() {
       return res.status(500).json({
         success: false,
         error: 'A tiltás feloldása nem sikerült.'
+      });
+    }
+  });
+
+  // ÚJ: aktuális kérés IP-címének feloldása
+  app.post('/api/admin/ios-unban-current', rateReady, async (req, res) => {
+    if (!checkAdmin(req, res)) return;
+
+    try {
+      const ip = clientIp(req);
+
+      if (!net.isIP(ip)) {
+        return res.status(400).json({
+          success: false,
+          error: 'A szerver nem tudott érvényes IP-címet azonosítani.'
+        });
+      }
+
+      const result = await pool.query(
+        'DELETE FROM public.license_attempts WHERE ip_hash=$1',
+        [hashIp(ip, rateSecret)]
+      );
+
+      res.setHeader('Cache-Control', 'no-store');
+
+      return res.json({
+        success: true,
+        unbanned: result.rowCount > 0,
+        message: result.rowCount > 0
+          ? 'A szerver által érzékelt IP-cím tiltása feloldva.'
+          : 'Ehhez az IP-címhez nem található tiltás.'
+      });
+
+    } catch (error) {
+      console.error('iOS current IP unban:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: 'A feloldás nem sikerült.'
       });
     }
   });
