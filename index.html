@@ -1183,8 +1183,10 @@
         }
 
         function storeBanUntil(ms) {
-            if (ms && ms > Date.now()) lsSet(ACTIVATE_BAN_STORAGE_KEY, String(ms));
-        }
+    if (ms && ms > Date.now()) {
+        localStorage.setItem(ACTIVATE_BAN_STORAGE_KEY, String(ms));
+    }
+}
 
         function getActivateLock() {
     const serverUntil = iosAttemptState.lockedUntil
@@ -1307,83 +1309,127 @@
             toggleModal('activate-ban-modal', false);
         }
 
-        async function verifyActivateKey() {
-            const input = document.getElementById('activate-key-input');
-            const inputVal = input.value.trim();
-            if (!/^\d{12}$/.test(inputVal)) {
-                showFeedback('Hibás kulcs', 'Pontosan 12 számjegyű aktiválókulcsot adj meg!', '❌');
-                return;
-            }
-            const activateButton = document.querySelector('#activate-key-modal button[onclick="verifyActivateKey()"]');
-            if (activateButton) { activateButton.disabled = true; activateButton.textContent = '⏳ Ellenőrzés...'; }
-            try {
-                const response = await fetch(`${QUIZ_API_BASE}/api/ios/activate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ activationKey: inputVal, installId: getIosInstallId() }),
-                    cache: 'no-store'
-                });
-                const data = await response.json();
-                if (response.ok && data.success && data.token) {
-                    iosActivationToken = data.token;
-                    localStorage.setItem('iosActivationToken', data.token);
-                    iosActivationActive = true;
-                    iosAttemptState = { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
-                    localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
-                    input.value = '';
-                    toggleModal('activate-key-modal', false);
-                    playSuccessSound();
-                    applyPlatformRestrictions();
-                    showFeedback('Sikeres aktiválás!', 'A szerver sikeresen ellenőrizte a kulcsot. Az iOS-en korlátozott funkciók feloldásra kerültek ezen a telepítésen.', '🔓');
-                } else {
-    playDrinkSound();
-    input.value = '';
+        
+async function verifyActivateKey() {
+    const input = document.getElementById('activate-key-input');
 
-    // Mindig a szerver állapotát tekintjük mérvadónak.
-    let serverState = data;
+    if (!input) return;
 
-    if (
-        !serverState ||
-        serverState.remainingAttempts === undefined ||
-        serverState.failedAttempts === undefined
-    ) {
-        await refreshIosAttemptStatus();
-        serverState = iosAttemptState;
-    }
+    const inputVal = input.value.trim();
 
-    const failed = Number(serverState.failedAttempts);
-    const remaining = Number(serverState.remainingAttempts);
-
-    iosAttemptState = {
-        ...iosAttemptState,
-        failedAttempts: Number.isFinite(failed) ? failed : 0,
-        remainingAttempts: Number.isFinite(remaining) ? remaining : 3,
-        lockedUntil: serverState.lockedUntil || null
-    };
-
-    if (
-    iosAttemptState.lockedUntil &&
-    new Date(iosAttemptState.lockedUntil).getTime() > Date.now()
-) {
-    showActivateBanModal();
-} else {
-    localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
-    s        showFeedback(
+    if (!/^\d{12}$/.test(inputVal)) {
+        showFeedback(
             'Hibás kulcs',
-            `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
+            'Pontosan 12 számjegyű aktiválókulcsot adj meg!',
             '❌'
         );
+        return;
     }
-}
-                        } catch (error) {
-                showFeedback('Kapcsolati hiba', 'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.', '⚠️');
-            } finally {
-                if (activateButton) {
-                    activateButton.disabled = false;
-                    activateButton.textContent = '✅ Kulcs aktiválása';
-                }
+
+    const activateButton = document.querySelector(
+        '#activate-key-modal button[onclick="verifyActivateKey()"]'
+    );
+
+    if (activateButton) {
+        activateButton.disabled = true;
+        activateButton.textContent = '⏳ Ellenőrzés...';
+    }
+
+    try {
+        const response = await fetch(`${QUIZ_API_BASE}/api/ios/activate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                activationKey: inputVal,
+                installId: getIosInstallId()
+            }),
+            cache: 'no-store'
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success && data.token) {
+            iosActivationToken = data.token;
+            localStorage.setItem('iosActivationToken', data.token);
+            iosActivationActive = true;
+
+            iosAttemptState = {
+                failedAttempts: 0,
+                remainingAttempts: 3,
+                lockedUntil: null
+            };
+
+            localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
+            input.value = '';
+
+            toggleModal('activate-key-modal', false);
+            playSuccessSound();
+            applyPlatformRestrictions();
+
+            showFeedback(
+                'Sikeres aktiválás!',
+                'A szerver sikeresen ellenőrizte a kulcsot. Az iOS-en korlátozott funkciók feloldásra kerültek ezen a telepítésen.',
+                '🔓'
+            );
+
+        } else {
+            playDrinkSound();
+            input.value = '';
+
+            let serverState = data;
+
+            if (
+                !serverState ||
+                serverState.remainingAttempts === undefined ||
+                serverState.failedAttempts === undefined
+            ) {
+                await refreshIosAttemptStatus();
+                serverState = iosAttemptState;
+            }
+
+            const failed = Number(serverState.failedAttempts);
+            const remaining = Number(serverState.remainingAttempts);
+
+            iosAttemptState = {
+                ...iosAttemptState,
+                failedAttempts: Number.isFinite(failed) ? failed : 0,
+                remainingAttempts: Number.isFinite(remaining) ? remaining : 3,
+                lockedUntil: serverState.lockedUntil || null
+            };
+
+            if (
+                iosAttemptState.lockedUntil &&
+                new Date(iosAttemptState.lockedUntil).getTime() > Date.now()
+            ) {
+                showActivateBanModal();
+            } else {
+                localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
+
+                showFeedback(
+                    'Hibás kulcs',
+                    `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
+                    '❌'
+                );
             }
         }
+
+    } catch (error) {
+        console.error('Aktiválási hiba:', error);
+
+        showFeedback(
+            'Kapcsolati hiba',
+            'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.',
+            '⚠️'
+        );
+
+    } finally {
+        if (activateButton) {
+            activateButton.disabled = false;
+            activateButton.textContent = '✅ Kulcs aktiválása';
+        }
+    }
+}
+
 
         function applyPlatformRestrictions() {
     const isIOS = isAppleMobileDevice();
