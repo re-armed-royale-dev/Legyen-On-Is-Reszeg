@@ -1,0 +1,5002 @@
+[
+    {
+        "question": "Melyik évben koronázták császárrá Nagy Károlyt Rómában?",
+        "answers": [
+            "843",
+            "962",
+            "1000",
+            "800"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben kötötték meg a verduni szerződést, amely felosztotta a Frank Birodalmat?",
+        "answers": [
+            "843",
+            "911",
+            "800",
+            "987"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben győzte le Vilmos herceg Haroldot a hastingsi csatában?",
+        "answers": [
+            "1066",
+            "1215",
+            "1086",
+            "1000"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben írták alá az angol Magna Cartát?",
+        "answers": [
+            "1348",
+            "1215",
+            "1265",
+            "1066"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben történt a konstantinápolyi ostrom, amely az Bizánci Birodalom végét jelentette?",
+        "answers": [
+            "1389",
+            "1453",
+            "1492",
+            "1204"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben nyomtatta ki Gutenberg a 42 soros Bibliát hozzávetőlegesen?",
+        "answers": [
+            "1517",
+            "1455",
+            "1492",
+            "1355"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben függesztette ki Luther Márton a 95 tételt?",
+        "answers": [
+            "1492",
+            "1534",
+            "1555",
+            "1517"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben győzte le az angol flotta a spanyol Armadát?",
+        "answers": [
+            "1618",
+            "1588",
+            "1555",
+            "1492"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben kezdődött a harmincéves háború?",
+        "answers": [
+            "1648",
+            "1618",
+            "1555",
+            "1688"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik békekötés zárta le a harmincéves háborút?",
+        "answers": [
+            "Utrechti béke",
+            "Vesztfáliai béke",
+            "Párizsi béke",
+            "Versailles-i béke"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben fejezték le I. Károly angol királyt?",
+        "answers": [
+            "1603",
+            "1649",
+            "1660",
+            "1688"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben írták alá az Egyesült Államok alkotmányát?",
+        "answers": [
+            "1776",
+            "1787",
+            "1791",
+            "1812"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben koronázta magát császárrá Napóleon?",
+        "answers": [
+            "1812",
+            "1799",
+            "1804",
+            "1815"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik csatában győzte le Wellington herceg Napóleont?",
+        "answers": [
+            "Leipzig",
+            "Waterloo",
+            "Borogyino",
+            "Austerlitz"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben volt a waterlooi csata?",
+        "answers": [
+            "1812",
+            "1815",
+            "1805",
+            "1821"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik csatában győzte le Napóleon az orosz–osztrák seregeket 1805-ben?",
+        "answers": [
+            "Waterloo",
+            "Jéna",
+            "Wagram",
+            "Austerlitz"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik kongresszus rendezte át Európát Napóleon bukása után?",
+        "answers": [
+            "Versailles-i kongresszus",
+            "Bécsi kongresszus",
+            "Párizsi kongresszus",
+            "Berlini kongresszus"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben volt a berlini kongresszus?",
+        "answers": [
+            "1848",
+            "1815",
+            "1878",
+            "1914"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben alakult meg egységes Németország Bismarck vezetésével?",
+        "answers": [
+            "1914",
+            "1866",
+            "1848",
+            "1871"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben egyesült Olaszország királysággá?",
+        "answers": [
+            "1871",
+            "1861",
+            "1848",
+            "1815"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben kezdődött az amerikai polgárháború?",
+        "answers": [
+            "1776",
+            "1865",
+            "1848",
+            "1861"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben mondta ki a függetlenségét Magyarország a Habsburgok trónfosztásával Debrecenben?",
+        "answers": [
+            "1848",
+            "1849",
+            "1918",
+            "1867"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki vezette a magyar honvédsereget Temesvárnál 1849-ben?",
+        "answers": [
+            "Dembinski Henrik",
+            "Görgei Artúr",
+            "Bem József",
+            "Klapka György"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki adta át a magyar sereget Világosnál 1849-ben az oroszoknak?",
+        "answers": [
+            "Bem József",
+            "Görgei Artúr",
+            "Kossuth Lajos",
+            "Klapka György"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik városban végezték ki a 13 aradi vértanút 1849-ben?",
+        "answers": [
+            "Pest",
+            "Temesvár",
+            "Világos",
+            "Arad"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki volt az 1849 októberében kivégzett első magyar miniszterelnök?",
+        "answers": [
+            "Szemere Bertalan",
+            "Kossuth Lajos",
+            "Batthyány Lajos",
+            "Deák Ferenc"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki volt a Habsburg császár és magyar király a kiegyezés idején?",
+        "answers": [
+            "Károly",
+            "II. József",
+            "I. Ferdinánd",
+            "I. Ferenc József"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben koronázták I. Ferenc Józsefet magyar királlyá?",
+        "answers": [
+            "1867",
+            "1848",
+            "1916",
+            "1849"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki volt az utolsó Habsburg magyar király?",
+        "answers": [
+            "I. Ferenc József",
+            "II. József",
+            "IV. Károly",
+            "I. Ferdinánd"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki volt Magyarország kormányzója 1920 és 1944 között?",
+        "answers": [
+            "Károlyi Mihály",
+            "Gömbös Gyula",
+            "Horthy Miklós",
+            "Bethlen István"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben alakult meg a Magyarországi Tanácsköztársaság?",
+        "answers": [
+            "1918",
+            "1920",
+            "1919",
+            "1921"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben mentek vissza a magyarok az I. bécsi döntéssel a Felvidék déli részére?",
+        "answers": [
+            "1944",
+            "1938",
+            "1940",
+            "1941"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben történt a II. bécsi döntés Észak-Erdélyről?",
+        "answers": [
+            "1941",
+            "1944",
+            "1938",
+            "1940"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben szállták meg a németek Magyarországot a Margarethe-hadművelettel?",
+        "answers": [
+            "1944",
+            "1941",
+            "1945",
+            "1943"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben ért véget a budapesti ostrom?",
+        "answers": [
+            "1944",
+            "1947",
+            "1946",
+            "1945"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben történt a magyar forint bevezetése?",
+        "answers": [
+            "1949",
+            "1956",
+            "1946",
+            "1945"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben lett pártállam a Magyar Népköztársaság hivatalosan kikiáltva?",
+        "answers": [
+            "1948",
+            "1956",
+            "1946",
+            "1949"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben temették újra Nagy Imrét a Hősök terén?",
+        "answers": [
+            "1958",
+            "1990",
+            "1989",
+            "1956"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki volt az 1956-os forradalom miniszterelnöke?",
+        "answers": [
+            "Gerő Ernő",
+            "Rákosi Mátyás",
+            "Kádár János",
+            "Nagy Imre"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki lett a forradalom utáni miniszterelnök és pártvezető 1956-ban?",
+        "answers": [
+            "Gerő Ernő",
+            "Hegedüs András",
+            "Rákosi Mátyás",
+            "Kádár János"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben nyerte a magyar vízilabda-válogatott az első olimpiai aranyát?",
+        "answers": [
+            "1936",
+            "1928",
+            "1952",
+            "1932"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben vezették be a magyar pengőt?",
+        "answers": [
+            "1920",
+            "1946",
+            "1930",
+            "1927"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben alapították a Magyar Tudományos Akadémiát?",
+        "answers": [
+            "1825",
+            "1867",
+            "1848",
+            "1790"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki mondta „Ember küzdj és bízva bízzál”?",
+        "answers": [
+            "Petőfi Sándor",
+            "Jókai Mór",
+            "Madách Imre",
+            "Arany János"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki volt Magyarország első köztársasági elnöke 1946-ban?",
+        "answers": [
+            "Tildy Zoltán",
+            "Dobi István",
+            "Szakasits Árpád",
+            "Göncz Árpád"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki volt a rendszerváltás utáni első köztársasági elnök (1990)?",
+        "answers": [
+            "Göncz Árpád",
+            "Mádl Ferenc",
+            "Antall József",
+            "Sólyom László"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki volt a rendszerváltás utáni első miniszterelnök (1990)?",
+        "answers": [
+            "Orbán Viktor",
+            "Antall József",
+            "Boross Péter",
+            "Horn Gyula"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben volt Magyarországon az első szabad parlamenti választás a rendszerváltás után?",
+        "answers": [
+            "1990",
+            "1998",
+            "1994",
+            "1989"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben csatlakozott Magyarország a Varsói Szerződéshez?",
+        "answers": [
+            "1949",
+            "1956",
+            "1968",
+            "1955"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben lépett ki a magyar kormány a Varsói Szerződésből, Nagy Imre bejelentésére?",
+        "answers": [
+            "1989",
+            "1968",
+            "1955",
+            "1956"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben nyitotta meg Magyarország a határát Ausztria felé a vasfüggönyön 1989-ben?",
+        "answers": [
+            "1991",
+            "1990",
+            "1987",
+            "1989"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik várost nevezték Sztálinvárosnak a szocializmus idején?",
+        "answers": [
+            "Miskolc",
+            "Komló",
+            "Tatabánya",
+            "Dunaújváros"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben nyitották meg Budapesten az első metróvonalat, a Millenniumi Földalattit?",
+        "answers": [
+            "1870",
+            "1950",
+            "1900",
+            "1896"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik európai városban nyílt meg az első kontinentális metró (a Millenniumi Földalatti után)?",
+        "answers": [
+            "Berlin",
+            "Párizs",
+            "Budapest",
+            "Bécs"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben nyílt meg a Szabadság híd?",
+        "answers": [
+            "1896",
+            "1876",
+            "1849",
+            "1903"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben nyílt meg a Lánchíd?",
+        "answers": [
+            "1849",
+            "1795",
+            "1873",
+            "1896"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben egyesült Pest, Buda és Óbuda Budapestté?",
+        "answers": [
+            "1896",
+            "1873",
+            "1867",
+            "1849"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben nyílt meg a Magyar Állami Operaház?",
+        "answers": [
+            "1884",
+            "1867",
+            "1873",
+            "1896"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki védte Eger várát 1552-ben?",
+        "answers": [
+            "Kinizsi Pál",
+            "Dobó István",
+            "Zrínyi Miklós",
+            "Jurisics Miklós"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki védte Kőszeg várát 1532-ben?",
+        "answers": [
+            "Zrínyi Miklós",
+            "Kinizsi Pál",
+            "Dobó István",
+            "Jurisics Miklós"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben védte Zrínyi Miklós Szigetvárt?",
+        "answers": [
+            "1526",
+            "1532",
+            "1552",
+            "1566"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki volt a Mohácsnál elesett magyar király?",
+        "answers": [
+            "II. Lajos",
+            "II. Ulászló",
+            "II. János",
+            "I. Ulászló"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki volt a Mohácsnál elesett egyik főpap, a hadvezér érsek?",
+        "answers": [
+            "Dózsa György",
+            "Tomori Pál",
+            "Szapolyai János",
+            "Bakócz Tamás"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben koronázták királlyá Szapolyai Jánost?",
+        "answers": [
+            "1541",
+            "1526",
+            "1527",
+            "1552"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki volt Erdély híres fejedelme, a 17. század elején, hadvezér és reformer?",
+        "answers": [
+            "Bethlen Gábor",
+            "Rákóczi György",
+            "Báthory István",
+            "Bocskai István"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben fejeződött be a Rákóczi-szabadságharc a szatmári békével?",
+        "answers": [
+            "1703",
+            "1711",
+            "1740",
+            "1699"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben alapították Budapesten a Nemzeti Múzeumot?",
+        "answers": [
+            "1802",
+            "1867",
+            "1825",
+            "1848"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik évben nyitotta meg kapuit a Nemzeti Színház Pesten?",
+        "answers": [
+            "1802",
+            "1837",
+            "1867",
+            "1873"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hányas rendszámú elem a szén?",
+        "answers": [
+            "8",
+            "12",
+            "6",
+            "14"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Hányas rendszámú elem az oxigén?",
+        "answers": [
+            "6",
+            "8",
+            "7",
+            "16"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hányas rendszámú elem a vas?",
+        "answers": [
+            "26",
+            "30",
+            "24",
+            "28"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hányas rendszámú elem az ezüst?",
+        "answers": [
+            "29",
+            "79",
+            "82",
+            "47"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Hányas rendszámú elem az urán?",
+        "answers": [
+            "92",
+            "82",
+            "94",
+            "88"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik elem vegyjele a Sn?",
+        "answers": [
+            "Ón",
+            "Stroncium",
+            "Szilícium",
+            "Szelén"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik elem vegyjele a Hg?",
+        "answers": [
+            "Higany",
+            "Hidrogén",
+            "Hafnium",
+            "Hélium"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik elem vegyjele az Sb?",
+        "answers": [
+            "Antimon",
+            "Stroncium",
+            "Ón",
+            "Szelén"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik elem vegyjele a Ti?",
+        "answers": [
+            "Tantál",
+            "Tallium",
+            "Tellúr",
+            "Titán"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik elem a legelektronegatívabb?",
+        "answers": [
+            "Oxigén",
+            "Nitrogén",
+            "Fluor",
+            "Klór"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik elem a legkönnyebb fém?",
+        "answers": [
+            "Magnézium",
+            "Alumínium",
+            "Nátrium",
+            "Lítium"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik elem a Föld kérgének leggyakoribb fémje?",
+        "answers": [
+            "Vas",
+            "Alumínium",
+            "Kalcium",
+            "Nátrium"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik elem a Föld kérgének leggyakoribb eleme?",
+        "answers": [
+            "Szilícium",
+            "Oxigén",
+            "Vas",
+            "Alumínium"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik nemesgáz a legkönnyebb?",
+        "answers": [
+            "Kripton",
+            "Argon",
+            "Neon",
+            "Hélium"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik gáz a Föld légkörének harmadik leggyakoribb alkotója?",
+        "answers": [
+            "Szén-dioxid",
+            "Hélium",
+            "Argon",
+            "Neon"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mennyi az Avogadro-szám nagyságrendje?",
+        "answers": [
+            "9,81 × 10^23",
+            "6,02 × 10^23",
+            "6,02 × 10^13",
+            "3,14 × 10^23"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mekkora a standard gravitációs gyorsulás a Föld felszínén?",
+        "answers": [
+            "6,67 m/s²",
+            "10,81 m/s²",
+            "8,91 m/s²",
+            "9,81 m/s²"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi a pH-skála semleges értéke tiszta vízre 25 °C-on?",
+        "answers": [
+            "1",
+            "14",
+            "0",
+            "7"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik savat tartalmazza a gyomorsav?",
+        "answers": [
+            "Sósav",
+            "Ecetsav",
+            "Salétromsav",
+            "Kénsav"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik sav található az ecetben?",
+        "answers": [
+            "Hangyasav",
+            "Ecetsav",
+            "Tejsav",
+            "Citromsav"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik sav található a citromban?",
+        "answers": [
+            "Tejsav",
+            "Citromsav",
+            "Ecetsav",
+            "Almasav"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik anyag a mész kémiai neve oltatlan formában?",
+        "answers": [
+            "Kalcium-karbonát",
+            "Nátrium-oxid",
+            "Kalcium-hidroxid",
+            "Kalcium-oxid"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik anyag a márvány és a mészkő fő összetevője?",
+        "answers": [
+            "Nátrium-klorid",
+            "Vas-oxid",
+            "Kalcium-karbonát",
+            "Szilícium-dioxid"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik anyag a homok fő összetevője?",
+        "answers": [
+            "Nátrium-klorid",
+            "Alumínium-oxid",
+            "Szilícium-dioxid",
+            "Kalcium-karbonát"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik anyag a rozsda?",
+        "answers": [
+            "Alumínium-oxid",
+            "Cink-oxid",
+            "Vas-oxid",
+            "Réz-oxid"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ötvözet réz és ón keveréke?",
+        "answers": [
+            "Sárgaréz",
+            "Acél",
+            "Alpakka",
+            "Bronz"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik ötvözet réz és cink keveréke?",
+        "answers": [
+            "Acél",
+            "Sárgaréz",
+            "Bronz",
+            "Ón"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik elem az acél fő összetevője a vason kívül?",
+        "answers": [
+            "Ólom",
+            "Szén",
+            "Alumínium",
+            "Réz"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik szervetlen anyag a „szódabikarbóna” kémiai neve?",
+        "answers": [
+            "Nátrium-klorid",
+            "Nátrium-karbonát",
+            "Kálium-nitrát",
+            "Nátrium-hidrogén-karbonát"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi az a Mohs-skála?",
+        "answers": [
+            "Földrengés skála",
+            "Hangerősség skála",
+            "Ásványok keménységi skálája",
+            "Hőmérsékleti skála"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi a Richter-skála?",
+        "answers": [
+            "Szélsebesség skála",
+            "Keménységi skála",
+            "Földrengés erősségének skálája",
+            "Hőmérséklet skála"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi a Beaufort-skála?",
+        "answers": [
+            "Földrengés skála",
+            "Keménységi skála",
+            "Hőmérséklet skála",
+            "Szélerősség skálája"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós nevét viseli az erő SI-mértékegysége?",
+        "answers": [
+            "Watt",
+            "Pascal",
+            "Joule",
+            "Newton"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós nevét viseli a nyomás SI-mértékegysége?",
+        "answers": [
+            "Newton",
+            "Watt",
+            "Joule",
+            "Pascal"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós nevét viseli a mágneses indukció SI-mértékegysége?",
+        "answers": [
+            "Gauss",
+            "Tesla",
+            "Henry",
+            "Weber"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik tudós nevét viseli az ellenállás SI-mértékegysége?",
+        "answers": [
+            "Ampère",
+            "Hertz",
+            "Volta",
+            "Ohm"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós nevét viseli az elektromos töltés SI-mértékegysége?",
+        "answers": [
+            "Ohm",
+            "Coulomb",
+            "Volta",
+            "Ampère"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik tudós nevéhez fűződik a bizonytalansági elv?",
+        "answers": [
+            "Heisenberg",
+            "Planck",
+            "Bohr",
+            "Schrödinger"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tudós ismert a macskás gondolatkísérletéről?",
+        "answers": [
+            "Bohr",
+            "Einstein",
+            "Schrödinger",
+            "Heisenberg"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik tudós javasolta az atom bolygómodelljét 1913-ban?",
+        "answers": [
+            "Max Planck",
+            "J. J. Thomson",
+            "Ernest Rutherford",
+            "Niels Bohr"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós fedezte fel az atommagot 1911-ben?",
+        "answers": [
+            "James Chadwick",
+            "J. J. Thomson",
+            "Ernest Rutherford",
+            "Niels Bohr"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik tudós fedezte fel az elektront?",
+        "answers": [
+            "Ernest Rutherford",
+            "James Chadwick",
+            "Niels Bohr",
+            "J. J. Thomson"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós fedezte fel a neutront?",
+        "answers": [
+            "James Chadwick",
+            "Niels Bohr",
+            "Ernest Rutherford",
+            "J. J. Thomson"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tudós fedezte fel a röntgensugárzást?",
+        "answers": [
+            "Henri Becquerel",
+            "Max Planck",
+            "Wilhelm Röntgen",
+            "Marie Curie"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik tudós fedezte fel a radioaktivitást 1896-ban?",
+        "answers": [
+            "Henri Becquerel",
+            "Wilhelm Röntgen",
+            "Pierre Curie",
+            "Marie Curie"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tudós kapott két Nobel-díjat különböző tudományágakban (fizika és kémia)?",
+        "answers": [
+            "Marie Curie",
+            "Linus Pauling",
+            "Albert Einstein",
+            "Niels Bohr"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tudós alkotta meg a periódusos rendszert 1869-ben?",
+        "answers": [
+            "Niels Bohr",
+            "Dmitrij Mengyelejev",
+            "Antoine Lavoisier",
+            "John Dalton"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik tudós nevéhez köthető a „tömegmegmaradás törvénye” a kémiai reakciókban?",
+        "answers": [
+            "Robert Boyle",
+            "Joseph Priestley",
+            "John Dalton",
+            "Antoine Lavoisier"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tudós nevéhez fűződik a hősugárzás kvantumhipotézise, 1900-ban?",
+        "answers": [
+            "Max Planck",
+            "Albert Einstein",
+            "Niels Bohr",
+            "Werner Heisenberg"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik tudós kapta a fizikai Nobel-díjat 1921-ben a fotoelektromos hatás magyarázatáért?",
+        "answers": [
+            "Max Planck",
+            "Albert Einstein",
+            "Marie Curie",
+            "Niels Bohr"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik elem az egyetlen halogén, amely szobahőmérsékleten folyékony?",
+        "answers": [
+            "Klór",
+            "Bróm",
+            "Fluor",
+            "Jód"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik elem szobahőmérsékleten gáz halmazállapotú halogén, és sárgászöld színű?",
+        "answers": [
+            "Bróm",
+            "Klór",
+            "Jód",
+            "Fluor"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik elem szilárd, lilás gőzű halogén?",
+        "answers": [
+            "Fluor",
+            "Klór",
+            "Bróm",
+            "Jód"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik fém olvadáspontja a legmagasabb?",
+        "answers": [
+            "Vas",
+            "Platina",
+            "Titán",
+            "Volfrám"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik anyag a gyémánt kémiai összetétele?",
+        "answers": [
+            "Bór",
+            "Szilícium",
+            "Szén",
+            "Foszfor"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik elem a grafit?",
+        "answers": [
+            "Ólom",
+            "Szén",
+            "Vas",
+            "Szilícium"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik molekula az ózon képlete?",
+        "answers": [
+            "H2O2",
+            "O3",
+            "CO2",
+            "O2"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik vegyület a hidrogén-peroxid képlete?",
+        "answers": [
+            "H2O",
+            "CO2",
+            "H2O2",
+            "HCl"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik gáz a legnagyobb mennyiségben a Mars légkörében?",
+        "answers": [
+            "Nitrogén",
+            "Argon",
+            "Szén-dioxid",
+            "Oxigén"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik gáz a legnagyobb mennyiségben a Vénusz légkörében?",
+        "answers": [
+            "Nitrogén",
+            "Oxigén",
+            "Kén-dioxid",
+            "Szén-dioxid"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik bolygó a Naprendszer legsűrűbb bolygója?",
+        "answers": [
+            "Mars",
+            "Vénusz",
+            "Merkúr",
+            "Föld"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik bolygónak a leghosszabb a nap (egy tengely körüli forgás)?",
+        "answers": [
+            "Merkúr",
+            "Mars",
+            "Vénusz",
+            "Jupiter"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik bolygó kering hátrafelé, a többihez képest ellentétes irányban forogva?",
+        "answers": [
+            "Jupiter",
+            "Mars",
+            "Vénusz",
+            "Merkúr"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik holdja van a Marsnak Phobos mellett?",
+        "answers": [
+            "Titán",
+            "Európé",
+            "Triton",
+            "Deimos"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik holdja a Jupiternek, amelyen vulkáni aktivitás van?",
+        "answers": [
+            "Io",
+            "Ganymedes",
+            "Kallisztó",
+            "Európé"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik holdja a Jupiternek, amely alatt feltételezett óceán rejtőzik, és élet kereső küldetés célpontja?",
+        "answers": [
+            "Európé",
+            "Kallisztó",
+            "Io",
+            "Ganymedes"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik holdja a Szaturnusznak, amelynek sűrű légköre van?",
+        "answers": [
+            "Titán",
+            "Mimasz",
+            "Rhea",
+            "Enceladusz"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik holdja a Neptunusznak, amely ellentétes irányban kering?",
+        "answers": [
+            "Európé",
+            "Triton",
+            "Charon",
+            "Titán"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik törpebolygó holdja a Charon?",
+        "answers": [
+            "Ceres",
+            "Haumea",
+            "Plútó",
+            "Eris"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik a Naprendszer aszteroidaövének legnagyobb törpebolygója?",
+        "answers": [
+            "Plútó",
+            "Ceres",
+            "Vesta",
+            "Eris"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik űrszonda érte el elsőként a Plútót 2015-ben?",
+        "answers": [
+            "Cassini",
+            "Voyager 1",
+            "Juno",
+            "New Horizons"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik űrszonda lépett ki elsőként a Naprendszerből?",
+        "answers": [
+            "Cassini",
+            "Pioneer 10",
+            "Galileo",
+            "Voyager 1"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik űrszonda keringett a Szaturnusz körül 2004 és 2017 között?",
+        "answers": [
+            "Juno",
+            "Cassini",
+            "Galileo",
+            "Voyager 2"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik űrszonda landolt a Hold túloldalán először 2019-ben?",
+        "answers": [
+            "Chandrayaan-2",
+            "Apollo 17",
+            "Luna 9",
+            "Csang'o–4"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik küldetés hozta az első embert a Holdra?",
+        "answers": [
+            "Apollo 11",
+            "Szojuz 1",
+            "Apollo 13",
+            "Gemini 4"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik Apollo-küldetés robbantott egy tartályt útban a Hold felé 1970-ben, de a legénység épségben hazatért?",
+        "answers": [
+            "Apollo 12",
+            "Apollo 13",
+            "Apollo 11",
+            "Apollo 17"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik magyar űrhajós volt a világűrben 1980-ban?",
+        "answers": [
+            "Magyari Béla",
+            "Kuti Gábor",
+            "Farkas Bertalan",
+            "Charles Simonyi"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik magyar származású milliárdos járt az űrben kétszer?",
+        "answers": [
+            "Magyari Béla",
+            "Kuti Gábor",
+            "Farkas Bertalan",
+            "Charles Simonyi"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik űrállomás volt a Szovjetunió, majd Oroszország űrállomása 1986-tól?",
+        "answers": [
+            "ISS",
+            "Szkajlab",
+            "Szalut",
+            "Mir"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben lőtték fel a Hubble-űrtávcsövet?",
+        "answers": [
+            "1990",
+            "1969",
+            "1981",
+            "2001"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik űrtávcső indult 2021 decemberében?",
+        "answers": [
+            "Hubble",
+            "James Webb",
+            "Spitzer",
+            "Kepler"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben indult az első amerikai űrrepülő, a Columbia?",
+        "answers": [
+            "1975",
+            "1981",
+            "1969",
+            "1990"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik űrrepülő robbant fel 1986-ban indulás után?",
+        "answers": [
+            "Discovery",
+            "Columbia",
+            "Atlantis",
+            "Challenger"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben történt a Csernobili atomerőmű-baleset?",
+        "answers": [
+            "1991",
+            "1979",
+            "1975",
+            "1986"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben történt a fukusimai atomerőmű-baleset?",
+        "answers": [
+            "2016",
+            "2008",
+            "2004",
+            "2011"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik atomerőmű-balesetnél olvadt meg a reaktor Pennsylvaniában 1979-ben?",
+        "answers": [
+            "Csernobil",
+            "Fukusima",
+            "Three Mile Island",
+            "Windscale"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Hol található Magyarország egyetlen atomerőműve?",
+        "answers": [
+            "Dunaújváros",
+            "Tiszaújváros",
+            "Paks",
+            "Mohács"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Hány blokkos a paksi atomerőmű?",
+        "answers": [
+            "4",
+            "6",
+            "2",
+            "3"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi az a Doppler-effektus?",
+        "answers": [
+            "Az elektromos áram áramlása",
+            "A fény törése",
+            "A hullám frekvenciájának változása a mozgás miatt",
+            "A hang visszaverődése"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta az „Elveszett idő nyomában” című regényfolyamot?",
+        "answers": [
+            "Marcel Proust",
+            "Émile Zola",
+            "Gustave Flaubert",
+            "Victor Hugo"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Bovaryné” című regényt?",
+        "answers": [
+            "Honoré de Balzac",
+            "Émile Zola",
+            "Stendhal",
+            "Gustave Flaubert"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Nyomorultak” című regényt?",
+        "answers": [
+            "Honoré de Balzac",
+            "Alexandre Dumas",
+            "Émile Zola",
+            "Victor Hugo"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „A három testőr” című regényt?",
+        "answers": [
+            "Jules Verne",
+            "Victor Hugo",
+            "Alexandre Dumas",
+            "Stendhal"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta „A vörös és a fekete” című regényt?",
+        "answers": [
+            "Stendhal",
+            "Gustave Flaubert",
+            "Émile Zola",
+            "Honoré de Balzac"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Háború és béke” című regényt?",
+        "answers": [
+            "Lev Tolsztoj",
+            "Nyikolaj Gogol",
+            "Fjodor Dosztojevszkij",
+            "Anton Csehov"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta az „Anna Karenina” című regényt?",
+        "answers": [
+            "Ivan Turgenyev",
+            "Lev Tolsztoj",
+            "Fjodor Dosztojevszkij",
+            "Mihail Solohov"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta „A Karamazov testvérek” című regényt?",
+        "answers": [
+            "Lev Tolsztoj",
+            "Mihail Bulgakov",
+            "Fjodor Dosztojevszkij",
+            "Ivan Turgenyev"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta „A Mester és Margarita” című regényt?",
+        "answers": [
+            "Fjodor Dosztojevszkij",
+            "Vlagyimir Nabokov",
+            "Mihail Bulgakov",
+            "Borisz Paszternak"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Doktor Zsivágó” című regényt?",
+        "answers": [
+            "Mihail Bulgakov",
+            "Borisz Paszternak",
+            "Alekszandr Szolzsenyicin",
+            "Mihail Solohov"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Lolitát”?",
+        "answers": [
+            "Vlagyimir Nabokov",
+            "Mihail Bulgakov",
+            "Borisz Paszternak",
+            "Joseph Conrad"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta „A per” című regényt?",
+        "answers": [
+            "Thomas Mann",
+            "Robert Musil",
+            "Hermann Hesse",
+            "Franz Kafka"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „A varázshegy” című regényt?",
+        "answers": [
+            "Thomas Mann",
+            "Günter Grass",
+            "Franz Kafka",
+            "Hermann Hesse"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Bádogdob” című regényt?",
+        "answers": [
+            "Thomas Mann",
+            "Heinrich Böll",
+            "Hermann Hesse",
+            "Günter Grass"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Faust” című drámát?",
+        "answers": [
+            "Johann Wolfgang von Goethe",
+            "Friedrich Schiller",
+            "Thomas Mann",
+            "Heinrich Heine"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Haramiák” című drámát?",
+        "answers": [
+            "Friedrich Schiller",
+            "Johann Wolfgang von Goethe",
+            "Heinrich Heine",
+            "Gotthold Ephraim Lessing"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta az „Isteni színjátékot”?",
+        "answers": [
+            "Petrarca",
+            "Giovanni Boccaccio",
+            "Ariosto",
+            "Dante Alighieri"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Dekameront”?",
+        "answers": [
+            "Machiavelli",
+            "Dante Alighieri",
+            "Giovanni Boccaccio",
+            "Petrarca"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta „A fejedelem” című művet?",
+        "answers": [
+            "Niccolò Machiavelli",
+            "Dante Alighieri",
+            "Petrarca",
+            "Boccaccio"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Don Quijote” című regényt?",
+        "answers": [
+            "Miguel de Cervantes",
+            "Federico García Lorca",
+            "Gabriel García Márquez",
+            "Lope de Vega"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Száz év magány” című regényt?",
+        "answers": [
+            "Mario Vargas Llosa",
+            "Jorge Luis Borges",
+            "Isabel Allende",
+            "Gabriel García Márquez"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „A homok könyve” című novelláskötetet?",
+        "answers": [
+            "Julio Cortázar",
+            "Jorge Luis Borges",
+            "Pablo Neruda",
+            "Gabriel García Márquez"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Szerelem a kolera idején” című regényt?",
+        "answers": [
+            "Gabriel García Márquez",
+            "Mario Vargas Llosa",
+            "Isabel Allende",
+            "Julio Cortázar"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta az „Öreg halász és a tenger” című kisregényt?",
+        "answers": [
+            "John Steinbeck",
+            "William Faulkner",
+            "Ernest Hemingway",
+            "F. Scott Fitzgerald"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta „A nagy Gatsby” című regényt?",
+        "answers": [
+            "Ernest Hemingway",
+            "William Faulkner",
+            "John Steinbeck",
+            "F. Scott Fitzgerald"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „A Zabhegyező” című regényt?",
+        "answers": [
+            "Ernest Hemingway",
+            "Jack Kerouac",
+            "John Steinbeck",
+            "J. D. Salinger"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „Az utcán” (On the Road) című regényt?",
+        "answers": [
+            "J. D. Salinger",
+            "William S. Burroughs",
+            "Allen Ginsberg",
+            "Jack Kerouac"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Moby Dicket”?",
+        "answers": [
+            "Herman Melville",
+            "Nathaniel Hawthorne",
+            "Edgar Allan Poe",
+            "Mark Twain"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta „A holló” című költeményt?",
+        "answers": [
+            "Walt Whitman",
+            "Emily Dickinson",
+            "Edgar Allan Poe",
+            "Robert Frost"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Haragos szőlő” című regényt?",
+        "answers": [
+            "Upton Sinclair",
+            "John Steinbeck",
+            "Ernest Hemingway",
+            "William Faulkner"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta az „1984” című regényt?",
+        "answers": [
+            "Aldous Huxley",
+            "Arthur Koestler",
+            "George Orwell",
+            "Ray Bradbury"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Szép új világ” című regényt?",
+        "answers": [
+            "Ray Bradbury",
+            "George Orwell",
+            "Anthony Burgess",
+            "Aldous Huxley"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Fahrenheit 451” című regényt?",
+        "answers": [
+            "Ray Bradbury",
+            "George Orwell",
+            "Isaac Asimov",
+            "Aldous Huxley"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta az „Állatfarm” című műveket?",
+        "answers": [
+            "Anthony Burgess",
+            "William Golding",
+            "Aldous Huxley",
+            "George Orwell"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Légy ura” című regényt?",
+        "answers": [
+            "George Orwell",
+            "William Golding",
+            "Aldous Huxley",
+            "Graham Greene"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta az „Üvöltő szelek” című regényt?",
+        "answers": [
+            "Charlotte Brontë",
+            "George Eliot",
+            "Emily Brontë",
+            "Jane Austen"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Jane Eyre” című regényt?",
+        "answers": [
+            "George Eliot",
+            "Charlotte Brontë",
+            "Jane Austen",
+            "Emily Brontë"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta az „Büszkeség és balítélet” című regényt?",
+        "answers": [
+            "George Eliot",
+            "Jane Austen",
+            "Mary Shelley",
+            "Charlotte Brontë"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Frankenstein” című regényt?",
+        "answers": [
+            "Jane Austen",
+            "Bram Stoker",
+            "Mary Shelley",
+            "Emily Brontë"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Drakula” című regényt?",
+        "answers": [
+            "Oscar Wilde",
+            "Bram Stoker",
+            "Mary Shelley",
+            "Arthur Conan Doyle"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Dorian Gray arcképe” című regényt?",
+        "answers": [
+            "Robert Louis Stevenson",
+            "Bram Stoker",
+            "Oscar Wilde",
+            "Arthur Conan Doyle"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Kincses szigetet”?",
+        "answers": [
+            "Arthur Conan Doyle",
+            "Jonathan Swift",
+            "Daniel Defoe",
+            "Robert Louis Stevenson"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Gulliver utazásai” című művet?",
+        "answers": [
+            "Jonathan Swift",
+            "Samuel Richardson",
+            "Daniel Defoe",
+            "Henry Fielding"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Robinson Crusoe” című regényt?",
+        "answers": [
+            "Samuel Richardson",
+            "Jonathan Swift",
+            "Henry Fielding",
+            "Daniel Defoe"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta az „Oliver Twist” című regényt?",
+        "answers": [
+            "Charles Dickens",
+            "George Eliot",
+            "William Thackeray",
+            "Thomas Hardy"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Karácsonyi éneket”?",
+        "answers": [
+            "Charles Dickens",
+            "William Thackeray",
+            "George Eliot",
+            "Thomas Hardy"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta a „Sherlock Holmes” történeteket?",
+        "answers": [
+            "Agatha Christie",
+            "Edgar Wallace",
+            "G. K. Chesterton",
+            "Arthur Conan Doyle"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Tíz kicsi négert” (ma újabb címen)?",
+        "answers": [
+            "Arthur Conan Doyle",
+            "Dorothy L. Sayers",
+            "Ruth Rendell",
+            "Agatha Christie"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Kis herceg” című művet?",
+        "answers": [
+            "Antoine de Saint-Exupéry",
+            "Jules Verne",
+            "Albert Camus",
+            "Jean-Paul Sartre"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta az „Idegen” című regényt 1942-ben?",
+        "answers": [
+            "Jean-Paul Sartre",
+            "Simone de Beauvoir",
+            "André Gide",
+            "Albert Camus"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „A hányinger” című regényt?",
+        "answers": [
+            "Albert Camus",
+            "Marcel Proust",
+            "Jean-Paul Sartre",
+            "André Gide"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Godot-ra várva” című drámát?",
+        "answers": [
+            "Bertolt Brecht",
+            "Eugène Ionesco",
+            "Samuel Beckett",
+            "Harold Pinter"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Kurázsi mama” című drámát?",
+        "answers": [
+            "Friedrich Dürrenmatt",
+            "Heinrich Böll",
+            "Bertolt Brecht",
+            "Max Frisch"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Hamletet”?",
+        "answers": [
+            "Ben Jonson",
+            "John Webster",
+            "Christopher Marlowe",
+            "William Shakespeare"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Macbethet”?",
+        "answers": [
+            "Christopher Marlowe",
+            "William Shakespeare",
+            "Thomas Kyd",
+            "Ben Jonson"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Szentivánéji álmot”?",
+        "answers": [
+            "Ben Jonson",
+            "Christopher Marlowe",
+            "William Shakespeare",
+            "John Fletcher"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Tartuffe-öt”?",
+        "answers": [
+            "Voltaire",
+            "Molière",
+            "Corneille",
+            "Racine"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Candide” című művet?",
+        "answers": [
+            "Montesquieu",
+            "Voltaire",
+            "Rousseau",
+            "Diderot"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Társadalmi szerződést”?",
+        "answers": [
+            "Montesquieu",
+            "Jean-Jacques Rousseau",
+            "Voltaire",
+            "Diderot"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki írta a „Tiszta ész kritikáját”?",
+        "answers": [
+            "Hegel",
+            "Schopenhauer",
+            "Immanuel Kant",
+            "Nietzsche"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta a „Így szólott Zarathustrát”?",
+        "answers": [
+            "Arthur Schopenhauer",
+            "Martin Heidegger",
+            "Immanuel Kant",
+            "Friedrich Nietzsche"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Tőke” című művet?",
+        "answers": [
+            "Adam Smith",
+            "John Stuart Mill",
+            "Karl Marx",
+            "Friedrich Engels"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki írta „A nemzetek gazdagsága” című művet?",
+        "answers": [
+            "David Ricardo",
+            "John Maynard Keynes",
+            "Karl Marx",
+            "Adam Smith"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta a „Leviatánt”?",
+        "answers": [
+            "Thomas Hobbes",
+            "Jean-Jacques Rousseau",
+            "John Locke",
+            "David Hume"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki írta az „Utópiát” 1516-ban?",
+        "answers": [
+            "Erasmus",
+            "Machiavelli",
+            "Francis Bacon",
+            "Morus Tamás"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki írta „A bolondság dicséretét”?",
+        "answers": [
+            "Rotterdami Erasmus",
+            "Montaigne",
+            "Morus Tamás",
+            "Machiavelli"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette „Az utolsó vacsorát”?",
+        "answers": [
+            "Raffaello",
+            "Tiziano",
+            "Leonardo da Vinci",
+            "Michelangelo"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette az „Athéni iskolát”?",
+        "answers": [
+            "Raffaello",
+            "Michelangelo",
+            "Leonardo da Vinci",
+            "Botticelli"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a „Vénusz születését”?",
+        "answers": [
+            "Raffaello",
+            "Sandro Botticelli",
+            "Giorgione",
+            "Tiziano"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki festette a „Mennyei és földi szerelmet”?",
+        "answers": [
+            "Tiziano",
+            "Botticelli",
+            "Giorgione",
+            "Raffaello"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette az „Éjjeli őrjáratot”?",
+        "answers": [
+            "Rembrandt",
+            "Rubens",
+            "Vermeer",
+            "Frans Hals"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a „Gyöngyfülbevalós lányt”?",
+        "answers": [
+            "Johannes Vermeer",
+            "Rembrandt",
+            "Rubens",
+            "Frans Hals"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a „Las Meninas” című képet?",
+        "answers": [
+            "Francisco Goya",
+            "Diego Velázquez",
+            "Murillo",
+            "El Greco"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki festette „Május 3-a Madridban” című képet?",
+        "answers": [
+            "Murillo",
+            "Diego Velázquez",
+            "Francisco Goya",
+            "El Greco"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette a „Toledói látképet”?",
+        "answers": [
+            "Goya",
+            "Diego Velázquez",
+            "Murillo",
+            "El Greco"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki festette „A kiáltást”?",
+        "answers": [
+            "Egon Schiele",
+            "Edvard Munch",
+            "Gustav Klimt",
+            "Vincent van Gogh"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki festette „A csókot” (1907–08)?",
+        "answers": [
+            "Henri Matisse",
+            "Gustav Klimt",
+            "Egon Schiele",
+            "Edvard Munch"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki festette a „Napfelkelte, benyomás” című képet?",
+        "answers": [
+            "Édouard Manet",
+            "Camille Pissarro",
+            "Claude Monet",
+            "Pierre-Auguste Renoir"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette a „Füves reggelit”?",
+        "answers": [
+            "Édouard Manet",
+            "Edgar Degas",
+            "Pierre-Auguste Renoir",
+            "Claude Monet"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a „Moulin de la Galette-i bált”?",
+        "answers": [
+            "Pierre-Auguste Renoir",
+            "Édouard Manet",
+            "Claude Monet",
+            "Edgar Degas"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a „Balett-táncosnőket” híresen pasztellel?",
+        "answers": [
+            "Renoir",
+            "Manet",
+            "Edgar Degas",
+            "Claude Monet"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette „A játszó kártyásokat”?",
+        "answers": [
+            "Paul Gauguin",
+            "Paul Cézanne",
+            "Georges Seurat",
+            "Vincent van Gogh"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki festette a „Vasárnap délután a La Grande Jatte szigetén” című pointillista művet?",
+        "answers": [
+            "Georges Seurat",
+            "Paul Signac",
+            "Vincent van Gogh",
+            "Paul Cézanne"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette „A tánc” című képet 1910-ben?",
+        "answers": [
+            "Henri Matisse",
+            "Georges Braque",
+            "André Derain",
+            "Pablo Picasso"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette „Az Avignoni kisasszonyok” című képet?",
+        "answers": [
+            "Pablo Picasso",
+            "Henri Matisse",
+            "Georges Braque",
+            "Joan Miró"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette az „Emlékezet állandósága” (olvadó órák) című képet?",
+        "answers": [
+            "René Magritte",
+            "Max Ernst",
+            "Salvador Dalí",
+            "Joan Miró"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette „Az emberi állapot”, „Ez nem pipa” című képeket?",
+        "answers": [
+            "René Magritte",
+            "Joan Miró",
+            "Salvador Dalí",
+            "Max Ernst"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a „Campbell’s Soup” képet?",
+        "answers": [
+            "Roy Lichtenstein",
+            "Jasper Johns",
+            "Andy Warhol",
+            "Jackson Pollock"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette a „Whaam!” című képregény-stílusú művet?",
+        "answers": [
+            "Jasper Johns",
+            "Robert Rauschenberg",
+            "Andy Warhol",
+            "Roy Lichtenstein"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki festette a magyar „Ásító inas” című képet?",
+        "answers": [
+            "Munkácsy Mihály",
+            "Benczúr Gyula",
+            "Székely Bertalan",
+            "Paál László"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki festette a magyar „Krisztus-trilógiát”?",
+        "answers": [
+            "Benczúr Gyula",
+            "Munkácsy Mihály",
+            "Székely Bertalan",
+            "Mednyánszky László"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki festette a magyar „Hunyadi László siratása” című képet?",
+        "answers": [
+            "Benczúr Gyula",
+            "Székely Bertalan",
+            "Madarász Viktor",
+            "Munkácsy Mihály"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette a „Majális” című magyar festményt?",
+        "answers": [
+            "Rippl-Rónai József",
+            "Munkácsy Mihály",
+            "Szinyei Merse Pál",
+            "Benczúr Gyula"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki festette a „Magányos cédrus” című magyar festményt?",
+        "answers": [
+            "Mednyánszky László",
+            "Szinyei Merse Pál",
+            "Rippl-Rónai József",
+            "Csontváry Kosztka Tivadar"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki festette a magyar „Kukoricázó lány”-t?",
+        "answers": [
+            "Szinyei Merse Pál",
+            "Csók István",
+            "Egry József",
+            "Rippl-Rónai József"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Bhután fővárosa?",
+        "answers": [
+            "Thimphu",
+            "Punakha",
+            "Katmandu",
+            "Paro"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Laosz fővárosa?",
+        "answers": [
+            "Hanoi",
+            "Vientián",
+            "Phnompen",
+            "Luang Prabang"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Kambodzsa fővárosa?",
+        "answers": [
+            "Phnompen",
+            "Hanoi",
+            "Siem Reap",
+            "Vientián"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Mianmar fővárosa 2005 óta?",
+        "answers": [
+            "Bangkok",
+            "Rangun",
+            "Nepjido",
+            "Mandalaj"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Brunei fővárosa?",
+        "answers": [
+            "Jakarta",
+            "Bandar Seri Begawan",
+            "Kuala Lumpur",
+            "Manila"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Kirgizisztán fővárosa?",
+        "answers": [
+            "Dusanbe",
+            "Biskek",
+            "Asztana",
+            "Taskent"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Üzbegisztán fővárosa?",
+        "answers": [
+            "Biskek",
+            "Szamarkand",
+            "Taskent",
+            "Buhara"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Türkmenisztán fővárosa?",
+        "answers": [
+            "Dusanbe",
+            "Asgabat",
+            "Baku",
+            "Taskent"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Tádzsikisztán fővárosa?",
+        "answers": [
+            "Biskek",
+            "Asgabat",
+            "Taskent",
+            "Dusanbe"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Omán fővárosa?",
+        "answers": [
+            "Maszkat",
+            "Abu-Dzabi",
+            "Doha",
+            "Manáma"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Katar fővárosa?",
+        "answers": [
+            "Abu-Dzabi",
+            "Manáma",
+            "Doha",
+            "Maszkat"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Bahrein fővárosa?",
+        "answers": [
+            "Maszkat",
+            "Kuvait",
+            "Manáma",
+            "Doha"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Jemen fővárosa?",
+        "answers": [
+            "Áden",
+            "Rijád",
+            "Szanaa",
+            "Maszkat"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Szomália fővárosa?",
+        "answers": [
+            "Mogadishu",
+            "Asmara",
+            "Addisz-Abeba",
+            "Dzsibuti"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Eritrea fővárosa?",
+        "answers": [
+            "Mogadishu",
+            "Asmara",
+            "Dzsibuti",
+            "Addisz-Abeba"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Dzsibuti fővárosa?",
+        "answers": [
+            "Dzsibuti",
+            "Asmara",
+            "Mogadishu",
+            "Kartúm"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Szudán fővárosa?",
+        "answers": [
+            "Kartúm",
+            "Asmara",
+            "Kairó",
+            "Juba"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Dél-Szudán fővárosa?",
+        "answers": [
+            "Kartúm",
+            "Kampala",
+            "Juba",
+            "Addisz-Abeba"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Uganda fővárosa?",
+        "answers": [
+            "Kigali",
+            "Dodoma",
+            "Kampala",
+            "Nairobi"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Ruanda fővárosa?",
+        "answers": [
+            "Nairobi",
+            "Kampala",
+            "Bujumbura",
+            "Kigali"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Kongói Demokratikus Köztársaság fővárosa?",
+        "answers": [
+            "Brazzaville",
+            "Kolwezi",
+            "Lubumbashi",
+            "Kinshasa"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Kongói Köztársaság fővárosa?",
+        "answers": [
+            "Brazzaville",
+            "Kinshasa",
+            "Yaoundé",
+            "Libreville"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Gabon fővárosa?",
+        "answers": [
+            "Brazzaville",
+            "Libreville",
+            "Malabo",
+            "Yaoundé"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Kamerun fővárosa?",
+        "answers": [
+            "Douala",
+            "Abuja",
+            "Libreville",
+            "Yaoundé"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Elefántcsontpart politikai fővárosa?",
+        "answers": [
+            "Yamoussoukro",
+            "Accra",
+            "Abidjan",
+            "Ouagadougou"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Mali fővárosa?",
+        "answers": [
+            "Timbuktu",
+            "Bamako",
+            "Niamey",
+            "Dakar"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Niger fővárosa?",
+        "answers": [
+            "Niamey",
+            "N’Djamena",
+            "Bamako",
+            "Abuja"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Csád fővárosa?",
+        "answers": [
+            "Niamey",
+            "N’Djamena",
+            "Khartoum",
+            "Bamako"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Burkina Faso fővárosa?",
+        "answers": [
+            "Bamako",
+            "Ouagadougou",
+            "Accra",
+            "Niamey"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Zambia fővárosa?",
+        "answers": [
+            "Lusaka",
+            "Lilongwe",
+            "Maputo",
+            "Harare"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Malawi fővárosa?",
+        "answers": [
+            "Lusaka",
+            "Lilongwe",
+            "Harare",
+            "Blantyre"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Mozambik fővárosa?",
+        "answers": [
+            "Harare",
+            "Maputo",
+            "Beira",
+            "Lusaka"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Angola fővárosa?",
+        "answers": [
+            "Kinshasa",
+            "Luanda",
+            "Maputo",
+            "Windhoek"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Namíbia fővárosa?",
+        "answers": [
+            "Pretoria",
+            "Walvis Bay",
+            "Gaborone",
+            "Windhoek"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Botswana fővárosa?",
+        "answers": [
+            "Gaborone",
+            "Pretoria",
+            "Windhoek",
+            "Harare"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Madagaszkár fővárosa?",
+        "answers": [
+            "Victoria",
+            "Toamasina",
+            "Maputo",
+            "Antananarivo"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Mauritius fővárosa?",
+        "answers": [
+            "Antananarivo",
+            "Victoria",
+            "Port Louis",
+            "Moroni"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi a Seychelle-szigetek fővárosa?",
+        "answers": [
+            "Port Louis",
+            "Victoria",
+            "Antananarivo",
+            "Moroni"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi a Dominikai Köztársaság fővárosa?",
+        "answers": [
+            "Kingston",
+            "Port-au-Prince",
+            "San Juan",
+            "Santo Domingo"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Honduras fővárosa?",
+        "answers": [
+            "Guatemalaváros",
+            "San Salvador",
+            "Tegucigalpa",
+            "Managua"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Nicaragua fővárosa?",
+        "answers": [
+            "Tegucigalpa",
+            "San Salvador",
+            "San José",
+            "Managua"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Guatemala fővárosa?",
+        "answers": [
+            "Guatemalaváros",
+            "Tegucigalpa",
+            "San Salvador",
+            "Belmopan"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Belize fővárosa?",
+        "answers": [
+            "Guatemalaváros",
+            "San Salvador",
+            "Belize City",
+            "Belmopan"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi El Salvador fővárosa?",
+        "answers": [
+            "Tegucigalpa",
+            "San José",
+            "Managua",
+            "San Salvador"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Ecuador fővárosa?",
+        "answers": [
+            "Bogotá",
+            "Guayaquil",
+            "Quito",
+            "Lima"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Bolívia alkotmányos fővárosa?",
+        "answers": [
+            "Santa Cruz",
+            "La Paz",
+            "Cochabamba",
+            "Sucre"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Paraguay fővárosa?",
+        "answers": [
+            "Montevideo",
+            "Asunción",
+            "La Paz",
+            "Lima"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Suriname fővárosa?",
+        "answers": [
+            "Caracas",
+            "Paramaribo",
+            "Georgetown",
+            "Cayenne"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Guyana fővárosa?",
+        "answers": [
+            "Caracas",
+            "Georgetown",
+            "Cayenne",
+            "Paramaribo"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Fiji fővárosa?",
+        "answers": [
+            "Apia",
+            "Suva",
+            "Nuku’alofa",
+            "Port Moresby"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Pápua Új-Guinea fővárosa?",
+        "answers": [
+            "Suva",
+            "Honiara",
+            "Port Moresby",
+            "Canberra"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Szamoa fővárosa?",
+        "answers": [
+            "Honiara",
+            "Apia",
+            "Suva",
+            "Nuku’alofa"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Tonga fővárosa?",
+        "answers": [
+            "Suva",
+            "Apia",
+            "Honiara",
+            "Nuku’alofa"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Mongólia legnagyobb városa?",
+        "answers": [
+            "Erdenet",
+            "Darhan",
+            "Karakorum",
+            "Ulánbátor"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Ukrajna második legnagyobb városa?",
+        "answers": [
+            "Harkiv",
+            "Odessza",
+            "Dnyipro",
+            "Lviv"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Lengyelország második legnagyobb városa?",
+        "answers": [
+            "Łódź",
+            "Krakkó",
+            "Poznań",
+            "Wrocław"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Szlovákia második legnagyobb városa?",
+        "answers": [
+            "Eperjes",
+            "Zsolna",
+            "Kassa",
+            "Nyitra"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Csehország második legnagyobb városa?",
+        "answers": [
+            "Brno",
+            "Ostrava",
+            "Plzeň",
+            "Liberec"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Ausztria második legnagyobb városa?",
+        "answers": [
+            "Graz",
+            "Linz",
+            "Salzburg",
+            "Innsbruck"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Németország legnagyobb városa Berlin után?",
+        "answers": [
+            "München",
+            "Frankfurt",
+            "Köln",
+            "Hamburg"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Spanyolország második legnagyobb városa?",
+        "answers": [
+            "Valencia",
+            "Sevilla",
+            "Barcelona",
+            "Zaragoza"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Olaszország második legnagyobb városa?",
+        "answers": [
+            "Nápoly",
+            "Torino",
+            "Róma",
+            "Milánó"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi Franciaország második legnagyobb városa?",
+        "answers": [
+            "Lyon",
+            "Marseille",
+            "Nizza",
+            "Toulouse"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Mi Portugália második legnagyobb városa?",
+        "answers": [
+            "Coimbra",
+            "Faro",
+            "Porto",
+            "Braga"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Mi Hollandia kormányzati székhelye?",
+        "answers": [
+            "Hága",
+            "Amszterdam",
+            "Rotterdam",
+            "Utrecht"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mi Svájc legnagyobb városa Zürich után?",
+        "answers": [
+            "Genf",
+            "Bern",
+            "Bázel",
+            "Lausanne"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik város Horvátország tengerparti kikötővárosa, amelyet a „Adria gyöngyének” is neveznek?",
+        "answers": [
+            "Pula",
+            "Split",
+            "Dubrovnik",
+            "Zadar"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik horvát város a Diocletianus-palotájáról híres?",
+        "answers": [
+            "Zadar",
+            "Split",
+            "Dubrovnik",
+            "Pula"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik horvát nemzeti park híres a vízesés-tavairól?",
+        "answers": [
+            "Kornati",
+            "Paklenica",
+            "Plitvicei-tavak",
+            "Krka"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik szlovén tó híres a szigetén álló templomáról?",
+        "answers": [
+            "Bled-tó",
+            "Cerknica-tó",
+            "Ohridi-tó",
+            "Bohinj-tó"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország híres a Ohridi-tóról, amelyet Albániával oszt meg?",
+        "answers": [
+            "Észak-Macedónia",
+            "Montenegró",
+            "Koszovó",
+            "Bulgária"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország híres a Bohinj- és a Bled-tóról?",
+        "answers": [
+            "Horvátország",
+            "Szlovénia",
+            "Olaszország",
+            "Ausztria"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország fővárosa Szarajevó, amely 1984-ben téli olimpiát rendezett?",
+        "answers": [
+            "Montenegró",
+            "Horvátország",
+            "Bosznia-Hercegovina",
+            "Szerbia"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ország szigete Korzika?",
+        "answers": [
+            "Spanyolország",
+            "Franciaország",
+            "Olaszország",
+            "Málta"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigete Szardínia?",
+        "answers": [
+            "Olaszország",
+            "Franciaország",
+            "Spanyolország",
+            "Görögország"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Menorca?",
+        "answers": [
+            "Spanyolország",
+            "Horvátország",
+            "Görögország",
+            "Olaszország"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Madeira?",
+        "answers": [
+            "Olaszország",
+            "Portugália",
+            "Marokkó",
+            "Spanyolország"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigetei a Kanári-szigetek?",
+        "answers": [
+            "Marokkó",
+            "Spanyolország",
+            "Olaszország",
+            "Portugália"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigetei az Azori-szigetek?",
+        "answers": [
+            "Írország",
+            "Portugália",
+            "Spanyolország",
+            "Olaszország"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigete Rodosz?",
+        "answers": [
+            "Olaszország",
+            "Ciprus",
+            "Törökország",
+            "Görögország"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik ország szigete Gotland?",
+        "answers": [
+            "Észtország",
+            "Svédország",
+            "Finnország",
+            "Dánia"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigetcsoportja a Lofoten?",
+        "answers": [
+            "Finnország",
+            "Svédország",
+            "Norvégia",
+            "Izland"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ország szigete Bornholm?",
+        "answers": [
+            "Svédország",
+            "Dánia",
+            "Németország",
+            "Lengyelország"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigete Sylt?",
+        "answers": [
+            "Hollandia",
+            "Dánia",
+            "Németország",
+            "Belgium"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ország szigete Texel?",
+        "answers": [
+            "Hollandia",
+            "Dánia",
+            "Németország",
+            "Belgium"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Tasmania?",
+        "answers": [
+            "Ausztrália",
+            "Indonézia",
+            "Új-Zéland",
+            "Fidzsi"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Hokkaidó?",
+        "answers": [
+            "Japán",
+            "Oroszország",
+            "Dél-Korea",
+            "Kína"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Szahalin?",
+        "answers": [
+            "Oroszország",
+            "Japán",
+            "Kína",
+            "Észak-Korea"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Bali?",
+        "answers": [
+            "Thaiföld",
+            "Malajzia",
+            "Indonézia",
+            "Fülöp-szigetek"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ország szigete Phuket?",
+        "answers": [
+            "Thaiföld",
+            "Malajzia",
+            "Indonézia",
+            "Vietnam"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Zanzibár?",
+        "answers": [
+            "Tanzánia",
+            "Mozambik",
+            "Kenya",
+            "Madagaszkár"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Szokotra?",
+        "answers": [
+            "Szomália",
+            "Szaúd-Arábia",
+            "Jemen",
+            "Omán"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ország szigete Tahiti?",
+        "answers": [
+            "Fidzsi",
+            "Ausztrália",
+            "Francia Polinézia",
+            "Új-Zéland"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ország szigete Gran Canaria?",
+        "answers": [
+            "Spanyolország",
+            "Olaszország",
+            "Marokkó",
+            "Portugália"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Capri?",
+        "answers": [
+            "Spanyolország",
+            "Olaszország",
+            "Görögország",
+            "Horvátország"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország szigete Murano?",
+        "answers": [
+            "Görögország",
+            "Horvátország",
+            "Szlovénia",
+            "Olaszország"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik ország szigete Santorini?",
+        "answers": [
+            "Görögország",
+            "Törökország",
+            "Olaszország",
+            "Horvátország"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország szigete Mykonos?",
+        "answers": [
+            "Görögország",
+            "Olaszország",
+            "Törökország",
+            "Horvátország"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik szigeten van a világ legnagyobb ismert vulkánja, Mauna Loa?",
+        "answers": [
+            "Hawaii (Nagy-sziget)",
+            "Szicília",
+            "Tenerife",
+            "Izland"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik szigeten van a Teide vulkán?",
+        "answers": [
+            "Tenerife",
+            "Gran Canaria",
+            "Mallorca",
+            "Madeira"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország területén van a Kilimandzsáró?",
+        "answers": [
+            "Tanzánia",
+            "Uganda",
+            "Etiópia",
+            "Kenya"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország területén van a Viktória-vízesés részben, Zambia mellett?",
+        "answers": [
+            "Mozambik",
+            "Namíbia",
+            "Botswana",
+            "Zimbabwe"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik folyó vízesése az Iguazú?",
+        "answers": [
+            "Iguazú folyó",
+            "Paraná",
+            "Amazonas",
+            "Orinoco"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik folyó vízesése a Niagara?",
+        "answers": [
+            "Colorado",
+            "Mississippi",
+            "Hudson",
+            "Niagara folyó"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik folyón épült a Háromszoros-szurdok (Three Gorges) gát?",
+        "answers": [
+            "Jangce",
+            "Sárga-folyó",
+            "Brahmaputra",
+            "Mekong"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik folyó a Duna leghosszabb mellékfolyója?",
+        "answers": [
+            "Tisza",
+            "Száva",
+            "Inn",
+            "Dráva"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik folyó a Tisza legnagyobb mellékfolyója?",
+        "answers": [
+            "Bodrog",
+            "Maros",
+            "Szamos",
+            "Körös"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik folyó folyik át Szegeden?",
+        "answers": [
+            "Körös",
+            "Tisza",
+            "Maros",
+            "Duna"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik folyó folyik át Győrön?",
+        "answers": [
+            "Mosoni-Duna és Rába",
+            "Dráva",
+            "Garam",
+            "Tisza"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik szigeten készül a legerősebben tőzeges skót whisky, a Laphroaig?",
+        "answers": [
+            "Skye",
+            "Jura",
+            "Orkney",
+            "Islay"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik skót whiskyrégió híres a Glenfiddich-ről?",
+        "answers": [
+            "Speyside",
+            "Islay",
+            "Highlands",
+            "Lowlands"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik skót whiskydestilléria készíti a The Macallan-t?",
+        "answers": [
+            "Speyside",
+            "Islay",
+            "Lowlands",
+            "Campbeltown"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik skót whiskyrégió legkisebb, ma már kevés destilláriával?",
+        "answers": [
+            "Campbeltown",
+            "Islay",
+            "Speyside",
+            "Highlands"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány évig kell legalább érlelni a skót whiskyt a törvény szerint?",
+        "answers": [
+            "3",
+            "10",
+            "1",
+            "5"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Milyen hordóban érlelik a bourbont, törvény szerint?",
+        "answers": [
+            "Üveghordóban",
+            "Acélhordóban",
+            "Új, kiégetett tölgyfahordóban",
+            "Használt sherryhordóban"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Legalább hány százalék kukoricát kell tartalmaznia a bourbon alapanyagának?",
+        "answers": [
+            "70%",
+            "90%",
+            "51%",
+            "30%"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik amerikai állam szülötte a bourbon, és híres a Maker’s Mark-ról?",
+        "answers": [
+            "Texas",
+            "Tennessee",
+            "Virginia",
+            "Kentucky"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Mi a különbség a Tennessee whiskey és a bourbon között?",
+        "answers": [
+            "Rizsalapanyag",
+            "Üveghordó",
+            "Szén-szűrés (Lincoln County Process)",
+            "Nincs különbség"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik ír eljárás jellemző az ír whiskey-re?",
+        "answers": [
+            "Ötszörös desztillálás",
+            "Fagyasztás",
+            "Háromszoros desztillálás",
+            "Egyszeri desztillálás"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Hány évig kell legalább érlelni a konyakot, hogy VS jelölést kapjon?",
+        "answers": [
+            "2",
+            "10",
+            "4",
+            "6"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Mit jelent a konyak címkéjén az XO?",
+        "answers": [
+            "Legalább 2 év",
+            "Legalább 4 év",
+            "Ritka palack",
+            "Legalább 10 év érlelés"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik francia régióban készül a konyak?",
+        "answers": [
+            "Bordeaux",
+            "Loire",
+            "Alsace",
+            "Charente (Cognac)"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik szőlőfajtából készül jellemzően a konyak?",
+        "answers": [
+            "Merlot",
+            "Pinot noir",
+            "Chardonnay",
+            "Ugni blanc"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik ital a francia „armagnac” rokona a konyaknak, Gascogne-ból?",
+        "answers": [
+            "Calvados",
+            "Chartreuse",
+            "Armagnac",
+            "Pastis"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik francia likőrt készítik karthauzi szerzetesek 130 gyógynövényből?",
+        "answers": [
+            "Chartreuse",
+            "Grand Marnier",
+            "Bénédictine",
+            "Cointreau"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik likőr narancsos, konyakos alapú, francia?",
+        "answers": [
+            "Baileys",
+            "Cointreau",
+            "Grand Marnier",
+            "Kahlúa"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik likőr színtelen, narancsos, és a Margarita fontos összetevője?",
+        "answers": [
+            "Cointreau",
+            "Kahlúa",
+            "Grand Marnier",
+            "Baileys"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik gin típus a „London Dry”?",
+        "answers": [
+            "Cukrozás nélküli, száraz gin",
+            "Édesített gin",
+            "Ízesített gin",
+            "Hordós gin"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik skót gin készül Islay szigetén?",
+        "answers": [
+            "The Botanist",
+            "Bombay Sapphire",
+            "Hendrick’s",
+            "Tanqueray"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik gin készül uborka és rózsa jellegű botanikumokkal Skóciában?",
+        "answers": [
+            "Hendrick’s",
+            "Gordon’s",
+            "Beefeater",
+            "Bombay Sapphire"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik vodka svéd eredetű?",
+        "answers": [
+            "Grey Goose",
+            "Belvedere",
+            "Stolichnaya",
+            "Absolut"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik vodka francia eredetű, búzából?",
+        "answers": [
+            "Belvedere",
+            "Absolut",
+            "Grey Goose",
+            "Stolichnaya"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik rumtípus készül közvetlenül cukornádlé fermentálásából, Martinique-on?",
+        "answers": [
+            "Rhum agricole",
+            "Cachaça",
+            "Fehér rum",
+            "Melasz rum"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ital a Pisco?",
+        "answers": [
+            "Gabonából készült whisky",
+            "Szőlőből készült desztillátum Peruból/Chiléből",
+            "Cukornádból készült rum",
+            "Agavé alapú ital"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik koktél a Pisco Sour?",
+        "answers": [
+            "Pisco, narancs, tonik",
+            "Pisco, kóla, menta",
+            "Pisco, lime, tojásfehérje",
+            "Pisco, tej, kávé"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik klasszikus koktél készül whiskyből, cukorkockából, keserűből?",
+        "answers": [
+            "Old Fashioned",
+            "Manhattan",
+            "Mint Julep",
+            "Whisky Sour"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik koktél készül bourbonból, mentából és cukorból, a Kentucky Derby itala?",
+        "answers": [
+            "Old Fashioned",
+            "Sazerac",
+            "Manhattan",
+            "Mint Julep"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik koktél New Orleans jelképe, és abszinttal öblítik a poharat?",
+        "answers": [
+            "Sazerac",
+            "Old Fashioned",
+            "Mint Julep",
+            "Manhattan"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik koktél készül gin, citromlé, cukorszirup, szóda és jég keverékéből?",
+        "answers": [
+            "Negroni",
+            "Martini",
+            "Gimlet",
+            "Tom Collins"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik koktél gin és lime cordial egyszerű keveréke?",
+        "answers": [
+            "Negroni",
+            "Tom Collins",
+            "Gimlet",
+            "Martini"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik koktél készül tequilából, grapefruitlé és szódából?",
+        "answers": [
+            "Mojito",
+            "Margarita",
+            "Paloma",
+            "Daiquiri"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik koktél készül rumból, lime-ból, mentából, cukorból és szódából?",
+        "answers": [
+            "Cuba Libre",
+            "Caipirinha",
+            "Daiquiri",
+            "Mojito"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik koktélt kapjuk, ha bourbonhoz citromlevet és cukrot teszünk?",
+        "answers": [
+            "Whiskey Sour",
+            "Mint Julep",
+            "Manhattan",
+            "Old Fashioned"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik koktélnak a hozzávalói a vodka, kávélikőr és eszpresszó?",
+        "answers": [
+            "Irish Coffee",
+            "Black Russian",
+            "White Russian",
+            "Espresso Martini"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik koktél készül vodkából, kávélikőrből és tejszínből?",
+        "answers": [
+            "Espresso Martini",
+            "Irish Coffee",
+            "White Russian",
+            "Black Russian"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik forró koktél kávéból, whiskeyből, cukorból és tejszínhabból áll?",
+        "answers": [
+            "Glühwein",
+            "Hot Toddy",
+            "Irish Coffee",
+            "Eggnog"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik koktél a Hot Toddy alapja?",
+        "answers": [
+            "Whisky, méz, citrom, forró víz",
+            "Rum és kóla",
+            "Vodka és tonik",
+            "Gin és tonik"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik koktél a Piña Colada szülőhelye?",
+        "answers": [
+            "Mexikó",
+            "Kuba",
+            "Puerto Rico",
+            "Jamaica"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik koktél készül bourbonból és vörös vermutból, keserűvel, és New Yorkhoz kötődik?",
+        "answers": [
+            "Manhattan",
+            "Old Fashioned",
+            "Negroni",
+            "Martini"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik olasz város híres a Negroni feltalálásáról?",
+        "answers": [
+            "Milánó",
+            "Firenze",
+            "Velence",
+            "Róma"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik velencei koktél készül prosecco-ból és barackpüréből?",
+        "answers": [
+            "Mimosa",
+            "Bellini",
+            "Spritz",
+            "Kir Royale"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik koktél készül pezsgőből és cassis likőrből?",
+        "answers": [
+            "Kir Royale",
+            "Mimosa",
+            "Aperol Spritz",
+            "Bellini"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik koktél készül pezsgőből, cukorból, keserűből és konyakból?",
+        "answers": [
+            "Bellini",
+            "Kir Royale",
+            "Mimosa",
+            "Champagne Cocktail"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik koktél a Negroni whiskys változata?",
+        "answers": [
+            "Sazerac",
+            "Old Fashioned",
+            "Manhattan",
+            "Boulevardier"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik sör a belga trappista sör?",
+        "answers": [
+            "Budweiser",
+            "Staropramen",
+            "Heineken",
+            "Chimay"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik német sör az eredeti „Reinheitsgebot” (tisztasági törvény) alapján készül?",
+        "answers": [
+            "Búza, rizs, víz",
+            "Komló, árpa, víz (és élesztő)",
+            "Árpa, cukor, víz",
+            "Kukorica, víz, komló"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben vezették be a bajor sörtisztasági törvényt?",
+        "answers": [
+            "1516",
+            "1400",
+            "1871",
+            "1648"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik német város híres a Kölsch söréről?",
+        "answers": [
+            "Bréma",
+            "Köln",
+            "Lipcse",
+            "Düsseldorf"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik német város híres az Altbier söréről?",
+        "answers": [
+            "Köln",
+            "Drezda",
+            "Düsseldorf",
+            "Hamburg"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik belga sörfajta fűszeres, gyümölcsös, spontán erjesztésű?",
+        "answers": [
+            "Porter",
+            "Stout",
+            "Pilsner",
+            "Lambic"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik sörfajta Cseh eredetű világos lager, 1842-ből?",
+        "answers": [
+            "Pilsner Urquell",
+            "Budweiser",
+            "Guinness",
+            "Corona"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik sörmárka a „Budvar” eredeti országa?",
+        "answers": [
+            "Ausztria",
+            "Csehország",
+            "Szlovákia",
+            "Németország"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik város híres a Budweiser Budvar söréről?",
+        "answers": [
+            "Brno",
+            "České Budějovice",
+            "Plzeň",
+            "Prága"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik magyar sörmárka kapcsolódik Sopronhoz?",
+        "answers": [
+            "Arany Ászok",
+            "Dreher",
+            "Borsodi",
+            "Soproni"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik magyar sörmárka kapcsolódik Miskolc–Bőcshöz?",
+        "answers": [
+            "Dreher",
+            "Soproni",
+            "Borsodi",
+            "Pécsi"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte a „Négy évszak” című hegedűversenyeket?",
+        "answers": [
+            "Antonio Vivaldi",
+            "Georg Friedrich Händel",
+            "Johann Sebastian Bach",
+            "Arcangelo Corelli"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki szerezte a „Brandenburgi versenyeket”?",
+        "answers": [
+            "Joseph Haydn",
+            "Johann Sebastian Bach",
+            "Antonio Vivaldi",
+            "Georg Friedrich Händel"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte a „Messiás” oratóriumot?",
+        "answers": [
+            "Joseph Haydn",
+            "Wolfgang Amadeus Mozart",
+            "Georg Friedrich Händel",
+            "Johann Sebastian Bach"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte „A varázsfuvola” című operát?",
+        "answers": [
+            "Joseph Haydn",
+            "Ludwig van Beethoven",
+            "Wolfgang Amadeus Mozart",
+            "Franz Schubert"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte a „Figaro házassága” című operát?",
+        "answers": [
+            "Giacomo Puccini",
+            "Giuseppe Verdi",
+            "Wolfgang Amadeus Mozart",
+            "Gioachino Rossini"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte „A sevillai borbélyt”?",
+        "answers": [
+            "Gaetano Donizetti",
+            "Giuseppe Verdi",
+            "Wolfgang Amadeus Mozart",
+            "Gioachino Rossini"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki szerezte „A Traviata” című operát?",
+        "answers": [
+            "Giuseppe Verdi",
+            "Gioachino Rossini",
+            "Vincenzo Bellini",
+            "Giacomo Puccini"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki szerezte a „Tosca” című operát?",
+        "answers": [
+            "Gioachino Rossini",
+            "Giacomo Puccini",
+            "Giuseppe Verdi",
+            "Pietro Mascagni"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte a „Carmen” című operát?",
+        "answers": [
+            "Charles Gounod",
+            "Jules Massenet",
+            "Georges Bizet",
+            "Jacques Offenbach"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte a „Nibelung gyűrűje” ciklust?",
+        "answers": [
+            "Richard Wagner",
+            "Anton Bruckner",
+            "Johannes Brahms",
+            "Richard Strauss"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki szerezte a „Hattyúk tava” című balettet?",
+        "answers": [
+            "Pjotr Iljics Csajkovszkij",
+            "Dmitrij Sosztakovics",
+            "Szergej Prokofjev",
+            "Igor Sztravinszkij"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki szerezte „A Diótörő” című balettet?",
+        "answers": [
+            "Szergej Prokofjev",
+            "Pjotr Iljics Csajkovszkij",
+            "Dmitrij Sosztakovics",
+            "Igor Sztravinszkij"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte a „Bolerót”?",
+        "answers": [
+            "Erik Satie",
+            "Claude Debussy",
+            "Camille Saint-Saëns",
+            "Maurice Ravel"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki szerezte a „Clair de lune”-t?",
+        "answers": [
+            "Maurice Ravel",
+            "Erik Satie",
+            "Claude Debussy",
+            "Gabriel Fauré"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte a „Gymnopédiákat”?",
+        "answers": [
+            "Maurice Ravel",
+            "Claude Debussy",
+            "Erik Satie",
+            "Gabriel Fauré"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte a „Planéták” című szvitet?",
+        "answers": [
+            "Ralph Vaughan Williams",
+            "Gustav Holst",
+            "Edward Elgar",
+            "Benjamin Britten"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte az „Enigma-variációkat”?",
+        "answers": [
+            "Gustav Holst",
+            "Benjamin Britten",
+            "Edward Elgar",
+            "Henry Purcell"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Ki szerezte „A kékszakállú herceg vára” című operát?",
+        "answers": [
+            "Kodály Zoltán",
+            "Bartók Béla",
+            "Liszt Ferenc",
+            "Erkel Ferenc"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte a „Háry János” szvitet?",
+        "answers": [
+            "Bartók Béla",
+            "Liszt Ferenc",
+            "Dohnányi Ernő",
+            "Kodály Zoltán"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki szerezte a „Bánk bán” című operát?",
+        "answers": [
+            "Kodály Zoltán",
+            "Liszt Ferenc",
+            "Bartók Béla",
+            "Erkel Ferenc"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki szerezte a „Hunyadi László” című operát?",
+        "answers": [
+            "Kodály Zoltán",
+            "Erkel Ferenc",
+            "Bartók Béla",
+            "Liszt Ferenc"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte a „Psalmus Hungaricus”-t?",
+        "answers": [
+            "Liszt Ferenc",
+            "Bartók Béla",
+            "Dohnányi Ernő",
+            "Kodály Zoltán"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Ki szerezte a „Concerto for Orchestra”-t?",
+        "answers": [
+            "Ligeti György",
+            "Bartók Béla",
+            "Kodály Zoltán",
+            "Liszt Ferenc"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Ki szerezte az „Atmosphères” című művet?",
+        "answers": [
+            "Ligeti György",
+            "Kurtág György",
+            "Bartók Béla",
+            "Kodály Zoltán"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Ki szerezte a „Mikrokozmosz” című zongoradarabot?",
+        "answers": [
+            "Liszt Ferenc",
+            "Ligeti György",
+            "Kodály Zoltán",
+            "Bartók Béla"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik magyar karmester vezette a Philadelphiai Zenekart évtizedekig?",
+        "answers": [
+            "Solti György",
+            "Ormándy Jenő",
+            "Fricsay Ferenc",
+            "Doráti Antal"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hány húrja van egy brácsának?",
+        "answers": [
+            "4",
+            "3",
+            "6",
+            "5"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány húrja van egy mandolinnak (hagyományos)?",
+        "answers": [
+            "8",
+            "4",
+            "10",
+            "6"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Hány billentyűje van egy szabványos zongorának?",
+        "answers": [
+            "61",
+            "88",
+            "96",
+            "76"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Hány pedál van a modern koncertzongorán?",
+        "answers": [
+            "4",
+            "1",
+            "3",
+            "2"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Hány szál húr van egy harfán hagyományosan (koncertharfa)?",
+        "answers": [
+            "47",
+            "36",
+            "52",
+            "60"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik hangszert találta fel Adolphe Sax?",
+        "answers": [
+            "Klarinét",
+            "Szaxofon",
+            "Fagott",
+            "Oboa"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik hangszer a skót nemzeti hangszer?",
+        "answers": [
+            "Dudás",
+            "Citera",
+            "Hegedű",
+            "Hárfa"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország tradicionális hangszere a szitár?",
+        "answers": [
+            "India",
+            "Japán",
+            "Kína",
+            "Irán"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik ország hagyományos hangszere a koto?",
+        "answers": [
+            "Kína",
+            "Vietnam",
+            "Korea",
+            "Japán"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik ország hagyományos hangszere a balalajka?",
+        "answers": [
+            "Ukrajna",
+            "Oroszország",
+            "Lengyelország",
+            "Bulgária"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik ország hagyományos hangszere a didgeridoo?",
+        "answers": [
+            "Pápua Új-Guinea",
+            "Indonézia",
+            "Új-Zéland",
+            "Ausztrália"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik táncot nevezik Argentína nemzeti táncának?",
+        "answers": [
+            "Szamba",
+            "Salsa",
+            "Flamenco",
+            "Tangó"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik tánc származik Spanyolországból, Andalúziából?",
+        "answers": [
+            "Salsa",
+            "Tangó",
+            "Flamenco",
+            "Szamba"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik tánc Brazília karneváljának jellegzetes tánca?",
+        "answers": [
+            "Salsa",
+            "Flamenco",
+            "Szamba",
+            "Tangó"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik táncot jelöli a „keringő” ütemmutatója?",
+        "answers": [
+            "3/4",
+            "6/8",
+            "4/4",
+            "2/4"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik osztrák város a keringő fővárosa, ahol a Bécsi Újévi Koncertet tartják?",
+        "answers": [
+            "Salzburg",
+            "Graz",
+            "Bécs",
+            "Innsbruck"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik fesztivál évente Bayreuthban Wagner műveit mutatja be?",
+        "answers": [
+            "Glastonbury",
+            "Salzburgi Ünnepi Játékok",
+            "Edinburghi Fesztivál",
+            "Bayreuthi Ünnepi Játékok"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik fesztivál évente Salzburgban klasszikus zenét és színházat mutat be?",
+        "answers": [
+            "Glastonbury",
+            "Salzburgi Ünnepi Játékok",
+            "Bayreuthi Ünnepi Játékok",
+            "Edinburgh Fringe"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik angol fesztivál a világ egyik legnagyobb zenei fesztiválja Somerset megyében?",
+        "answers": [
+            "Isle of Wight",
+            "Download",
+            "Reading",
+            "Glastonbury"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik amerikai fesztivál a kaliforniai sivatagban, a Coachella?",
+        "answers": [
+            "Lollapalooza",
+            "Burning Man",
+            "Woodstock",
+            "Coachella"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben volt a Woodstocki fesztivál?",
+        "answers": [
+            "1971",
+            "1975",
+            "1969",
+            "1967"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben volt a Live Aid koncert?",
+        "answers": [
+            "1978",
+            "1989",
+            "1985",
+            "1992"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik zenekar lépett fel az 1985-ös Live Aid koncerten, és ott lett híres a showjukról?",
+        "answers": [
+            "Queen",
+            "Led Zeppelin",
+            "Pink Floyd",
+            "The Who"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik zenekar híres „The Dark Side of the Moon” albumáról?",
+        "answers": [
+            "Queen",
+            "Led Zeppelin",
+            "The Who",
+            "Pink Floyd"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik zenekar híres a „Sgt. Pepper’s Lonely Hearts Club Band” albumról?",
+        "answers": [
+            "The Who",
+            "The Rolling Stones",
+            "The Beatles",
+            "The Beach Boys"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik zenekar híres a „Pet Sounds” albumról?",
+        "answers": [
+            "The Beatles",
+            "The Beach Boys",
+            "The Byrds",
+            "The Kinks"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik énekes híres a „Born to Run” albumról?",
+        "answers": [
+            "Bruce Springsteen",
+            "Tom Petty",
+            "Bob Dylan",
+            "Neil Young"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik énekes kapta az irodalmi Nobel-díjat 2016-ban?",
+        "answers": [
+            "Leonard Cohen",
+            "Bruce Springsteen",
+            "Bob Dylan",
+            "Paul McCartney"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik énekes-dalszerző híres a „Hallelujah” dalról?",
+        "answers": [
+            "Neil Young",
+            "Bob Dylan",
+            "Leonard Cohen",
+            "Jeff Buckley"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik zenekar lett a leghíresebb „Nevermind” című albumával 1991-ben?",
+        "answers": [
+            "Soundgarden",
+            "Pearl Jam",
+            "Alice in Chains",
+            "Nirvana"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik zenekar híres az „OK Computer” albumról?",
+        "answers": [
+            "Radiohead",
+            "Blur",
+            "Coldplay",
+            "Oasis"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik brit zenekar híres a „Wonderwall” dalról?",
+        "answers": [
+            "Oasis",
+            "Blur",
+            "Radiohead",
+            "Coldplay"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik brit zenekar híres a „Yellow” és „Viva la Vida” dalról?",
+        "answers": [
+            "Oasis",
+            "Radiohead",
+            "Blur",
+            "Coldplay"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik ír zenekar híres az „With or Without You” dalról?",
+        "answers": [
+            "U2",
+            "Thin Lizzy",
+            "The Pogues",
+            "The Cranberries"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik svéd zenekar híres a „Dancing Queen” dalról?",
+        "answers": [
+            "ABBA",
+            "Roxette",
+            "Europe",
+            "Ace of Base"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik német együttes híres a „Wind of Change” dalról?",
+        "answers": [
+            "Rammstein",
+            "Modern Talking",
+            "Kraftwerk",
+            "Scorpions"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik német zenekar híres a „Du hast” dalról?",
+        "answers": [
+            "Modern Talking",
+            "Kraftwerk",
+            "Scorpions",
+            "Rammstein"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik német elektronikus zenei úttörő együttes az „Autobahn” készítője?",
+        "answers": [
+            "Can",
+            "Tangerine Dream",
+            "Neu!",
+            "Kraftwerk"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik zenekar híres a „Sweet Child o’ Mine” dalról?",
+        "answers": [
+            "Bon Jovi",
+            "Guns N’ Roses",
+            "Aerosmith",
+            "Mötley Crüe"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik zenekar híres a „Livin’ on a Prayer” dalról?",
+        "answers": [
+            "Def Leppard",
+            "Guns N’ Roses",
+            "Bon Jovi",
+            "Aerosmith"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik zenekar híres a „Dream On” és „I Don’t Want to Miss a Thing” dalról?",
+        "answers": [
+            "Def Leppard",
+            "Aerosmith",
+            "Bon Jovi",
+            "Guns N’ Roses"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik zenekar híres a „Paranoid” és „Iron Man” dalról?",
+        "answers": [
+            "Judas Priest",
+            "Deep Purple",
+            "Black Sabbath",
+            "Led Zeppelin"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik zenekar híres a „The Number of the Beast” albumról?",
+        "answers": [
+            "Iron Maiden",
+            "Judas Priest",
+            "Metallica",
+            "Black Sabbath"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik zenekar híres a „Master of Puppets” albumról?",
+        "answers": [
+            "Metallica",
+            "Slayer",
+            "Megadeth",
+            "Anthrax"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik énekesnő híres a „Respect” dalról?",
+        "answers": [
+            "Diana Ross",
+            "Aretha Franklin",
+            "Tina Turner",
+            "Whitney Houston"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik énekesnő híres az „I Will Always Love You” (1992-es) feldolgozásról?",
+        "answers": [
+            "Mariah Carey",
+            "Whitney Houston",
+            "Celine Dion",
+            "Aretha Franklin"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik évben nyerte az első Forma-1-es világbajnoki címét Michael Schumacher?",
+        "answers": [
+            "1996",
+            "1992",
+            "2000",
+            "1994"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Hány világbajnoki címet nyert Lewis Hamilton 2020-ig?",
+        "answers": [
+            "8",
+            "6",
+            "7",
+            "5"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben nyerte Magyarország az első labdarúgó olimpiai aranyérmét?",
+        "answers": [
+            "1948",
+            "1964",
+            "1952",
+            "1968"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik magyar úszó nyert két aranyat 1992-ben Barcelonában 200 m vegyesen és 400 m vegyesen?",
+        "answers": [
+            "Egerszegi Krisztina",
+            "Gyurta Dániel",
+            "Darnyi Tamás",
+            "Hosszú Katinka"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik évben rendezték az első Forma-1-es Magyar Nagydíjat?",
+        "answers": [
+            "1982",
+            "1995",
+            "1986",
+            "1990"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik pályán rendezik a Forma-1-es Magyar Nagydíjat?",
+        "answers": [
+            "Red Bull Ring",
+            "Balaton Park",
+            "Pannonia Ring",
+            "Hungaroring"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik évben nyerte Fernando Alonso az első F1-es világbajnoki címét?",
+        "answers": [
+            "2007",
+            "2005",
+            "2001",
+            "2003"
+        ],
+        "correct": 1
+    },
+    {
+        "question": "Melyik városban rendezték a 2000-es nyári olimpiát?",
+        "answers": [
+            "Sydney",
+            "Atlanta",
+            "Athén",
+            "Barcelona"
+        ],
+        "correct": 0
+    },
+    {
+        "question": "Melyik városban rendezték az 1992-es nyári olimpiát?",
+        "answers": [
+            "Moszkva",
+            "Szöul",
+            "Barcelona",
+            "Atlanta"
+        ],
+        "correct": 2
+    },
+    {
+        "question": "Melyik városban rendezték az 1988-as nyári olimpiát?",
+        "answers": [
+            "Los Angeles",
+            "Calgary",
+            "Moszkva",
+            "Szöul"
+        ],
+        "correct": 3
+    },
+    {
+        "question": "Melyik városban rendezték az 1980-as nyári olimpiát?",
+        "answers": [
+            "München",
+            "Montréal",
+            "Moszkva",
+            "Los Angeles"
+        ],
+        "correct": 2
+    }
+]
