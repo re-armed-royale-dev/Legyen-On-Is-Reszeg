@@ -279,7 +279,6 @@ function registerIosActivationRoutes(app, pool) {
 <title>iOS Admin</title>
 <style>
 * { box-sizing: border-box; }
-
 body {
   margin: 0;
   min-height: 100vh;
@@ -290,7 +289,6 @@ body {
   color: white;
   font-family: Arial, sans-serif;
 }
-
 .panel {
   width: 100%;
   max-width: 500px;
@@ -299,16 +297,9 @@ body {
   border-radius: 18px;
   background: #151c2b;
 }
-
 h2 { color: #fbbf24; margin-top: 0; }
-
 p { color: #cbd5e1; }
-
-label {
-  display: block;
-  margin-top: 12px;
-}
-
+label { display: block; margin-top: 12px; }
 input {
   width: 100%;
   padding: 14px;
@@ -319,7 +310,6 @@ input {
   color: white;
   font-size: 16px;
 }
-
 button {
   width: 100%;
   padding: 14px;
@@ -331,14 +321,11 @@ button {
   font-size: 15px;
   cursor: pointer;
 }
-
 button:disabled { opacity: .6; }
-
 .secondary {
   background: #334155;
   margin-bottom: 12px;
 }
-
 #result {
   margin-top: 15px;
   padding: 12px;
@@ -346,11 +333,7 @@ button:disabled { opacity: .6; }
   display: none;
   overflow-wrap: anywhere;
 }
-
-#banList {
-  margin-top: 15px;
-}
-
+#banList { margin-top: 15px; }
 .ban {
   border: 1px solid #475569;
   border-radius: 10px;
@@ -359,17 +342,12 @@ button:disabled { opacity: .6; }
   background: #0b0f19;
   overflow-wrap: anywhere;
 }
-
-.ban button {
-  margin-top: 10px;
-}
-
+.ban button { margin-top: 10px; }
 .small {
   color: #94a3b8;
   font-size: 13px;
   line-height: 1.5;
 }
-
 hr {
   border: 0;
   border-top: 1px solid #374151;
@@ -377,17 +355,14 @@ hr {
 }
 </style>
 </head>
-
 <body>
 <div class="panel">
   <h2>🔐 iOS Admin</h2>
   <p>iOS aktiválási tiltások kezelése</p>
 
   <label>Admin API kulcs</label>
-  <input id="adminKey"
-    type="password"
-    placeholder="Admin kulcs"
-    autocomplete="off">
+  <input id="adminKey" type="password"
+    placeholder="Admin kulcs" autocomplete="off">
 
   <button class="secondary" onclick="loadBans()">
     📋 Tiltott IP-címek betöltése
@@ -399,16 +374,11 @@ hr {
   <hr>
 
   <h3>➕ Kézi feloldás</h3>
-
   <label>IP-cím</label>
-  <input id="ip"
-    type="text"
-    placeholder="Például: 192.168.1.100"
-    autocomplete="off">
+  <input id="ip" type="text"
+    placeholder="Például: 192.168.1.100" autocomplete="off">
 
-  <button onclick="manualUnban()">
-    🔓 Tiltás feloldása
-  </button>
+  <button onclick="manualUnban()">🔓 Tiltás feloldása</button>
 
   <button class="secondary" onclick="unbanCurrentIp()">
     🔓 Saját aktuális IP-címem feloldása
@@ -427,7 +397,6 @@ function getKey() {
 
 function showResult(message, success) {
   const result = document.getElementById('result');
-
   result.style.display = 'block';
   result.textContent = message;
   result.style.background = success ? '#14532d' : '#7f1d1d';
@@ -439,10 +408,7 @@ async function api(url, options = {}) {
     ...options.headers
   };
 
-  return fetch(url, {
-    ...options,
-    headers
-  });
+  return fetch(url, { ...options, headers });
 }
 
 async function loadBans() {
@@ -490,17 +456,13 @@ async function loadBans() {
 
       const button = document.createElement('button');
       button.textContent = '🔓 IP feloldása';
-
       button.onclick = () => unbanIp(ban.ip);
 
       card.append(ip, attempts, until, button);
       list.appendChild(card);
     });
 
-    showResult(
-      'Betöltve: ' + data.bans.length + ' aktív tiltás.',
-      true
-    );
+    showResult('Betöltve: ' + data.bans.length + ' aktív tiltás.', true);
 
   } catch (error) {
     list.textContent = '';
@@ -516,9 +478,7 @@ async function unbanIp(ip) {
   try {
     const response = await api('/api/admin/ios-unban', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ip })
     });
 
@@ -529,16 +489,13 @@ async function unbanIp(ip) {
       data.success && data.unbanned
     );
 
-    if (data.success && data.unbanned) {
-      await loadBans();
-    }
+    if (data.success && data.unbanned) await loadBans();
 
   } catch (error) {
     showResult('Nem sikerült kapcsolódni a szerverhez.', false);
   }
 }
 
-// ÚJ: aktuális IP-cím feloldása
 async function unbanCurrentIp() {
   if (!getKey()) {
     showResult('Először add meg az admin API kulcsot!', false);
@@ -561,9 +518,8 @@ async function unbanCurrentIp() {
       data.success && data.unbanned
     );
 
-    if (data.success && data.unbanned) {
-      await loadBans();
-    }
+    if (data.success && data.unbanned) await loadBans();
+
   } catch (error) {
     showResult('Nem sikerült kapcsolódni a szerverhez.', false);
   }
@@ -609,10 +565,7 @@ async function manualUnban() {
 
       res.setHeader('Cache-Control', 'no-store');
 
-      return res.json({
-        success: true,
-        bans
-      });
+      return res.json({ success: true, bans });
 
     } catch (error) {
       console.error('iOS admin ban list:', error);
@@ -663,7 +616,7 @@ async function manualUnban() {
     }
   });
 
-  // ÚJ: aktuális kérés IP-címének feloldása
+  // Aktuális kérés IP-címének feloldása
   app.post('/api/admin/ios-unban-current', rateReady, async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
@@ -702,20 +655,24 @@ async function manualUnban() {
     }
   });
 
-  // Próbálkozási állapot
+  // Próbálkozási állapot és biztonságos IP-azonosító
   app.get('/api/ios/attempt-status', rateReady, async (req, res) => {
     try {
+      const ip = clientIp(req);
+      const ipTag = hashIp(ip, rateSecret).slice(0, 12);
+
       res.setHeader('Cache-Control', 'no-store');
 
-      res.json({
+      return res.json({
         success: true,
-        ...await attemptStatus(clientIp(req))
+        ...await attemptStatus(ip),
+        ipTag
       });
 
     } catch (error) {
       console.error('iOS attempt status:', error);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: 'Nem sikerült lekérdezni a próbálkozási állapotot.'
       });
@@ -789,12 +746,12 @@ async function manualUnban() {
       );
 
       res.setHeader('Cache-Control', 'no-store');
-      res.json({ success: true, token });
+      return res.json({ success: true, token });
 
     } catch (error) {
       console.error('iOS activation:', error);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: 'Az aktiválás most nem sikerült.'
       });
@@ -835,7 +792,7 @@ async function manualUnban() {
 
       res.setHeader('Cache-Control', 'no-store');
 
-      res.json({
+      return res.json({
         success: true,
         active: true
       });
@@ -843,7 +800,7 @@ async function manualUnban() {
     } catch (error) {
       console.error('iOS activation status:', error);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         active: false
       });
@@ -863,7 +820,6 @@ async function initializeIosActivationTables(pool) {
     )
   `);
 
-  // Titkosított IP-cím tárolásához szükséges oszlop
   await pool.query(`
     ALTER TABLE public.license_attempts
     ADD COLUMN IF NOT EXISTS ip_encrypted TEXT
