@@ -1525,6 +1525,7 @@
             if (!nextExpiry) return;
 
             unlockExpiryTimer = setTimeout(() => {
+                unlockExpiryTimer = null;
                 applyPlatformRestrictions();
                 scheduleRestrictionRefresh();
             }, Math.max(50, nextExpiry - now + 50));
@@ -3656,6 +3657,14 @@ async function loadDifficulty(diffKey) {
                     applyPlatformRestrictions();
                     scheduleRestrictionRefresh();
                 }
+            });
+            window.addEventListener('focus', () => {
+                applyPlatformRestrictions();
+                scheduleRestrictionRefresh();
+            });
+            window.addEventListener('pageshow', () => {
+                applyPlatformRestrictions();
+                scheduleRestrictionRefresh();
             });
             initAudioSettingsUI();
 
