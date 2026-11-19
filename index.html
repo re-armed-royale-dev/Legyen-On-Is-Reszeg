@@ -1314,43 +1314,41 @@
                     applyPlatformRestrictions();
                     showFeedback('Sikeres aktiválás!', 'A szerver sikeresen ellenőrizte a kulcsot. Az iOS-en korlátozott funkciók feloldásra kerültek ezen a telepítésen.', '🔓');
                 } else {
-                    playDrinkSound();
-                    input.value = '';
-                    const asCount = v => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
-                    const previousRemaining = asCount(iosAttemptState.remainingAttempts) ?? ACTIVATE_MAX_FAILS;
+    playDrinkSound();
+    input.value = '';
 
-                    if (data.lockedUntil) {
-                        iosAttemptState = data;
-                    } else {
-                        // A kulcs-ellenőrzés válasza a legfrissebb adat, ezt használjuk elsőként.
-                        let remaining = asCount(data.remainingAttempts);
-                        if (remaining === null) {
-                            const failed = asCount(data.failedAttempts);
-                            if (failed !== null) remaining = Math.max(0, ACTIVATE_MAX_FAILS - failed);
-                        }
-                        if (remaining === null) {
-                            await refreshIosAttemptStatus();
-                            remaining = asCount(iosAttemptState.remainingAttempts);
-                        }
-                        // Hibás próbálkozás után a szám nem maradhat ugyanannyi: helyben is levonjuk.
-                        if (remaining === null || (previousRemaining > 0 && remaining >= previousRemaining)) {
-                            remaining = Math.max(0, previousRemaining - 1);
-                        }
-                        iosAttemptState = {
-                            ...iosAttemptState,
-                            remainingAttempts: remaining,
-                            failedAttempts: Math.max(0, ACTIVATE_MAX_FAILS - remaining)
-                        };
-                        // Ha elfogyott a próbálkozás, kérjük le a tiltás idejét a szervertől.
-                        if (remaining === 0 && !iosAttemptState.lockedUntil) {
-                            const kept = iosAttemptState;
-                            await refreshIosAttemptStatus();
-                            if (!iosAttemptState.lockedUntil) iosAttemptState = kept;
-                        }
-                    }
-                    if (getActivateBanRemainingMs() > 0 || response.status === 429) showActivateBanModal();
-                    else showFeedback('Hibás kulcs', `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts ?? 0}</strong>.`, '❌');
-                }
+    // Mindig a szerver állapotát tekintjük mérvadónak.
+    let serverState = data;
+
+    if (
+        !serverState ||
+        serverState.remainingAttempts === undefined ||
+        serverState.failedAttempts === undefined
+    ) {
+        await refreshIosAttemptStatus();
+        serverState = iosAttemptState;
+    }
+
+    const failed = Number(serverState.failedAttempts);
+    const remaining = Number(serverState.remainingAttempts);
+
+    iosAttemptState = {
+        ...iosAttemptState,
+        failedAttempts: Number.isFinite(failed) ? failed : 0,
+        remainingAttempts: Number.isFinite(remaining) ? remaining : 3,
+        lockedUntil: serverState.lockedUntil || null
+    };
+
+    if (iosAttemptState.lockedUntil || response.status === 429) {
+        showActivateBanModal();
+    } else {
+        showFeedback(
+            'Hibás kulcs',
+            `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
+            '❌'
+        );
+    }
+}
             } catch (error) {
                 showFeedback('Kapcsolati hiba', 'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.', '⚠️');
             } finally {
