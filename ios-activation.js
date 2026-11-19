@@ -139,7 +139,7 @@ function registerIosActivationRoutes(app, pool) {
     return true;
   }
 
-  // Mindig a szerver adatbázisából olvassa a tényleges állapotot.
+  // A szerver adatbázisából olvassa a tényleges állapotot.
   async function attemptStatus(ip) {
     const ipHash = hashIp(ip, rateSecret);
 
@@ -165,6 +165,7 @@ function registerIosActivationRoutes(app, pool) {
       ? new Date(row.locked_until)
       : null;
 
+    // Aktív tiltás.
     if (until && until.getTime() > now) {
       return {
         failedAttempts: 3,
@@ -182,10 +183,67 @@ function registerIosActivationRoutes(app, pool) {
       };
     }
 
-    const failed = Math.min(
-      2,
-      Math.max(0, Number(row.failed_attempts) || 0)
+    const failedRaw = Math.max(
+      0,
+      Number(row.failed_attempts) || 0
     );
+
+    // Javítás: ha 3 hibás próbálkozás van eltárolva,
+    // de valamiért hiányzik a locked_until, létrehozzuk a tiltást.
+    if (failedRaw >= 3) {
+      const repair = await pool.query(
+        `UPDATE ${TABLE}
+         SET locked_until = NOW() + INTERVAL '30 days',
+             updated_at = NOW()
+         WHERE ip_hash=$1
+           AND locked_until IS NULL
+           AND failed_attempts >= 3
+         RETURNING locked_until`,
+        [ipHash]
+      );
+
+      if (repair.rowCount) {
+        const repairedUntil = new Date(
+          repair.rows[0].locked_until
+        );
+
+        return {
+          failedAttempts: 3,
+          remainingAttempts: 0,
+          lockedUntil: repairedUntil.toISOString()
+        };
+      }
+
+      // Ha egy másik kérés időközben módosította a sort,
+      // újra lekérjük az aktuális adatokat.
+      const refreshed = await pool.query(
+        `SELECT failed_attempts, locked_until
+         FROM ${TABLE}
+         WHERE ip_hash=$1`,
+        [ipHash]
+      );
+
+      if (refreshed.rowCount) {
+        const refreshedRow = refreshed.rows[0];
+
+        if (
+          refreshedRow.locked_until &&
+          new Date(refreshedRow.locked_until).getTime() > Date.now()
+        ) {
+          const refreshedUntil = new Date(
+            refreshedRow.locked_until
+          );
+
+          return {
+            failedAttempts: 3,
+            remainingAttempts: 0,
+            lockedUntil: refreshedUntil.toISOString()
+          };
+        }
+      }
+    }
+
+    const failed = Math.min(2, failedRaw);
 
     return {
       failedAttempts: failed,
@@ -741,13 +799,17 @@ async function manualUnban(){
         });
       }
 
+      // Az aktiválás IP-azonosítója diagnosztikai célra.
+      const ipTag = hashIp(ip, rateSecret).slice(0, 12);
+
       const status = await attemptStatus(ip);
 
       if (status.lockedUntil) {
         return res.status(429).json({
           success: false,
           error: 'Három hibás próbálkozás miatt 30 napos tiltás van érvényben.',
-          ...status
+          ...status,
+          ipTag
         });
       }
 
@@ -759,7 +821,8 @@ async function manualUnban(){
           error: attempt.locked
             ? 'Három hibás próbálkozás miatt 30 napos tiltás lépett életbe.'
             : 'Hibás aktiválókulcs.',
-          ...attempt
+          ...attempt,
+          ipTag
         });
       }
 
@@ -877,8 +940,7 @@ async function initializeIosActivationTables(pool) {
   `);
 
   // A régi iOS-adatok átvitele.
-  // Csak azokat vesszük át, amelyekhez az iOS-modul által
-  // korábban eltárolt titkosított IP-cím tartozik.
+  // Fontos: meglévő iOS-rekordot soha nem írunk felül régi adattal.
   await pool.query(`
     INSERT INTO public.ios_license_attempts
       (ip_hash, failed_attempts, locked_until, updated_at, ip_encrypted)
@@ -891,11 +953,7 @@ async function initializeIosActivationTables(pool) {
     FROM public.license_attempts
     WHERE ip_encrypted IS NOT NULL
     ON CONFLICT (ip_hash)
-    DO UPDATE SET
-      failed_attempts = EXCLUDED.failed_attempts,
-      locked_until = EXCLUDED.locked_until,
-      updated_at = EXCLUDED.updated_at,
-      ip_encrypted = EXCLUDED.ip_encrypted
+    DO NOTHING
   `);
 
   console.log('iOS aktiválási és külön próbálkozási adatbázis ellenőrizve!');
