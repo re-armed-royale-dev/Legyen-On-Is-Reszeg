@@ -40,40 +40,45 @@ function registerIosActivationRoutes(app, pool) {
     return { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
   }
 
-  async function failAttempt(ip) {
-    const client = await pool.connect();
-    const ipHash = hashIp(ip, rateSecret);
-    try {
-      await client.query('BEGIN');
-      await client.query(
-        'INSERT INTO public.license_attempts (ip_hash,failed_attempts,updated_at) VALUES ($1,0,NOW()) ON CONFLICT (ip_hash) DO NOTHING',
-        [ipHash]
-      );
-      const q = await client.query(
-        'SELECT failed_attempts,locked_until FROM public.license_attempts WHERE ip_hash=$1 FOR UPDATE',
-        [ipHash]
-      );
-      const row = q.rows[0];
-      const oldUntil = row.locked_until ? new Date(row.locked_until).getTime() : 0;
-      if (oldUntil > Date.now()) {
-        await client.query('COMMIT');
-        return { locked: true, failedAttempts: Number(row.failed_attempts) || 3, remainingAttempts: 0, lockedUntil: new Date(oldUntil).toISOString() };
-      }
-      const fails = oldUntil ? 1 : (Number(row.failed_attempts) || 0) + 1;
-      const until = fails >= 3 ? new Date(Date.now() + 30 * 86400000) : null;
-      await client.query(
-        'UPDATE public.license_attempts SET failed_attempts=$2,locked_until=$3,updated_at=NOW() WHERE ip_hash=$1',
-        [ipHash, fails, until]
-      );
-      await client.query('COMMIT');
-      return { locked: Boolean(until), failedAttempts: fails, remainingAttempts: Math.max(0, 3 - fails), lockedUntil: until ? until.toISOString() : null };
-    } catch (error) {
-      await client.query('ROLLBACK').catch(() => {});
-      throw error;
-    } finally {
-      client.release();
-    }
+  
+async function attemptStatus(ip) {
+  const q = await pool.query(
+    'SELECT failed_attempts, locked_until FROM public.license_attempts WHERE ip_hash=$1',
+    [hashIp(ip, rateSecret)]
+  );
+
+  if (!q.rowCount) {
+    return {
+      failedAttempts: 0,
+      remainingAttempts: 3,
+      lockedUntil: null
+    };
   }
+
+  const row = q.rows[0];
+  const until = row.locked_until
+    ? new Date(row.locked_until)
+    : null;
+
+  if (until && until.getTime() > Date.now()) {
+    return {
+      failedAttempts: Number(row.failed_attempts) || 3,
+      remainingAttempts: 0,
+      lockedUntil: until.toISOString()
+    };
+  }
+
+  const failed = Math.min(
+    3,
+    Math.max(0, Number(row.failed_attempts) || 0)
+  );
+
+  return {
+    failedAttempts: failed,
+    remainingAttempts: Math.max(0, 3 - failed),
+    lockedUntil: null
+  };
+}
 
   app.get('/api/ios/attempt-status', rateReady, async (req, res) => {
     try {
