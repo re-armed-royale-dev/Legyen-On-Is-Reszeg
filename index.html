@@ -1368,11 +1368,12 @@
     showActivateBanModal();
 } else {
     localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
-    showFeedback(
-        'Hibás kulcs',
-        `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
-        '❌'
-    );
+    s        showFeedback(
+            'Hibás kulcs',
+            `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
+            '❌'
+        );
+    }
 }
             } catch (error) {
                 showFeedback('Kapcsolati hiba', 'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.', '⚠️');
