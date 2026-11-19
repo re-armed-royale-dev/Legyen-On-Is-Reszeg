@@ -15,13 +15,8 @@ const hashIp = (ip, secret) =>
 function normalizeIp(value) {
   let ip = String(value || '').trim();
 
-  if (ip.startsWith('::ffff:')) {
-    ip = ip.slice(7);
-  }
-
-  if (ip.includes('%')) {
-    ip = ip.split('%')[0];
-  }
+  if (ip.startsWith('::ffff:')) ip = ip.slice(7);
+  if (ip.includes('%')) ip = ip.split('%')[0];
 
   return net.isIP(ip) ? ip : 'unknown';
 }
@@ -100,10 +95,15 @@ function registerIosActivationRoutes(app, pool) {
   }
 
   const rateSecret = process.env.RATE_LIMIT_SECRET || '';
-  const TABLE = 'public.ios_license_attempts';
+
+  const LEGACY_TABLE = 'public.ios_license_attempts';
+  const INSTALL_TABLE = 'public.ios_install_attempts';
 
   const clientIp = req =>
     normalizeIp(req.ip || req.socket?.remoteAddress || 'unknown');
+
+  const validInstallId = value =>
+    /^[A-F0-9-]{20,80}$/i.test(String(value || ''));
 
   const rateReady = (req, res, next) => {
     if (rateSecret.length < 32) {
@@ -139,15 +139,13 @@ function registerIosActivationRoutes(app, pool) {
     return true;
   }
 
-  // A szerver adatbázisából olvassa a tényleges állapotot.
-  async function attemptStatus(ip) {
-    const ipHash = hashIp(ip, rateSecret);
-
+  // TELEPÍTÉSENKÉNTI PRÓBÁLKOZÁSI ÁLLAPOT
+  async function attemptStatus(installId) {
     const q = await pool.query(
       `SELECT failed_attempts, locked_until
-       FROM ${TABLE}
-       WHERE ip_hash=$1`,
-      [ipHash]
+       FROM ${INSTALL_TABLE}
+       WHERE install_id=$1`,
+      [installId]
     );
 
     if (!q.rowCount) {
@@ -173,7 +171,17 @@ function registerIosActivationRoutes(app, pool) {
       };
     }
 
+    // Lejárt tiltás: az adott telepítés újra 0/3-ról indul.
     if (until && until.getTime() <= now) {
+      await pool.query(
+        `UPDATE ${INSTALL_TABLE}
+         SET failed_attempts=0,
+             locked_until=NULL,
+             updated_at=NOW()
+         WHERE install_id=$1`,
+        [installId]
+      );
+
       return {
         failedAttempts: 0,
         remainingAttempts: 3,
@@ -188,14 +196,14 @@ function registerIosActivationRoutes(app, pool) {
 
     if (failedRaw >= 3) {
       const repair = await pool.query(
-        `UPDATE ${TABLE}
-         SET locked_until = NOW() + INTERVAL '30 days',
-             updated_at = NOW()
-         WHERE ip_hash=$1
+        `UPDATE ${INSTALL_TABLE}
+         SET locked_until=NOW() + INTERVAL '30 days',
+             updated_at=NOW()
+         WHERE install_id=$1
            AND locked_until IS NULL
            AND failed_attempts >= 3
          RETURNING locked_until`,
-        [ipHash]
+        [installId]
       );
 
       if (repair.rowCount) {
@@ -209,32 +217,6 @@ function registerIosActivationRoutes(app, pool) {
           lockedUntil: repairedUntil.toISOString()
         };
       }
-
-      const refreshed = await pool.query(
-        `SELECT failed_attempts, locked_until
-         FROM ${TABLE}
-         WHERE ip_hash=$1`,
-        [ipHash]
-      );
-
-      if (refreshed.rowCount) {
-        const refreshedRow = refreshed.rows[0];
-
-        if (
-          refreshedRow.locked_until &&
-          new Date(refreshedRow.locked_until).getTime() > Date.now()
-        ) {
-          const refreshedUntil = new Date(
-            refreshedRow.locked_until
-          );
-
-          return {
-            failedAttempts: 3,
-            remainingAttempts: 0,
-            lockedUntil: refreshedUntil.toISOString()
-          };
-        }
-      }
     }
 
     const failed = Math.min(2, failedRaw);
@@ -246,8 +228,8 @@ function registerIosActivationRoutes(app, pool) {
     };
   }
 
-  // Tranzakcióval védi a számlálót párhuzamos kéréseknél is.
-  async function failAttempt(ip) {
+  // HIBÁS KULCS: KIZÁRÓLAG AZ ADOTT INSTALLID SZÁMLÁLÓJA NŐ
+  async function failAttempt(installId, ip) {
     const client = await pool.connect();
 
     const ipHash = hashIp(ip, rateSecret);
@@ -257,19 +239,20 @@ function registerIosActivationRoutes(app, pool) {
       await client.query('BEGIN');
 
       await client.query(
-        `INSERT INTO ${TABLE}
-         (ip_hash, failed_attempts, updated_at, ip_encrypted)
-         VALUES ($1, 0, NOW(), $2)
-         ON CONFLICT (ip_hash) DO NOTHING`,
-        [ipHash, encryptedIp]
+        `INSERT INTO ${INSTALL_TABLE}
+         (install_id, ip_hash, failed_attempts,
+          updated_at, ip_encrypted)
+         VALUES ($1, $2, 0, NOW(), $3)
+         ON CONFLICT (install_id) DO NOTHING`,
+        [installId, ipHash, encryptedIp]
       );
 
       const q = await client.query(
         `SELECT failed_attempts, locked_until
-         FROM ${TABLE}
-         WHERE ip_hash=$1
+         FROM ${INSTALL_TABLE}
+         WHERE install_id=$1
          FOR UPDATE`,
-        [ipHash]
+        [installId]
       );
 
       const row = q.rows[0];
@@ -291,7 +274,10 @@ function registerIosActivationRoutes(app, pool) {
 
       const oldFailed = oldUntil
         ? 0
-        : Math.min(2, Math.max(0, Number(row.failed_attempts) || 0));
+        : Math.min(
+            2,
+            Math.max(0, Number(row.failed_attempts) || 0)
+          );
 
       const fails = oldFailed + 1;
 
@@ -300,13 +286,14 @@ function registerIosActivationRoutes(app, pool) {
         : null;
 
       await client.query(
-        `UPDATE ${TABLE}
+        `UPDATE ${INSTALL_TABLE}
          SET failed_attempts=$2,
              locked_until=$3,
-             updated_at=NOW(),
-             ip_encrypted=$4
-         WHERE ip_hash=$1`,
-        [ipHash, fails, until, encryptedIp]
+             ip_hash=$4,
+             ip_encrypted=$5,
+             updated_at=NOW()
+         WHERE install_id=$1`,
+        [installId, fails, until, ipHash, encryptedIp]
       );
 
       await client.query('COMMIT');
@@ -346,7 +333,7 @@ body{
   font-family:Arial,sans-serif
 }
 .panel{
-  width:100%;max-width:600px;padding:25px;
+  width:100%;max-width:650px;padding:25px;
   border:1px solid #374151;border-radius:18px;
   background:#151c2b
 }
@@ -381,14 +368,14 @@ hr{border:0;border-top:1px solid #374151;margin:22px 0}
 <body>
 <div class="panel">
 <h2>🔐 iOS Admin</h2>
-<p>Összes iOS aktiválási próbálkozás és tiltás kezelése</p>
+<p>Telepítésenkénti próbálkozások és régi IP-rekordok kezelése</p>
 
 <label>Admin API kulcs</label>
 <input id="adminKey" type="password"
 placeholder="Admin kulcs" autocomplete="off">
 
 <button class="secondary" onclick="loadBans()">
-📋 Összes iOS-próbálkozás betöltése
+📋 Összes rekord betöltése
 </button>
 
 <div id="result"></div>
@@ -408,9 +395,8 @@ placeholder="Például: 192.168.1.100" autocomplete="off">
 </button>
 
 <p class="small">
-Az IP-címek titkosítva vannak tárolva.
-Az IP-azonosítók alapján is feloldható a tiltás.
-A lista legfeljebb 1000 meglévő rekordot mutat.
+Az új rendszer telepítésenként számolja a próbálkozásokat.
+Az IP-alapú régi rekordok is megmaradnak a listában.
 </p>
 </div>
 
@@ -437,7 +423,6 @@ async function api(url,options={}){
   });
 }
 
-// MINDEN TÁROLT PRÓBÁLKOZÁSI REKORD BETÖLTÉSE
 async function loadBans(){
   if(!getKey()){
     showResult('Először add meg az admin API kulcsot!',false);
@@ -445,7 +430,7 @@ async function loadBans(){
   }
 
   const list=document.getElementById('banList');
-  list.textContent='Összes próbálkozási rekord betöltése...';
+  list.textContent='Rekordok betöltése...';
 
   try{
     const response=await api('/api/admin/ios-bans');
@@ -460,7 +445,7 @@ async function loadBans(){
     list.textContent='';
 
     if(!data.bans || !data.bans.length){
-      list.textContent='Jelenleg nincs tárolt iOS-próbálkozási rekord.';
+      list.textContent='Jelenleg nincs tárolt rekord.';
       showResult('A lista sikeresen betöltve.',true);
       return;
     }
@@ -471,6 +456,18 @@ async function loadBans(){
 
       const ip=document.createElement('strong');
       ip.textContent='IP: '+(ban.ip||'nem visszafejthető');
+
+      const type=document.createElement('div');
+      type.textContent='Rekord típusa: '+
+        (ban.installId?'Telepítésenkénti':'Régi IP-alapú');
+
+      card.append(ip,type);
+
+      if(ban.installId){
+        const install=document.createElement('div');
+        install.textContent='Telepítésazonosító: '+ban.installId;
+        card.appendChild(install);
+      }
 
       const tag=document.createElement('div');
       tag.textContent='IP-azonosító: '+ban.ipTag;
@@ -487,7 +484,7 @@ async function loadBans(){
           ? new Date(ban.updatedAt).toLocaleString('hu-HU')
           : 'Ismeretlen');
 
-      card.append(ip,tag,attempts,status,updated);
+      card.append(tag,attempts,status,updated);
 
       if(ban.lockedUntil){
         const until=document.createElement('div');
@@ -498,8 +495,15 @@ async function loadBans(){
 
       if(ban.status==='Aktív tiltás'){
         const button=document.createElement('button');
+
         button.textContent='🔓 Tiltás feloldása';
-        button.onclick=()=>unbanTag(ban.ipTag);
+
+        if(ban.installId){
+          button.onclick=()=>unbanInstall(ban.installId);
+        }else{
+          button.onclick=()=>unbanTag(ban.ipTag);
+        }
+
         card.appendChild(button);
       }
 
@@ -507,7 +511,7 @@ async function loadBans(){
     });
 
     showResult(
-      'Betöltve: '+data.bans.length+' tárolt iOS-próbálkozási rekord.',
+      'Betöltve: '+data.bans.length+' rekord.',
       true
     );
 
@@ -517,15 +521,29 @@ async function loadBans(){
   }
 }
 
-async function unbanTag(ipTag){
-  if(!getKey()){
-    showResult('Először add meg az admin API kulcsot!',false);
-    return;
-  }
+async function unbanInstall(installId){
+  if(!confirm('Biztosan feloldod ennek a telepítésnek a tiltását?')) return;
 
-  if(!confirm('Biztosan feloldod ezt a tiltást?\\nIP-azonosító: '+ipTag)){
-    return;
+  try{
+    const response=await api('/api/admin/ios-unban-install',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({installId})
+    });
+
+    const data=await response.json();
+
+    showResult(data.message||data.error||'Szerverválasz érkezett.',
+      data.success&&data.unbanned);
+
+    if(data.success&&data.unbanned) await loadBans();
+  }catch(error){
+    showResult('Nem sikerült kapcsolódni a szerverhez.',false);
   }
+}
+
+async function unbanTag(ipTag){
+  if(!confirm('Biztosan feloldod az ehhez az IP-azonosítóhoz tartozó rekordokat?')) return;
 
   try{
     const response=await api('/api/admin/ios-unban-tag',{
@@ -535,6 +553,7 @@ async function unbanTag(ipTag){
     });
 
     const data=await response.json();
+
     showResult(data.message||data.error||'Szerverválasz érkezett.',
       data.success&&data.unbanned);
 
@@ -545,7 +564,7 @@ async function unbanTag(ipTag){
 }
 
 async function unbanIp(ip){
-  if(!confirm('Biztosan feloldod ezt az IP-címet: '+ip+'?')) return;
+  if(!confirm('Biztosan feloldod az ehhez az IP-címhez tartozó rekordokat: '+ip+'?')) return;
 
   try{
     const response=await api('/api/admin/ios-unban',{
@@ -555,6 +574,7 @@ async function unbanIp(ip){
     });
 
     const data=await response.json();
+
     showResult(data.message||data.error||'Szerverválasz érkezett.',
       data.success&&data.unbanned);
 
@@ -570,9 +590,7 @@ async function unbanCurrentIp(){
     return;
   }
 
-  if(!confirm('Biztosan feloldod a szerver által érzékelt IP-címet?')){
-    return;
-  }
+  if(!confirm('Biztosan feloldod a szerver által érzékelt IP-címhez tartozó rekordokat?')) return;
 
   try{
     const response=await api('/api/admin/ios-unban-current',{method:'POST'});
@@ -603,49 +621,75 @@ async function manualUnban(){
 </html>`);
   });
 
-  // ADMIN: MINDEN TÁROLT iOS-PRÓBÁLKOZÁSI REKORD
+  // ADMIN: ÚJ TELEPÍTÉSI ÉS RÉGI IP-REKORDOK LISTÁJA
   app.get('/api/admin/ios-bans', rateReady, async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
     try {
-      const result = await pool.query(
-        `SELECT
-           ip_hash,
-           ip_encrypted,
-           failed_attempts,
-           locked_until,
-           updated_at
-         FROM ${TABLE}
-         ORDER BY updated_at DESC
-         LIMIT 1000`
-      );
+      const [installResult, legacyResult] = await Promise.all([
+        pool.query(
+          `SELECT install_id, ip_hash, ip_encrypted,
+                  failed_attempts, locked_until, updated_at
+           FROM ${INSTALL_TABLE}
+           ORDER BY updated_at DESC`
+        ),
+        pool.query(
+          `SELECT ip_hash, ip_encrypted,
+                  failed_attempts, locked_until, updated_at
+           FROM ${LEGACY_TABLE}
+           ORDER BY updated_at DESC`
+        )
+      ]);
 
       const now = Date.now();
 
-      const bans = result.rows.map(row => {
+      function makeStatus(row) {
         const until = row.locked_until
           ? new Date(row.locked_until)
           : null;
 
-        let status = 'Nincs aktív tiltás';
+        if (until && until.getTime() > now) return 'Aktív tiltás';
+        if (until && until.getTime() <= now) return 'Lejárt tiltás';
 
-        if (until && until.getTime() > now) {
-          status = 'Aktív tiltás';
-        } else if (until && until.getTime() <= now) {
-          status = 'Lejárt tiltás';
-        }
+        const fails = Number(row.failed_attempts) || 0;
 
-        return {
-          ip: decryptIp(row.ip_encrypted, rateSecret),
-          ipTag: String(row.ip_hash).slice(0, 12),
-          failedAttempts: Number(row.failed_attempts) || 0,
-          status,
-          lockedUntil: until ? until.toISOString() : null,
-          updatedAt: row.updated_at
-            ? new Date(row.updated_at).toISOString()
-            : null
-        };
-      });
+        return fails > 0
+          ? 'Folyamatban lévő próbálkozás'
+          : 'Nincs aktív tiltás';
+      }
+
+      const installBans = installResult.rows.map(row => ({
+        installId: row.install_id,
+        ip: decryptIp(row.ip_encrypted, rateSecret),
+        ipTag: String(row.ip_hash).slice(0, 12),
+        failedAttempts: Number(row.failed_attempts) || 0,
+        status: makeStatus(row),
+        lockedUntil: row.locked_until
+          ? new Date(row.locked_until).toISOString()
+          : null,
+        updatedAt: row.updated_at
+          ? new Date(row.updated_at).toISOString()
+          : null
+      }));
+
+      const legacyBans = legacyResult.rows.map(row => ({
+        installId: null,
+        ip: decryptIp(row.ip_encrypted, rateSecret),
+        ipTag: String(row.ip_hash).slice(0, 12),
+        failedAttempts: Number(row.failed_attempts) || 0,
+        status: makeStatus(row),
+        lockedUntil: row.locked_until
+          ? new Date(row.locked_until).toISOString()
+          : null,
+        updatedAt: row.updated_at
+          ? new Date(row.updated_at).toISOString()
+          : null
+      }));
+
+      const bans = [...installBans, ...legacyBans]
+        .sort((a, b) =>
+          new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
+        );
 
       res.setHeader('Cache-Control', 'no-store');
 
@@ -665,7 +709,47 @@ async function manualUnban(){
     }
   });
 
-  // ADMIN: tiltás feloldása az IP-azonosító alapján
+  // ADMIN: EGY KONKRÉT TELEPÍTÉS FELOLDÁSA
+  app.post('/api/admin/ios-unban-install', rateReady, async (req, res) => {
+    if (!checkAdmin(req, res)) return;
+
+    const installId = String(req.body?.installId || '');
+
+    if (!validInstallId(installId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Érvénytelen telepítésazonosító.'
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `DELETE FROM ${INSTALL_TABLE}
+         WHERE install_id=$1`,
+        [installId]
+      );
+
+      res.setHeader('Cache-Control', 'no-store');
+
+      return res.json({
+        success: true,
+        unbanned: result.rowCount > 0,
+        message: result.rowCount > 0
+          ? 'A telepítés tiltása sikeresen feloldva.'
+          : 'Ehhez a telepítéshez nem található rekord.'
+      });
+
+    } catch (error) {
+      console.error('iOS unban install:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: 'A telepítés feloldása nem sikerült.'
+      });
+    }
+  });
+
+  // ADMIN: RÉGI IP-AZONOSÍTÓ ALAPJÁN FELOLDÁS
   app.post('/api/admin/ios-unban-tag', rateReady, async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
@@ -679,24 +763,34 @@ async function manualUnban(){
     }
 
     try {
-      const result = await pool.query(
-        `DELETE FROM ${TABLE}
-         WHERE LEFT(ip_hash, 12)=$1`,
-        [ipTag]
-      );
+      const [legacy, installs] = await Promise.all([
+        pool.query(
+          `DELETE FROM ${LEGACY_TABLE}
+           WHERE LEFT(ip_hash, 12)=$1`,
+          [ipTag]
+        ),
+        pool.query(
+          `DELETE FROM ${INSTALL_TABLE}
+           WHERE LEFT(ip_hash, 12)=$1`,
+          [ipTag]
+        )
+      ]);
+
+      const count = legacy.rowCount + installs.rowCount;
 
       res.setHeader('Cache-Control', 'no-store');
 
       return res.json({
         success: true,
-        unbanned: result.rowCount > 0,
-        message: result.rowCount > 0
-          ? 'A kiválasztott iOS-tiltás sikeresen feloldva.'
-          : 'Ehhez az IP-azonosítóhoz nem található iOS-tiltás.'
+        unbanned: count > 0,
+        message: count > 0
+          ? 'Az ehhez az IP-azonosítóhoz tartozó rekordok feloldva.'
+          : 'Ehhez az IP-azonosítóhoz nem található rekord.'
       });
 
     } catch (error) {
       console.error('iOS admin unban by tag:', error);
+
       return res.status(500).json({
         success: false,
         error: 'A tiltás feloldása nem sikerült.'
@@ -704,7 +798,7 @@ async function manualUnban(){
     }
   });
 
-  // ADMIN: kézi IP-feloldás
+  // ADMIN: KÉZI IP-FELOLDÁS
   app.post('/api/admin/ios-unban', rateReady, async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
@@ -717,24 +811,35 @@ async function manualUnban(){
       });
     }
 
+    const ipHash = hashIp(ip, rateSecret);
+
     try {
-      const result = await pool.query(
-        `DELETE FROM ${TABLE} WHERE ip_hash=$1`,
-        [hashIp(ip, rateSecret)]
-      );
+      const [legacy, installs] = await Promise.all([
+        pool.query(
+          `DELETE FROM ${LEGACY_TABLE} WHERE ip_hash=$1`,
+          [ipHash]
+        ),
+        pool.query(
+          `DELETE FROM ${INSTALL_TABLE} WHERE ip_hash=$1`,
+          [ipHash]
+        )
+      ]);
+
+      const count = legacy.rowCount + installs.rowCount;
 
       res.setHeader('Cache-Control', 'no-store');
 
       return res.json({
         success: true,
-        unbanned: result.rowCount > 0,
-        message: result.rowCount > 0
-          ? 'Az iOS-tiltás sikeresen feloldva.'
-          : 'Ehhez az IP-címhez nem található iOS-tiltás.'
+        unbanned: count > 0,
+        message: count > 0
+          ? 'Az IP-címhez tartozó rekordok feloldva.'
+          : 'Ehhez az IP-címhez nem található rekord.'
       });
 
     } catch (error) {
       console.error('iOS admin unban:', error);
+
       return res.status(500).json({
         success: false,
         error: 'A tiltás feloldása nem sikerült.'
@@ -742,7 +847,7 @@ async function manualUnban(){
     }
   });
 
-  // ADMIN: az adminoldal által használt IP feloldása
+  // ADMIN: AZ ADMINOLDAL ÁLTAL HASZNÁLT IP FELOLDÁSA
   app.post('/api/admin/ios-unban-current', rateReady, async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
@@ -756,23 +861,34 @@ async function manualUnban(){
         });
       }
 
-      const result = await pool.query(
-        `DELETE FROM ${TABLE} WHERE ip_hash=$1`,
-        [hashIp(ip, rateSecret)]
-      );
+      const ipHash = hashIp(ip, rateSecret);
+
+      const [legacy, installs] = await Promise.all([
+        pool.query(
+          `DELETE FROM ${LEGACY_TABLE} WHERE ip_hash=$1`,
+          [ipHash]
+        ),
+        pool.query(
+          `DELETE FROM ${INSTALL_TABLE} WHERE ip_hash=$1`,
+          [ipHash]
+        )
+      ]);
+
+      const count = legacy.rowCount + installs.rowCount;
 
       res.setHeader('Cache-Control', 'no-store');
 
       return res.json({
         success: true,
-        unbanned: result.rowCount > 0,
-        message: result.rowCount > 0
-          ? 'A szerver által érzékelt IP iOS-tiltása feloldva.'
-          : 'Ehhez az IP-címhez nem található iOS-tiltás.'
+        unbanned: count > 0,
+        message: count > 0
+          ? 'A jelenlegi IP-címhez tartozó rekordok feloldva.'
+          : 'Ehhez az IP-címhez nem található rekord.'
       });
 
     } catch (error) {
       console.error('iOS current IP unban:', error);
+
       return res.status(500).json({
         success: false,
         error: 'A feloldás nem sikerült.'
@@ -780,30 +896,28 @@ async function manualUnban(){
     }
   });
 
-  // PRÓBÁLKOZÁSI ÁLLAPOT
+  // PRÓBÁLKOZÁSI ÁLLAPOT LEKÉRDEZÉSE INSTALLID ALAPJÁN
   app.get('/api/ios/attempt-status', rateReady, async (req, res) => {
     try {
-      const ip = clientIp(req);
+      const installId = String(req.query.installId || '');
 
-      if (ip === 'unknown') {
+      if (!validInstallId(installId)) {
         return res.status(400).json({
           success: false,
-          error: 'A szerver nem tudta azonosítani az IP-címet.'
+          error: 'Érvénytelen vagy hiányzó telepítésazonosító.'
         });
       }
-
-      const ipTag = hashIp(ip, rateSecret).slice(0, 12);
 
       res.setHeader('Cache-Control', 'no-store');
 
       return res.json({
         success: true,
-        ...await attemptStatus(ip),
-        ipTag
+        ...await attemptStatus(installId)
       });
 
     } catch (error) {
       console.error('iOS attempt status:', error);
+
       return res.status(500).json({
         success: false,
         error: 'Nem sikerült lekérdezni a próbálkozási állapotot.'
@@ -826,7 +940,7 @@ async function manualUnban(){
 
     if (
       !/^\d{12}$/.test(submittedKey) ||
-      !/^[A-F0-9-]{20,80}$/i.test(installId)
+      !validInstallId(installId)
     ) {
       return res.status(400).json({
         success: false,
@@ -844,29 +958,25 @@ async function manualUnban(){
         });
       }
 
-      const ipTag = hashIp(ip, rateSecret).slice(0, 12);
-
-      const status = await attemptStatus(ip);
+      const status = await attemptStatus(installId);
 
       if (status.lockedUntil) {
         return res.status(429).json({
           success: false,
           error: 'Három hibás próbálkozás miatt 30 napos tiltás van érvényben.',
-          ...status,
-          ipTag
+          ...status
         });
       }
 
       if (!safeEqual(submittedKey, serverKey)) {
-        const attempt = await failAttempt(ip);
+        const attempt = await failAttempt(installId, ip);
 
         return res.status(attempt.locked ? 429 : 401).json({
           success: false,
           error: attempt.locked
             ? 'Három hibás próbálkozás miatt 30 napos tiltás lépett életbe.'
             : 'Hibás aktiválókulcs.',
-          ...attempt,
-          ipTag
+          ...attempt
         });
       }
 
@@ -884,17 +994,30 @@ async function manualUnban(){
         [installId, sha256(token)]
       );
 
-      // Sikeres aktiváláskor az adott IP iOS-hibaszámlálója törlődik.
+      // Sikeres aktiváláskor a számláló nullázódik,
+      // de a rekord megmarad az adminlistában.
       await pool.query(
-        `DELETE FROM ${TABLE} WHERE ip_hash=$1`,
-        [hashIp(ip, rateSecret)]
+        `UPDATE ${INSTALL_TABLE}
+         SET failed_attempts=0,
+             locked_until=NULL,
+             ip_hash=$2,
+             ip_encrypted=$3,
+             updated_at=NOW()
+         WHERE install_id=$1`,
+        [
+          installId,
+          hashIp(ip, rateSecret),
+          encryptIp(ip, rateSecret)
+        ]
       );
 
       res.setHeader('Cache-Control', 'no-store');
+
       return res.json({ success: true, token });
 
     } catch (error) {
       console.error('iOS activation:', error);
+
       return res.status(500).json({
         success: false,
         error: 'Az aktiválás most nem sikerült.'
@@ -945,6 +1068,7 @@ async function manualUnban(){
 
     } catch (error) {
       console.error('iOS activation status:', error);
+
       return res.status(500).json({
         success: false,
         active: false
@@ -966,13 +1090,13 @@ async function initializeIosActivationTables(pool) {
     )
   `);
 
-  // A régi közös tábla IP-titkosított oszlopa.
+  // Régi közös tábla titkosított IP-oszlopa.
   await pool.query(`
     ALTER TABLE public.license_attempts
     ADD COLUMN IF NOT EXISTS ip_encrypted TEXT
   `);
 
-  // Külön iOS próbálkozási tábla.
+  // Régi IP-alapú iOS-rekordok táblája.
   await pool.query(`
     CREATE TABLE IF NOT EXISTS public.ios_license_attempts (
       ip_hash CHAR(64) PRIMARY KEY,
@@ -983,8 +1107,7 @@ async function initializeIosActivationTables(pool) {
     )
   `);
 
-  // A régi iOS-adatok átvitele.
-  // Meglévő iOS-rekordot nem írunk felül régi adattal.
+  // A régi iOS-adatok átvitele, felülírás nélkül.
   await pool.query(`
     INSERT INTO public.ios_license_attempts
       (ip_hash, failed_attempts, locked_until, updated_at, ip_encrypted)
@@ -1000,7 +1123,26 @@ async function initializeIosActivationTables(pool) {
     DO NOTHING
   `);
 
-  console.log('iOS aktiválási és külön próbálkozási adatbázis ellenőrizve!');
+  // ÚJ: telepítésenkénti próbálkozási tábla.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS public.ios_install_attempts (
+      install_id VARCHAR(80) PRIMARY KEY,
+      ip_hash CHAR(64) NOT NULL,
+      failed_attempts INTEGER NOT NULL DEFAULT 0,
+      locked_until TIMESTAMPTZ,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      ip_encrypted TEXT
+    )
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS ios_install_attempts_ip_hash_idx
+    ON public.ios_install_attempts (ip_hash)
+  `);
+
+  console.log(
+    'iOS aktiválási rendszer ellenőrizve: telepítésenkénti próbálkozásszámlálás aktív.'
+  );
 }
 
 module.exports = {
