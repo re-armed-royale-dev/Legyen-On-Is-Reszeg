@@ -1187,13 +1187,21 @@
         }
 
         function getActivateLock() {
-            const serverUntil = iosAttemptState.lockedUntil ? (new Date(iosAttemptState.lockedUntil).getTime() || 0) : 0;
-            if (serverUntil > Date.now()) storeBanUntil(serverUntil);
-            return {
-                fails: Number(iosAttemptState.failedAttempts) || 0,
-                lockedUntil: Math.max(serverUntil, getStoredBanUntil())
-            };
-        }
+    const serverUntil = iosAttemptState.lockedUntil
+        ? (new Date(iosAttemptState.lockedUntil).getTime() || 0)
+        : 0;
+
+    if (serverUntil > Date.now()) {
+        storeBanUntil(serverUntil);
+    } else {
+        localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
+    }
+
+    return {
+        fails: Number(iosAttemptState.failedAttempts) || 0,
+        lockedUntil: serverUntil > Date.now() ? serverUntil : 0
+    };
+}
 
         async function refreshIosAttemptStatus() {
             try {
