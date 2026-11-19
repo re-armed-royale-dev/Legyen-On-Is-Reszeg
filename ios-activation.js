@@ -1,153 +1,366 @@
+
 'use strict';
 
 const crypto = require('crypto');
+const net = require('net');
 
-const sha256 = value => crypto.createHash('sha256').update(String(value)).digest('hex');
-const hashIp = (ip, secret) => crypto.createHmac('sha256', secret).update(String(ip || 'unknown')).digest('hex');
+const sha256 = value =>
+  crypto.createHash('sha256').update(String(value)).digest('hex');
+
+const hashIp = (ip, secret) =>
+  crypto.createHmac('sha256', secret).update(String(ip || 'unknown')).digest('hex');
+
 const safeEqual = (a, b) => {
   const x = Buffer.from(String(a || ''), 'utf8');
   const y = Buffer.from(String(b || ''), 'utf8');
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 };
+
 const bearer = req => {
   const match = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || '');
   return match ? match[1].trim() : '';
 };
 
 function registerIosActivationRoutes(app, pool) {
-  if (!pool) throw new Error('Az iOS aktiváláshoz DATABASE_URL szükséges.');
+  if (!pool) {
+    throw new Error('Az iOS aktiváláshoz DATABASE_URL szükséges.');
+  }
 
   const rateSecret = process.env.RATE_LIMIT_SECRET || '';
   const clientIp = req => req.ip || req.socket?.remoteAddress || 'unknown';
+
   const rateReady = (req, res, next) => {
     if (rateSecret.length < 32) {
-      return res.status(503).json({ success: false, error: 'A RATE_LIMIT_SECRET nincs megfelelően beállítva.' });
+      return res.status(503).json({
+        success: false,
+        error: 'A RATE_LIMIT_SECRET nincs megfelelően beállítva.'
+      });
     }
     next();
   };
 
+  // Próbálkozási állapot lekérdezése
   async function attemptStatus(ip) {
     const q = await pool.query(
       'SELECT failed_attempts, locked_until FROM public.license_attempts WHERE ip_hash=$1',
       [hashIp(ip, rateSecret)]
     );
-    if (!q.rowCount) return { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
-    const row = q.rows[0];
-    const until = row.locked_until ? new Date(row.locked_until) : null;
-    if (until && until.getTime() > Date.now()) {
-      return { failedAttempts: Number(row.failed_attempts) || 3, remainingAttempts: 0, lockedUntil: until.toISOString() };
+
+    if (!q.rowCount) {
+      return {
+        failedAttempts: 0,
+        remainingAttempts: 3,
+        lockedUntil: null
+      };
     }
-    return { failedAttempts: 0, remainingAttempts: 3, lockedUntil: null };
-  }
 
-  
-async function attemptStatus(ip) {
-  const q = await pool.query(
-    'SELECT failed_attempts, locked_until FROM public.license_attempts WHERE ip_hash=$1',
-    [hashIp(ip, rateSecret)]
-  );
+    const row = q.rows[0];
+    const until = row.locked_until
+      ? new Date(row.locked_until)
+      : null;
 
-  if (!q.rowCount) {
+    if (until && until.getTime() > Date.now()) {
+      return {
+        failedAttempts: Number(row.failed_attempts) || 3,
+        remainingAttempts: 0,
+        lockedUntil: until.toISOString()
+      };
+    }
+
+    // Lejárt tiltás esetén újraindul a számláló
+    if (until && until.getTime() <= Date.now()) {
+      return {
+        failedAttempts: 0,
+        remainingAttempts: 3,
+        lockedUntil: null
+      };
+    }
+
+    const failed = Math.min(
+      3,
+      Math.max(0, Number(row.failed_attempts) || 0)
+    );
+
     return {
-      failedAttempts: 0,
-      remainingAttempts: 3,
+      failedAttempts: failed,
+      remainingAttempts: Math.max(0, 3 - failed),
       lockedUntil: null
     };
   }
 
-  const row = q.rows[0];
-  const until = row.locked_until
-    ? new Date(row.locked_until)
-    : null;
+  // Hibás próbálkozás rögzítése
+  async function failAttempt(ip) {
+    const client = await pool.connect();
+    const ipHash = hashIp(ip, rateSecret);
 
-  if (until && until.getTime() > Date.now()) {
-    return {
-      failedAttempts: Number(row.failed_attempts) || 3,
-      remainingAttempts: 0,
-      lockedUntil: until.toISOString()
-    };
+    try {
+      await client.query('BEGIN');
+
+      await client.query(
+        `INSERT INTO public.license_attempts
+         (ip_hash, failed_attempts, updated_at)
+         VALUES ($1, 0, NOW())
+         ON CONFLICT (ip_hash) DO NOTHING`,
+        [ipHash]
+      );
+
+      const q = await client.query(
+        `SELECT failed_attempts, locked_until
+         FROM public.license_attempts
+         WHERE ip_hash=$1
+         FOR UPDATE`,
+        [ipHash]
+      );
+
+      const row = q.rows[0];
+      const oldUntil = row.locked_until
+        ? new Date(row.locked_until).getTime()
+        : 0;
+
+      if (oldUntil > Date.now()) {
+        await client.query('COMMIT');
+
+        return {
+          locked: true,
+          failedAttempts: Number(row.failed_attempts) || 3,
+          remainingAttempts: 0,
+          lockedUntil: new Date(oldUntil).toISOString()
+        };
+      }
+
+      const fails = oldUntil
+        ? 1
+        : (Number(row.failed_attempts) || 0) + 1;
+
+      const until = fails >= 3
+        ? new Date(Date.now() + 30 * 86400000)
+        : null;
+
+      await client.query(
+        `UPDATE public.license_attempts
+         SET failed_attempts=$2,
+             locked_until=$3,
+             updated_at=NOW()
+         WHERE ip_hash=$1`,
+        [ipHash, fails, until]
+      );
+
+      await client.query('COMMIT');
+
+      return {
+        locked: Boolean(until),
+        failedAttempts: fails,
+        remainingAttempts: Math.max(0, 3 - fails),
+        lockedUntil: until ? until.toISOString() : null
+      };
+
+    } catch (error) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
-  const failed = Math.min(
-    3,
-    Math.max(0, Number(row.failed_attempts) || 0)
-  );
+  // ADMIN: iOS tiltás feloldása
+  app.post('/api/admin/ios-unban', rateReady, async (req, res) => {
+    const adminKey = String(process.env.ADMIN_API_KEY || '');
+    const suppliedKey = bearer(req);
 
-  return {
-    failedAttempts: failed,
-    remainingAttempts: Math.max(0, 3 - failed),
-    lockedUntil: null
-  };
-}
+    if (adminKey.length < 32) {
+      return res.status(503).json({
+        success: false,
+        error: 'Az ADMIN_API_KEY nincs megfelelően beállítva.'
+      });
+    }
 
-  app.get('/api/ios/attempt-status', rateReady, async (req, res) => {
+    if (!safeEqual(suppliedKey, adminKey)) {
+      return res.status(401).json({
+        success: false,
+        error: 'Nincs adminisztrátori jogosultság.'
+      });
+    }
+
+    const ip = String(req.body?.ip || '').trim();
+
+    if (!net.isIP(ip)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Érvénytelen IP-cím.'
+      });
+    }
+
     try {
+      const result = await pool.query(
+        'DELETE FROM public.license_attempts WHERE ip_hash=$1',
+        [hashIp(ip, rateSecret)]
+      );
+
       res.setHeader('Cache-Control', 'no-store');
-      res.json({ success: true, ...await attemptStatus(clientIp(req)) });
+
+      return res.json({
+        success: true,
+        unbanned: result.rowCount > 0,
+        message: result.rowCount > 0
+          ? 'A tiltás sikeresen feloldva.'
+          : 'Ehhez az IP-címhez nem található tiltás.'
+      });
+
     } catch (error) {
-      console.error('iOS attempt status:', error);
-      res.status(500).json({ success: false, error: 'Nem sikerült lekérdezni a próbálkozási állapotot.' });
+      console.error('iOS admin unban:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: 'A tiltás feloldása nem sikerült.'
+      });
     }
   });
 
+  // Próbálkozási állapot
+  app.get('/api/ios/attempt-status', rateReady, async (req, res) => {
+    try {
+      res.setHeader('Cache-Control', 'no-store');
+
+      res.json({
+        success: true,
+        ...await attemptStatus(clientIp(req))
+      });
+
+    } catch (error) {
+      console.error('iOS attempt status:', error);
+
+      res.status(500).json({
+        success: false,
+        error: 'Nem sikerült lekérdezni a próbálkozási állapotot.'
+      });
+    }
+  });
+
+  // iOS aktiválás
   app.post('/api/ios/activate', rateReady, async (req, res) => {
     const submittedKey = String(req.body?.activationKey || '').trim();
     const installId = String(req.body?.installId || '');
     const serverKey = String(process.env.IOS_ACTIVATE_KEY || '');
 
     if (!/^\d{12}$/.test(serverKey)) {
-      return res.status(503).json({ success: false, error: 'Az iOS aktiválókulcs nincs megfelelően beállítva a szerveren.' });
+      return res.status(503).json({
+        success: false,
+        error: 'Az iOS aktiválókulcs nincs megfelelően beállítva a szerveren.'
+      });
     }
-    if (!/^\d{12}$/.test(submittedKey) || !/^[A-F0-9-]{20,80}$/i.test(installId)) {
-      return res.status(400).json({ success: false, error: 'Érvénytelen kulcs vagy eszközazonosító.' });
+
+    if (
+      !/^\d{12}$/.test(submittedKey) ||
+      !/^[A-F0-9-]{20,80}$/i.test(installId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: 'Érvénytelen kulcs vagy eszközazonosító.'
+      });
     }
 
     try {
       const ip = clientIp(req);
       const status = await attemptStatus(ip);
+
       if (status.lockedUntil) {
-        return res.status(429).json({ success: false, error: 'Három hibás próbálkozás miatt 30 napos tiltás van érvényben.', ...status });
+        return res.status(429).json({
+          success: false,
+          error: 'Három hibás próbálkozás miatt 30 napos tiltás van érvényben.',
+          ...status
+        });
       }
+
       if (!safeEqual(submittedKey, serverKey)) {
         const attempt = await failAttempt(ip);
+
         return res.status(attempt.locked ? 429 : 401).json({
           success: false,
-          error: attempt.locked ? 'Három hibás próbálkozás miatt 30 napos tiltás lépett életbe.' : 'Hibás aktiválókulcs.',
+          error: attempt.locked
+            ? 'Három hibás próbálkozás miatt 30 napos tiltás lépett életbe.'
+            : 'Hibás aktiválókulcs.',
           ...attempt
         });
       }
 
       const token = crypto.randomBytes(32).toString('hex');
+
       await pool.query(
-        `INSERT INTO public.ios_activation_sessions (install_id,token_hash,created_at,last_seen_at,active)
-         VALUES ($1,$2,NOW(),NOW(),TRUE)
-         ON CONFLICT (install_id) DO UPDATE SET token_hash=EXCLUDED.token_hash,last_seen_at=NOW(),active=TRUE`,
+        `INSERT INTO public.ios_activation_sessions
+         (install_id, token_hash, created_at, last_seen_at, active)
+         VALUES ($1, $2, NOW(), NOW(), TRUE)
+         ON CONFLICT (install_id)
+         DO UPDATE SET
+           token_hash=EXCLUDED.token_hash,
+           last_seen_at=NOW(),
+           active=TRUE`,
         [installId, sha256(token)]
       );
-      await pool.query('DELETE FROM public.license_attempts WHERE ip_hash=$1', [hashIp(ip, rateSecret)]);
+
+      await pool.query(
+        'DELETE FROM public.license_attempts WHERE ip_hash=$1',
+        [hashIp(ip, rateSecret)]
+      );
+
       res.setHeader('Cache-Control', 'no-store');
       res.json({ success: true, token });
+
     } catch (error) {
       console.error('iOS activation:', error);
-      res.status(500).json({ success: false, error: 'Az aktiválás most nem sikerült.' });
+
+      res.status(500).json({
+        success: false,
+        error: 'Az aktiválás most nem sikerült.'
+      });
     }
   });
 
+  // Aktiválási állapot ellenőrzése
   app.get('/api/ios/status', async (req, res) => {
     const token = bearer(req);
-    if (!token || token.length > 200) return res.status(401).json({ success: false, active: false });
+
+    if (!token || token.length > 200) {
+      return res.status(401).json({
+        success: false,
+        active: false
+      });
+    }
+
     try {
       const q = await pool.query(
-        'SELECT id FROM public.ios_activation_sessions WHERE token_hash=$1 AND active=TRUE LIMIT 1',
+        `SELECT id
+         FROM public.ios_activation_sessions
+         WHERE token_hash=$1 AND active=TRUE
+         LIMIT 1`,
         [sha256(token)]
       );
-      if (!q.rowCount) return res.status(401).json({ success: false, active: false });
-      await pool.query('UPDATE public.ios_activation_sessions SET last_seen_at=NOW() WHERE id=$1', [q.rows[0].id]);
+
+      if (!q.rowCount) {
+        return res.status(401).json({
+          success: false,
+          active: false
+        });
+      }
+
+      await pool.query(
+        'UPDATE public.ios_activation_sessions SET last_seen_at=NOW() WHERE id=$1',
+        [q.rows[0].id]
+      );
+
       res.setHeader('Cache-Control', 'no-store');
-      res.json({ success: true, active: true });
+
+      res.json({
+        success: true,
+        active: true
+      });
+
     } catch (error) {
       console.error('iOS activation status:', error);
-      res.status(500).json({ success: false, active: false });
+
+      res.status(500).json({
+        success: false,
+        active: false
+      });
     }
   });
 }
@@ -163,7 +376,11 @@ async function initializeIosActivationTables(pool) {
       active BOOLEAN NOT NULL DEFAULT TRUE
     )
   `);
+
   console.log('iOS aktiválási adatbázistábla ellenőrizve!');
 }
 
-module.exports = { registerIosActivationRoutes, initializeIosActivationTables };
+module.exports = {
+  registerIosActivationRoutes,
+  initializeIosActivationTables
+};
