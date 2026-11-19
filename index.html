@@ -1204,16 +1204,30 @@
 }
 
         async function refreshIosAttemptStatus() {
-            try {
-                const response = await fetch(`${QUIZ_API_BASE}/api/ios/attempt-status?installId=${encodeURIComponent(getIosInstallId())}`, { cache: 'no-store' });
-                const data = await response.json();
-                if (response.ok && data.success) iosAttemptState = data;
-            } catch (error) {
-                console.warn('iOS próbálkozási állapot nem érhető el:', error);
-            }
-            getActivateLock(); // ha a szerver tiltást jelez, elmenti helyben is
-            return iosAttemptState;
+    try {
+        const response = await fetch(
+            `${QUIZ_API_BASE}/api/ios/attempt-status?installId=${encodeURIComponent(getIosInstallId())}`,
+            { cache: 'no-store' }
+        );
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            iosAttemptState = {
+                failedAttempts: Number(data.failedAttempts) || 0,
+                remainingAttempts: Number(data.remainingAttempts) || 0,
+                lockedUntil: data.lockedUntil || null
+            };
+
+            getActivateLock();
         }
+
+    } catch (error) {
+        console.warn('iOS próbálkozási állapot nem érhető el:', error);
+    }
+
+    return iosAttemptState;
+}
 
         async function syncIosActivation() {
             iosActivationToken = localStorage.getItem('iosActivationToken') || '';
@@ -1347,15 +1361,18 @@
         lockedUntil: serverState.lockedUntil || null
     };
 
-    if (iosAttemptState.lockedUntil || response.status === 429) {
-        showActivateBanModal();
-    } else {
-        showFeedback(
-            'Hibás kulcs',
-            `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
-            '❌'
-        );
-    }
+    if (
+    iosAttemptState.lockedUntil &&
+    new Date(iosAttemptState.lockedUntil).getTime() > Date.now()
+) {
+    showActivateBanModal();
+} else {
+    localStorage.removeItem(ACTIVATE_BAN_STORAGE_KEY);
+    showFeedback(
+        'Hibás kulcs',
+        `${data.error || 'A megadott biztonsági kulcs helytelen.'} Hátralévő próbálkozások: <strong>${iosAttemptState.remainingAttempts}</strong>.`,
+        '❌'
+    );
 }
             } catch (error) {
                 showFeedback('Kapcsolati hiba', 'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.', '⚠️');
