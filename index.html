@@ -1375,10 +1375,13 @@
         );
     }
 }
-            } catch (error) {
+                        } catch (error) {
                 showFeedback('Kapcsolati hiba', 'A szerver most nem érhető el. Ellenőrizd az internetkapcsolatot, majd próbáld újra.', '⚠️');
             } finally {
-                if (activateButton) { activateButton.disabled = false; activateButton.textContent = '✅ Kulcs aktiválása'; }
+                if (activateButton) {
+                    activateButton.disabled = false;
+                    activateButton.textContent = '✅ Kulcs aktiválása';
+                }
             }
         }
 
