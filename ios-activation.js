@@ -67,7 +67,6 @@ function registerIosActivationRoutes(app, pool) {
       };
     }
 
-    // Lejárt tiltás esetén újraindul a számláló
     if (until && until.getTime() <= Date.now()) {
       return {
         failedAttempts: 0,
@@ -161,6 +160,150 @@ function registerIosActivationRoutes(app, pool) {
       client.release();
     }
   }
+
+  // ADMIN: egyszerű iOS feloldóoldal
+  app.get('/admin/ios-unban', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+
+    res.type('html').send(`<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iOS Admin – Tiltás feloldása</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #0b0f19;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+.panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 25px;
+  border: 1px solid #374151;
+  border-radius: 18px;
+  background: #151c2b;
+}
+h2 { color: #fbbf24; margin-top: 0; }
+p { color: #cbd5e1; }
+label { display: block; margin-top: 12px; }
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0 15px;
+  border: 1px solid #475569;
+  border-radius: 9px;
+  background: #0b0f19;
+  color: white;
+  font-size: 16px;
+}
+button {
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  border-radius: 9px;
+  background: #dc2626;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:disabled { opacity: .6; }
+#result {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 8px;
+  display: none;
+  overflow-wrap: anywhere;
+}
+</style>
+</head>
+<body>
+<div class="panel">
+  <h2>🔐 iOS Admin</h2>
+  <p>IP-cím tiltásának feloldása</p>
+
+  <label>Admin API kulcs</label>
+  <input id="adminKey" type="password"
+    placeholder="Admin kulcs" autocomplete="off">
+
+  <label>Feloldandó IP-cím</label>
+  <input id="ip" type="text"
+    placeholder="Például: 192.168.1.100"
+    autocomplete="off">
+
+  <button id="unlock" onclick="unban()">
+    🔓 Tiltás feloldása
+  </button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+async function unban() {
+  const key = document.getElementById('adminKey').value.trim();
+  const ip = document.getElementById('ip').value.trim();
+  const button = document.getElementById('unlock');
+  const result = document.getElementById('result');
+
+  result.style.display = 'block';
+
+  if (!key || !ip) {
+    result.textContent = 'Töltsd ki mindkét mezőt!';
+    result.style.background = '#7f1d1d';
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Feloldás folyamatban...';
+  result.textContent = 'Kapcsolódás a szerverhez...';
+
+  try {
+    const response = await fetch('/api/admin/ios-unban', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({ ip })
+    });
+
+    const data = await response.json();
+
+    result.textContent = data.message || data.error ||
+      'Ismeretlen szerverválasz.';
+
+    result.style.background =
+      data.success && data.unbanned
+        ? '#14532d'
+        : '#7f1d1d';
+
+    if (data.success && data.unbanned) {
+      document.getElementById('ip').value = '';
+    }
+
+  } catch (error) {
+    result.textContent =
+      'Nem sikerült kapcsolódni a szerverhez.';
+    result.style.background = '#7f1d1d';
+  } finally {
+    button.disabled = false;
+    button.textContent = '🔓 Tiltás feloldása';
+  }
+}
+</script>
+</body>
+</html>`);
+  });
 
   // ADMIN: iOS tiltás feloldása
   app.post('/api/admin/ios-unban', rateReady, async (req, res) => {
