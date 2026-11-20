@@ -3441,7 +3441,10 @@ async function loadDifficulty(diffKey) {
                     const set = saved[editName];
                     if (set) {
                         nameInput.value = editName;
-                        set.forEach(q => addQuestionItem(q));
+                        hydrateSetMedia(editName, set).then(fullSet => {
+                            container.innerHTML = '';
+                            fullSet.forEach(q => addQuestionItem(q));
+                        });
                     }
                 } else {
                     nameInput.value = '';
@@ -3764,7 +3767,100 @@ async function loadDifficulty(diffKey) {
             }
         }
 
-        function saveQuestions() {
+        // ===== Képek és hangok tárolása IndexedDB-ben =====
+        // A localStorage kb. 5 MB-os, ezért a képek/hangok oda nem férnek be. Az IndexedDB sokkal többet bír.
+        // A kérdéssor szövege továbbra is a localStorage-ban marad, a média kérdéssor-névvel kulcsolva külön tárolódik.
+        const MEDIA_DB_NAME = 'QuizMediaDB';
+        const MEDIA_STORE = 'sets';
+        let mediaDbPromise = null;
+
+        function openMediaDb() {
+            if (!mediaDbPromise) {
+                mediaDbPromise = new Promise((resolve, reject) => {
+                    if (!window.indexedDB) {
+                        reject(new Error('Az IndexedDB nem elérhető'));
+                        return;
+                    }
+                    const req = indexedDB.open(MEDIA_DB_NAME, 1);
+                    req.onupgradeneeded = () => { req.result.createObjectStore(MEDIA_STORE); };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error || new Error('IndexedDB hiba'));
+                }).catch(error => {
+                    mediaDbPromise = null;
+                    throw error;
+                });
+            }
+            return mediaDbPromise;
+        }
+
+        async function mediaPut(key, value) {
+            const db = await openMediaDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(MEDIA_STORE, 'readwrite');
+                tx.objectStore(MEDIA_STORE).put(value, key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = tx.onabort = () => reject(tx.error || new Error('IndexedDB írási hiba'));
+            });
+        }
+
+        async function mediaGet(key) {
+            const db = await openMediaDb();
+            return new Promise((resolve, reject) => {
+                const req = db.transaction(MEDIA_STORE, 'readonly').objectStore(MEDIA_STORE).get(key);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error || new Error('IndexedDB olvasási hiba'));
+            });
+        }
+
+        async function mediaDelete(key) {
+            const db = await openMediaDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(MEDIA_STORE, 'readwrite');
+                tx.objectStore(MEDIA_STORE).delete(key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = tx.onabort = () => reject(tx.error || new Error('IndexedDB törlési hiba'));
+            });
+        }
+
+        // Szétválasztja a kérdések szövegét (localStorage) és a képeit/hangjait (IndexedDB).
+        function splitQuestionMedia(list) {
+            const media = [];
+            let hasMedia = false;
+            const light = list.map((q, i) => {
+                const { image, audio, ...rest } = q;
+                if (image || audio) {
+                    hasMedia = true;
+                    media[i] = {};
+                    if (image) media[i].image = image;
+                    if (audio) media[i].audio = audio;
+                    return { ...rest, media: true };
+                }
+                media[i] = null;
+                return rest;
+            });
+            return { light, media, hasMedia };
+        }
+
+        // Visszaadja a kérdéssort a hozzá tartozó képekkel/hangokkal együtt.
+        async function hydrateSetMedia(name, set) {
+            if (!Array.isArray(set) || !set.some(q => q && q.media)) return set;
+            try {
+                const media = await mediaGet(name);
+                if (!Array.isArray(media)) return set;
+                return set.map((q, i) => {
+                    if (!q || !q.media || !media[i]) return q;
+                    const copy = { ...q };
+                    if (media[i].image) copy.image = media[i].image;
+                    if (media[i].audio) copy.audio = media[i].audio;
+                    return copy;
+                });
+            } catch (error) {
+                console.warn('A képek/hangok betöltése nem sikerült:', error);
+                return set;
+            }
+        }
+
+        async function saveQuestions() {
             const setName = document.getElementById('question-set-name').value.trim();
             if (!setName) {
                 showFeedback("Hiányzó név", "Add meg a kérdéssor nevét!", "⚠️");
@@ -3790,11 +3886,40 @@ async function loadDifficulty(diffKey) {
             }
 
             const saved = lsGetJSON('SavedQuestions', {});
-            saved[setName] = parsedQuestions;
+            const { light, media, hasMedia } = splitQuestionMedia(parsedQuestions);
+
+            // Ha van kép/hang, azt az IndexedDB-be mentjük (a kérdés szövege marad a localStorage-ban).
+            // Ha az IndexedDB nem elérhető, a régi módon, a localStorage-ba kerül minden.
+            let toStore = parsedQuestions;
+            let mediaInIdb = false;
+            let oldMedia;
+            if (hasMedia) {
+                try {
+                    oldMedia = await mediaGet(setName);
+                    await mediaPut(setName, media);
+                    toStore = light;
+                    mediaInIdb = true;
+                } catch (error) {
+                    console.warn('IndexedDB mentés nem sikerült, localStorage-ba mentünk:', error);
+                }
+            }
+
+            saved[setName] = toStore;
             if (!lsSetJSON('SavedQuestions', saved)) {
-                const hasImages = parsedQuestions.some(q => q.image || q.audio);
-                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva)." + (hasImages ? " A képek és hangok sok helyet foglalnak, próbálj kevesebbet vagy kisebbeket használni." : ""), "⚠️");
+                if (mediaInIdb) {
+                    // A szöveg mentése nem sikerült: a média állapotát visszaállítjuk.
+                    try {
+                        if (oldMedia !== undefined) await mediaPut(setName, oldMedia);
+                        else await mediaDelete(setName);
+                    } catch (e) {}
+                }
+                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva)." + (hasMedia && !mediaInIdb ? " A képek és hangok sok helyet foglalnak, próbálj kevesebbet vagy kisebbeket használni." : ""), "⚠️");
                 return;
+            }
+
+            // Ha a kérdéssorban már nincs kép/hang, a korábban eltárolt médiát töröljük.
+            if (!hasMedia) {
+                mediaDelete(setName).catch(() => {});
             }
 
             toggleModal('create-modal', false);
@@ -3822,8 +3947,8 @@ async function loadDifficulty(diffKey) {
 
         async function shareCustomSet(name) {
             const saved = lsGetJSON('SavedQuestions', {});
-            const set = saved[name];
-            if (!set || !set.length) return;
+            const rawSet = saved[name];
+            if (!rawSet || !rawSet.length) return;
 
             document.getElementById('loading-modal-icon').textContent = "📤";
             document.getElementById('loading-modal-title').textContent = "Megosztás";
@@ -3834,6 +3959,7 @@ async function loadDifficulty(diffKey) {
             startShareDotsAnimation();
 
             try {
+                const set = (await hydrateSetMedia(name, rawSet)).map(({ media, ...rest }) => rest);
                 const response = await fetch(`${QUIZ_API_BASE}/api/share`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ questions: set })
@@ -3914,13 +4040,14 @@ async function loadDifficulty(diffKey) {
             selectRivalDifficulty(diffKey);
         }
 
-        function loadCustomSet(name) {
+        async function loadCustomSet(name) {
             const saved = lsGetJSON('SavedQuestions', {});
             if (saved[name]) {
+                const fullSet = await hydrateSetMedia(name, saved[name]);
                 currentDifficultyKey = 'custom';
                 activeSetName = name;
                 lsSetJSON('LastSelection', { type: 'custom', name: name });
-                questions = shuffleArray(saved[name]);
+                questions = shuffleArray(fullSet);
                 document.getElementById('active-set-label').textContent = `${name} (${questions.length} kérdés)`;
                 const rivalLabelEl = document.getElementById('rival-active-set-label');
                 if (rivalLabelEl) rivalLabelEl.textContent = `${name}`;
@@ -3933,6 +4060,7 @@ async function loadDifficulty(diffKey) {
             const saved = lsGetJSON('SavedQuestions', {});
             delete saved[name];
             lsSetJSON('SavedQuestions', saved);
+            mediaDelete(name).catch(() => {});
             showLoadModal();
         }
 
@@ -3972,7 +4100,7 @@ async function loadDifficulty(diffKey) {
                 if (last && last.type === 'custom' && Array.isArray(savedSets[last.name]) && savedSets[last.name].length) {
                     currentDifficultyKey = 'custom';
                     activeSetName = last.name;
-                    questions = shuffleArray(savedSets[last.name]);
+                    questions = shuffleArray(await hydrateSetMedia(last.name, savedSets[last.name]));
                     const labelEl = document.getElementById('active-set-label');
                     if (labelEl) labelEl.textContent = `${last.name} (${questions.length} kérdés)`;
                     const rivalLabelEl = document.getElementById('rival-active-set-label');
