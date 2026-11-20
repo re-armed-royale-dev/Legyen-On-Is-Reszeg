@@ -125,6 +125,80 @@
             caret-color: #fde047;
         }
 
+        /* Asztali méretben (>= 768px) az eredeti főmenü-elrendezés marad: a réteg nem hoz létre saját dobozt. */
+        #start-menu-overlay {
+            display: contents;
+        }
+
+        /* Telefon-méret (< 768px): alsó gombsáv (bal: Rivális, közép: Egyjátékos, jobb: Kód), az oldalak középen. */
+        @media (max-width: 767px) {
+            #start-screen {
+                padding-bottom: 7rem;
+            }
+            #start-bottom-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 40;
+                max-width: none;
+                margin: 0;
+                padding: 1.5rem 0.75rem calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.5rem;
+                background: linear-gradient(to top, rgba(2, 6, 23, 0.95), rgba(2, 6, 23, 0.7) 60%, transparent);
+            }
+            #start-bottom-bar > button {
+                width: 100%;
+                font-size: 0.75rem;
+                line-height: 1.15;
+                padding: 0.75rem 0.5rem;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+            #rival-menu-btn { order: 1; }
+            #single-player-btn { order: 2; }
+            #code-entry-btn { order: 3; }
+
+            #start-menu-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 45;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+                background: rgba(0, 0, 0, 0.72);
+            }
+            #start-menu-overlay.open {
+                display: flex;
+            }
+            #start-menu-overlay > div {
+                width: 100%;
+                max-width: 36rem;
+                margin: 0;
+                max-height: calc(100vh - 2rem);
+                max-height: calc(100dvh - 2rem);
+                overflow-y: auto;
+                background-color: rgba(2, 6, 23, 0.98);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            }
+
+            /* Beállítások: telefonon középen nyílik meg (a háttér elsötétül). */
+            #settings-menu {
+                top: 50%;
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -50%);
+                width: min(24rem, calc(100% - 2rem));
+                max-height: calc(100vh - 2rem);
+                max-height: calc(100dvh - 2rem);
+                overflow-y: auto;
+                box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.65), 0 20px 60px rgba(0, 0, 0, 0.6);
+            }
+        }
+
         .lifeline-used {
             opacity: 0.48;
             cursor: not-allowed !important;
@@ -346,8 +420,8 @@
                 Tedd fel a 10 piros poharadat a helyes válaszra! Ami rossz helyre kerül, azt bizony meg kell inni!
             </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-6">
-                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
+            <div id="start-bottom-bar" class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-6">
+                <button id="single-player-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openSinglePlayerMenu()" class="bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2">
                     👤 Egyjátékos
                 </button>
                 <button id="rival-menu-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openRivalMenu()" class="bg-gradient-to-r from-purple-700 via-fuchsia-600 to-rose-600 hover:from-purple-600 hover:to-rose-500 text-white font-black text-base sm:text-lg py-4 px-4 rounded-2xl shadow-lg shadow-fuchsia-600/30 border border-fuchsia-400/50 cursor-pointer flex items-center justify-center gap-2">
@@ -358,6 +432,7 @@
                 </button>
             </div>
 
+            <div id="start-menu-overlay" onclick="if (event.target === this) backToMainStartMenu()">
             <div id="singleplayer-menu" class="hidden max-w-xl mx-auto bg-slate-950/80 border border-slate-800 rounded-2xl p-4 mb-4">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Egyjátékos mód beállításai</span>
@@ -493,6 +568,8 @@
                 </div>
             </div>
 
+            </div>
+
             <div class="mt-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-4">
                 <span>20 kérdéses paklik (Automatikusan keverve belépéskor)</span>
                 <span class="font-mono font-bold text-yellow-400">v2.33 iOS Activate Key</span>
@@ -576,6 +653,9 @@
                 <div class="relative w-full aspect-video bg-black/60 rounded-2xl overflow-hidden border border-yellow-500/30">
                     <img id="question-image" alt="" class="absolute inset-0 w-full h-full object-contain">
                 </div>
+            </div>
+            <div id="question-audio-wrap" class="hidden mt-3 mx-auto w-full max-w-xl">
+                <audio id="question-audio" controls preload="none" class="w-full"></audio>
             </div>
             <p id="instruction-hint" class="text-xs sm:text-sm text-yellow-400/90 mt-2">
                 Válassz ki egy választ (vagy használd az ALL-IN / + / − gombokat), és helyezd el az összes poharadat!
@@ -766,6 +846,30 @@
         </div>
     </div>
     <input type="file" id="image-file-input" accept="image/*" class="hidden" onchange="handleQuestionImageSelected(event)">
+
+    <!-- HANG FELTÖLTÉSE ABLAK (kérdésekhez) -->
+    <div id="audio-upload-modal" class="hidden fixed inset-0 bg-black/80 flex items-end sm:items-center justify-center z-[60]" onclick="closeAudioUploadModal()">
+        <div class="bg-slate-900 border-t-2 sm:border-2 border-violet-500/60 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 shadow-2xl" onclick="event.stopPropagation()">
+            <h3 class="text-lg font-black text-violet-400 mb-3 text-center">🔊 Hang a kérdéshez</h3>
+            <div class="bg-slate-950 border border-slate-700 rounded-2xl p-3 mb-2 min-h-[4.5rem] flex items-center justify-center">
+                <audio id="audio-upload-preview" controls class="hidden w-full"></audio>
+                <span id="audio-upload-placeholder" class="text-xs text-slate-500 px-4 text-center">Még nincs hang feltöltve</span>
+            </div>
+            <p id="audio-upload-info" class="text-[11px] text-slate-400 mb-3 text-center min-h-[1rem]"></p>
+            <div class="flex flex-col gap-2">
+                <button id="audio-remove-btn" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); removeQuestionAudio()" class="hidden w-full bg-red-900/60 hover:bg-red-800/70 border border-red-500/50 text-red-200 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                    🗑️ Hang törlése
+                </button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); document.getElementById('audio-file-input').click()" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-3.5 rounded-xl text-sm cursor-pointer">
+                    📁 Hang feltöltése
+                </button>
+                <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeAudioUploadModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs cursor-pointer">
+                    Bezárás
+                </button>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleQuestionAudioSelected(event)">
 
     <div id="create-modal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('create-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col relative" onclick="event.stopPropagation()">
@@ -1603,6 +1707,20 @@ async function verifyActivateKey() {
                 scheduleRestrictionRefresh();
             }, Math.max(50, nextExpiry - now + 50));
         }
+
+        // Telefon-méretben az ablak-réteg akkor látszik, ha bármelyik almenü nyitva van
+        // (a meglévő nyitó/záró függvények változtatása nélkül, a `hidden` osztályt figyelve).
+        function initStartMenuOverlay() {
+            const overlay = document.getElementById('start-menu-overlay');
+            if (!overlay) return;
+            const sync = () => {
+                const anyOpen = Array.from(overlay.children).some(child => !child.classList.contains('hidden'));
+                overlay.classList.toggle('open', anyOpen);
+            };
+            new MutationObserver(sync).observe(overlay, { subtree: true, attributes: true, attributeFilter: ['class'] });
+            sync();
+        }
+        document.addEventListener('DOMContentLoaded', initStartMenuOverlay);
 
         function openSinglePlayerMenu() {
             document.getElementById('singleplayer-menu').classList.remove('hidden');
@@ -2773,6 +2891,25 @@ async function loadDifficulty(diffKey) {
                 }
             }
 
+            const questionAudioWrap = document.getElementById('question-audio-wrap');
+            const questionAudioEl = document.getElementById('question-audio');
+            if (questionAudioWrap && questionAudioEl) {
+                if (typeof currentQ.audio === 'string' && /^data:audio\/[a-z0-9.+-]+;base64,/i.test(currentQ.audio)) {
+                    if (questionAudioEl.getAttribute('src') !== currentQ.audio) {
+                        questionAudioEl.pause();
+                        questionAudioEl.src = currentQ.audio;
+                    }
+                    questionAudioWrap.classList.remove('hidden');
+                } else {
+                    questionAudioEl.pause();
+                    if (questionAudioEl.getAttribute('src')) {
+                        questionAudioEl.removeAttribute('src');
+                        questionAudioEl.load();
+                    }
+                    questionAudioWrap.classList.add('hidden');
+                }
+            }
+
             const placedTotal = answerBets.reduce((a, b) => a + b, 0);
             const unplaced = totalGlasses - placedTotal;
             document.getElementById('unplaced-count').textContent = unplaced;
@@ -3332,6 +3469,10 @@ async function loadDifficulty(diffKey) {
                     <span class="q-image-status hidden text-xs text-emerald-400 font-semibold">✅ Kép csatolva</span>
                     <img class="q-image-thumb hidden h-9 w-16 object-cover rounded-md border border-slate-600" alt="">
                 </div>
+                <div class="flex items-center gap-2 mb-2.5">
+                    <button type="button" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openAudioUploadModal(this)" class="q-audio-btn bg-violet-600 hover:bg-violet-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">🔊 Hang hozzáadása</button>
+                    <span class="q-audio-status hidden text-xs text-emerald-400 font-semibold">✅ Hang csatolva</span>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
                     <input type="text" class="q-ans-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 1" value="${prefill ? prefill.answers[0].replace(/"/g, '&quot;') : ''}">
                     <input type="text" class="q-ans-2 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 2" value="${prefill ? prefill.answers[1].replace(/"/g, '&quot;') : ''}">
@@ -3353,6 +3494,10 @@ async function loadDifficulty(diffKey) {
             if (prefill && typeof prefill.image === 'string' && prefill.image.startsWith('data:image/')) {
                 div.dataset.image = prefill.image;
                 updateQuestionImageUI(div);
+            }
+            if (prefill && typeof prefill.audio === 'string' && prefill.audio.startsWith('data:audio/')) {
+                div.dataset.audio = prefill.audio;
+                updateQuestionAudioUI(div);
             }
         }
 
@@ -3484,6 +3629,141 @@ async function loadDifficulty(diffKey) {
             }
         }
 
+        // ===== Hangok a kérdésekhez =====
+        const MAX_AUDIO_BYTES = 3 * 1024 * 1024;
+        const AUDIO_MIME_BY_EXT = {
+            mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav',
+            ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg', flac: 'audio/flac', webm: 'audio/webm'
+        };
+        let currentAudioItem = null;
+
+        function audioDataSizeKB(dataUrl) {
+            const i = dataUrl.indexOf(',');
+            return Math.round((dataUrl.length - i - 1) * 0.75 / 1024);
+        }
+
+        function updateQuestionAudioUI(item) {
+            if (!item) return;
+            const status = item.querySelector('.q-audio-status');
+            if (!status) return;
+            if (item.dataset.audio) status.classList.remove('hidden');
+            else status.classList.add('hidden');
+        }
+
+        function refreshAudioModal() {
+            const item = currentAudioItem;
+            const data = item ? (item.dataset.audio || '') : '';
+            const preview = document.getElementById('audio-upload-preview');
+            const placeholder = document.getElementById('audio-upload-placeholder');
+            const info = document.getElementById('audio-upload-info');
+            const removeBtn = document.getElementById('audio-remove-btn');
+
+            if (data) {
+                if (preview.getAttribute('src') !== data) preview.src = data;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                removeBtn.classList.remove('hidden');
+                info.textContent = item.dataset.audioInfo || `Hangfájl • ${audioDataSizeKB(data)} KB`;
+            } else {
+                preview.pause();
+                if (preview.getAttribute('src')) {
+                    preview.removeAttribute('src');
+                    preview.load();
+                }
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                removeBtn.classList.add('hidden');
+                info.textContent = '';
+            }
+        }
+
+        function openAudioUploadModal(btn) {
+            currentAudioItem = btn.closest('.question-item');
+            refreshAudioModal();
+            toggleModal('audio-upload-modal', true);
+        }
+
+        function closeAudioUploadModal() {
+            const preview = document.getElementById('audio-upload-preview');
+            if (preview) preview.pause();
+            toggleModal('audio-upload-modal', false);
+            currentAudioItem = null;
+        }
+
+        function removeQuestionAudio() {
+            if (!currentAudioItem) return;
+            delete currentAudioItem.dataset.audio;
+            delete currentAudioItem.dataset.audioInfo;
+            updateQuestionAudioUI(currentAudioItem);
+            refreshAudioModal();
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('A fájl nem olvasható'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Ellenőrzi, hogy a hang lejátszható-e (és megméri a hosszát, ha a készülék megadja).
+        function probeAudio(dataUrl) {
+            return new Promise(resolve => {
+                const a = new Audio();
+                let done = false;
+                const finish = result => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    resolve(result);
+                };
+                const timer = setTimeout(() => finish({ ok: true, duration: null }), 3000);
+                a.preload = 'metadata';
+                a.onloadedmetadata = () => finish({ ok: true, duration: Number.isFinite(a.duration) ? a.duration : null });
+                a.onerror = () => finish({ ok: false });
+                a.src = dataUrl;
+            });
+        }
+
+        async function handleQuestionAudioSelected(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file || !currentAudioItem) return;
+
+            const ext = (file.name.split('.').pop() || '').toLowerCase();
+            let mime = (file.type && file.type.startsWith('audio/')) ? file.type.split(';')[0] : AUDIO_MIME_BY_EXT[ext];
+            if (!mime) {
+                showFeedback("Nem hangfájl", "Csak hangfájlt (pl. mp3, m4a, wav, ogg) tölthetsz fel!", "⚠️");
+                return;
+            }
+            if (file.size > MAX_AUDIO_BYTES) {
+                showFeedback("Túl nagy hangfájl", `A hangfájl ${(file.size / 1048576).toFixed(1)} MB, a maximum <strong>3 MB</strong>. Válassz rövidebb vagy kisebb hangot!`, "⚠️");
+                return;
+            }
+
+            const item = currentAudioItem;
+            try {
+                const raw = await readFileAsDataURL(file);
+                const dataUrl = `data:${mime};base64,${raw.slice(raw.indexOf(',') + 1)}`;
+                const probe = await probeAudio(dataUrl);
+                if (!probe.ok) {
+                    showFeedback("Nem játszható le", "Ezt a hangformátumot a készülék nem tudja lejátszani. Próbálj mp3 vagy m4a fájlt!", "⚠️");
+                    return;
+                }
+                const shortName = file.name.length > 28 ? file.name.slice(0, 25) + '…' : file.name;
+                item.dataset.audio = dataUrl;
+                item.dataset.audioInfo = `${shortName} • ${audioDataSizeKB(dataUrl)} KB` + (probe.duration ? ` • ${Math.round(probe.duration)} mp` : '');
+                updateQuestionAudioUI(item);
+                if (currentAudioItem === item) refreshAudioModal();
+                playSuccessSound();
+            } catch (e) {
+                console.error('Hangfeldolgozási hiba:', e);
+                showFeedback("Hanghiba", "A hangfájlt nem sikerült feldolgozni. Próbálj meg egy másikat!", "⚠️");
+            }
+        }
+
         function saveQuestions() {
             const setName = document.getElementById('question-set-name').value.trim();
             if (!setName) {
@@ -3505,14 +3785,15 @@ async function loadDifficulty(diffKey) {
                 }
                 const questionObj = { question: qText, answers: [a1, a2, a3, a4], correct: correctIdx };
                 if (items[i].dataset.image) questionObj.image = items[i].dataset.image;
+                if (items[i].dataset.audio) questionObj.audio = items[i].dataset.audio;
                 parsedQuestions.push(questionObj);
             }
 
             const saved = lsGetJSON('SavedQuestions', {});
             saved[setName] = parsedQuestions;
             if (!lsSetJSON('SavedQuestions', saved)) {
-                const hasImages = parsedQuestions.some(q => q.image);
-                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva)." + (hasImages ? " A képek sok helyet foglalnak, próbálj kevesebb képet használni." : ""), "⚠️");
+                const hasImages = parsedQuestions.some(q => q.image || q.audio);
+                showFeedback("Mentési hiba", "A kérdéssort nem sikerült elmenteni a készülék tárhelyére (megtelt vagy le van tiltva)." + (hasImages ? " A képek és hangok sok helyet foglalnak, próbálj kevesebbet vagy kisebbeket használni." : ""), "⚠️");
                 return;
             }
 
