@@ -504,277 +504,31 @@
         #cup-tray { border-radius: 1.4rem; }
     
         /* =====================================================================
-           ILLESZKEDÉS A KÉPERNYŐHÖZ (TESZT)
-           Cél: oldalgörgetés nélkül, minden kijelzőmérethez igazodva. Görgetés csak ott marad,
-           ahol a tartalom tényleg hosszú lehet (pl. sok kérdés a szerkesztőben / betöltésnél).
-           ===================================================================== */
-        html, body { height: 100%; }
-        body {
-            height: 100vh;
-            height: 100dvh;
-            min-height: 0;
-            overflow: hidden;
-        }
-        body > header.w-full { flex: none; }
-        #start-screen, #game-screen { min-height: 0; }
-
-        /* ---------- FŐMENÜ: a tartalom a képernyő magasságához méreteződik ---------- */
-        #start-screen {
-            flex: 1 1 0;
-            overflow: hidden;
-            padding-top: clamp(0.25rem, 1.5dvh, 1.25rem);
-            padding-bottom: clamp(0.5rem, 2dvh, 1.5rem);
-        }
-        #start-screen > .caret-fix {
-            max-height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        #start-screen > .caret-fix > div:first-child {
-            flex: none;
-            width: clamp(3.4rem, 11dvh, 6rem);
-            height: clamp(3.4rem, 11dvh, 6rem);
-            margin-bottom: clamp(0.35rem, 1.4dvh, 1rem);
-        }
-        #start-screen > .caret-fix > div:first-child svg { width: 56%; height: 56%; }
-        body .rgb-title {
-            font-size: clamp(1.6rem, min(8vw, 6.5dvh), 4.25rem);
-            margin-bottom: 0.25rem;
-        }
-        #start-screen > .caret-fix > p {
-            font-size: clamp(0.78rem, 1.9dvh, 1.05rem);
-            line-height: 1.35;
-            margin-bottom: 0;
-        }
-        #start-bottom-bar { margin: clamp(0.75rem, 3.2dvh, 2rem) auto clamp(0.5rem, 2dvh, 1.5rem); }
-        #start-bottom-bar > button {
-            min-height: clamp(5.25rem, 17dvh, 9.5rem);
-            padding: clamp(0.6rem, 2dvh, 1.25rem) 0.75rem;
-            font-size: clamp(0.95rem, 2.2dvh, 1.15rem);
-        }
-        #start-screen > .caret-fix > div:last-child {
-            margin-top: clamp(0.4rem, 1.6dvh, 1.5rem);
-            padding-top: clamp(0.4rem, 1.2dvh, 1rem);
-            flex-wrap: wrap;
-            gap: 0.25rem 0.75rem;
-            justify-content: center;
-            font-size: 0.7rem;
-        }
-        @media (max-width: 767px) {
-            #start-screen { padding-bottom: 6.5rem; }
-            #start-bottom-bar > button { min-height: 0; font-size: 0.74rem; padding: 0.7rem 0.3rem; }
-        }
-
-        /* ---------- ABLAKOK: mindig beleférnek a látható területbe ---------- */
-        .fixed.inset-0 > div[class*="max-h-"] { max-height: calc(100vh - 1.5rem); max-height: calc(100dvh - 1.5rem); }
-        .fixed.inset-0 > div { overscroll-behavior: contain; }
-        #rival-menu .grid.text-left { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
-        /* ---------- JÁTÉKKÉPERNYŐ: egy képernyőn, görgetés nélkül ---------- */
-        #game-screen {
-            flex: 1 1 0;
-            justify-content: flex-start;
-            gap: clamp(0.3rem, 1dvh, 0.75rem);
-            padding: 0.25rem clamp(0.5rem, 2vw, 1rem) clamp(0.5rem, 1.5dvh, 1rem);
-            overflow-y: auto;
-            overscroll-behavior: contain;
-        }
-        #game-screen > * { margin-bottom: 0; flex-shrink: 0; }
-
-        /* Kérdés doboz */
-        #game-screen > div:nth-child(3) {
-            flex-shrink: 1;
-            min-height: 0;
-            overflow-y: auto;
-            padding: clamp(0.55rem, 1.8dvh, 2rem) clamp(0.7rem, 2.5vw, 2rem);
-        }
-        #question-text {
-            font-size: clamp(0.95rem, min(3.2vw, 2.6dvh), 1.9rem);
-            line-height: 1.25;
-        }
-        #instruction-hint { font-size: clamp(0.62rem, 1.5dvh, 0.8rem); margin-top: 0.3rem; }
-        #question-image-wrap {
-            margin-top: 0.4rem;
-            max-width: calc(min(24dvh, 40vw) * 16 / 9);
-        }
-        #question-audio { height: 2.2rem; }
-
-        /* Válaszok: mindig 2x2, a maradék helyet kitöltik; csak szükség esetén görgethetők */
-        #answers-grid {
-            flex: 1 1 0;
-            min-height: clamp(6.5rem, 26dvh, 13rem);
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-auto-rows: minmax(min-content, 1fr);
-            gap: clamp(0.3rem, 1dvh, 0.9rem);
-            overflow-y: auto;
-            overscroll-behavior: contain;
-        }
-        #answers-grid > * { min-height: 0; }
-        #answers-grid > .answer-card {
-            padding: clamp(0.4rem, 1.2dvh, 1rem);
-            border-radius: 1.1rem;
-        }
-        #answers-grid > .answer-card > div:first-child { margin-bottom: 0.3rem; gap: 0.3rem; }
-        #answers-grid > .answer-card > div:last-child {
-            min-height: 1.6rem;
-            padding: 0.15rem 0.45rem;
-            gap: 0.2rem;
-        }
-        #answers-grid .answer-card svg { width: 1.2rem; height: 1.2rem; }
-
-        /* Pohár-tálca és gombok */
-        #game-screen > div:last-child { padding: clamp(0.5rem, 1.5dvh, 1.25rem); border-radius: 1.4rem; }
-        #game-screen > div:last-child > div:first-child { margin-bottom: 0.35rem; }
-        #cup-tray {
-            min-height: 2.6rem;
-            padding: 0.3rem;
-            margin-bottom: 0.45rem;
-            gap: 0.25rem;
-        }
-        #cup-tray svg { width: 1.7rem; height: 1.7rem; }
-        #game-screen > div:last-child > div:last-child { gap: 0.5rem; }
-        #game-screen > div:last-child > div:last-child > button {
-            padding-top: clamp(0.5rem, 1.4dvh, 0.9rem);
-            padding-bottom: clamp(0.5rem, 1.4dvh, 0.9rem);
-        }
-
-        /* Rivális állásjelző */
-        #rival-scoreboard { padding: 0.4rem 0.5rem; border-radius: 1.1rem; }
-        #rival-p1-card, #rival-p2-card { padding: 0.25rem; }
-        #rival-sabotage-bar { margin-top: 0.35rem; padding-top: 0.35rem; }
-
-        /* ---------- TELEFON (keskeny) ---------- */
-        @media (max-width: 767px) {
-            /* felső sáv: két kis számláló + 4 segítség egy sorban */
-            #game-screen > div:nth-child(2) { padding: 0.45rem 0.5rem; gap: 0.35rem; border-radius: 1.1rem; }
-            #game-screen > div:nth-child(2) > div:first-child {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 0.4rem;
-                width: 100%;
-            }
-            #game-screen > div:nth-child(2) > div:first-child > div {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 0.4rem;
-                padding: 0.25rem 0.6rem;
-            }
-            #game-screen > div:nth-child(2) > div:first-child > div > span.block {
-                display: inline;
-                font-size: 0.65rem;
-            }
-            #game-screen > div:nth-child(2) > div:last-child {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 0.3rem;
-                width: 100%;
-            }
-            #game-screen > div:nth-child(2) > div:last-child > button {
-                padding: 0.35rem 0.15rem;
-                font-size: 0.62rem;
-                line-height: 1.1;
-                border-radius: 0.8rem;
-            }
-
-            /* válasz kártya: a fejléc két sorba törik (szöveg, majd vezérlők) */
-            #answers-grid > .answer-card > div:first-child { flex-wrap: wrap; }
-            #answers-grid > .answer-card > div:first-child > div:first-child { flex: 1 1 100%; gap: 0.4rem; }
-            #answers-grid > .answer-card > div:first-child > div:last-child {
-                flex: 1 1 100%;
-                justify-content: space-between;
-            }
-            #answers-grid > .answer-card > div:first-child > div:first-child > span:first-child {
-                width: 1.5rem;
-                height: 1.5rem;
-                font-size: 0.75rem;
-            }
-            #answers-grid > .answer-card > div:first-child > div:first-child > span:last-child {
-                font-size: 0.8rem;
-                line-height: 1.2;
-            }
-            #answers-grid > .answer-card .all-in-btn { padding: 0.2rem 0.45rem; font-size: 0.65rem; }
-            #answers-grid > .answer-card button.w-8 { width: 1.6rem; height: 1.6rem; }
-
-            /* tálca: a magyarázó szöveg elrejtve, a két gomb egy sorban */
-            #game-screen > div:last-child > div:first-child { flex-direction: row; gap: 0.5rem; }
-            #game-screen > div:last-child > div:first-child > div:last-child { display: none; }
-            #game-screen > div:last-child > div:first-child > div:first-child span { font-size: 0.78rem; }
-            #game-screen > div:last-child > div:last-child { flex-direction: row; }
-            #clear-bets-btn { width: auto; flex: 0 0 auto; padding-left: 0.8rem; padding-right: 0.8rem; font-size: 0.72rem; }
-            #check-answer-btn, #next-question-btn { flex: 1 1 0; padding-left: 0.5rem; padding-right: 0.5rem; font-size: 0.95rem; }
-
-            /* rivális sáv: a képességek négy oszlopban */
-            #rival-sabotage-bar > span { font-size: 0.6rem; }
-            #rival-sabotage-bar > div {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                width: 100%;
-                gap: 0.3rem;
-            }
-            #rival-sabotage-bar > div > button { padding: 0.3rem 0.1rem; font-size: 0.58rem; line-height: 1.1; }
-        }
-
-        /* ---------- RÖVID KIJELZŐK ---------- */
-        @media (max-height: 700px) {
-            body > header.w-full { margin-top: 0.4rem; padding: 0.3rem 0.4rem 0.3rem 0.9rem; }
-            body > header.w-full button { padding: 0.35rem 0.65rem; font-size: 0.7rem; }
-            #instruction-hint { display: none; }
-            #game-screen > div:last-child > div:first-child > div:last-child { display: none; }
-            .fixed.inset-0 > div[class*="p-"] { padding: 0.9rem; }
-        }
-        @media (max-height: 600px) {
-            #start-screen > .caret-fix > p { display: none; }
-            #start-bottom-bar > button::after { display: none; }
-            #start-screen > .caret-fix > div:last-child { display: none; }
-            #rival-sabotage-bar > span { display: none; }
-        }
-
-        /* ---------- FEKVŐ TELEFON (alacsony és széles): két oszlopos játékképernyő ---------- */
-        @media (orientation: landscape) and (max-height: 560px) {
-            body > header.w-full { margin-top: 0.3rem; padding: 0.25rem 0.4rem 0.25rem 0.8rem; }
-            #game-screen:not(.hidden) {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-                grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-                column-gap: 0.5rem;
-                row-gap: 0.3rem;
-                overflow: hidden;
-            }
-            #rival-scoreboard { grid-column: 1 / -1; grid-row: 1; }
-            #game-screen > div:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
-            #game-screen > div:nth-child(3) { grid-column: 1; grid-row: 3; }
-            #audience-chart-box { grid-column: 1; grid-row: 4; }
-            #answers-grid { grid-column: 2; grid-row: 3 / span 3; }
-            #game-screen > div:last-child { grid-column: 1; grid-row: 5; }
-            #game-screen > div:nth-child(2) > div:first-child > div > span.block { display: none; }
-            #start-screen { padding-bottom: 5.5rem; }
-        }
-    
-        /* =====================================================================
-           TELJESÍTMÉNY (TESZT) – a dizájn marad, de a lassú effektek kikapcsolva / olcsóbbak.
-           A telefonon a legdrágább dolgok: rögzített háttér, elmosás (backdrop-filter),
-           szűrők (drop-shadow), nagy elmosású árnyékok és a folyamatosan futó animációk.
+           SIMÍTÁS (TESZT) – a látvány és az animációk maradnak (pl. a főmenü címének színáramlása),
+           csak a telefont lassító, drága műveleteket cseréltem olcsóbbra.
            ===================================================================== */
 
         /* 1) A rögzített (fixed) háttér mobilon minden képkockán újrafest */
         body { background-attachment: scroll; }
 
-        /* 2) Háttér-elmosás sehol (nagyon költséges GPU-művelet) */
+        /* 2) Háttér-elmosás (backdrop-filter): nagyon költséges GPU-művelet, a háttér úgyis sötét */
         [class*="backdrop-blur"] {
             -webkit-backdrop-filter: none !important;
             backdrop-filter: none !important;
         }
 
-        /* 3) Szűrők és folyamatos animációk kikapcsolása a statikus elemeken */
-        body .rgb-title { animation: none; background-position: 30% center; }
-        .red-cup-shadow, svg.red-cup-shadow { filter: none !important; }
-        .cup-animate { animation: none; }
-        body > header .animate-pulse { animation: none; }
+        /* 3) Főmenü cím: az animáció marad, de saját rétegen fut, így csak a cím területe frissül */
+        body .rgb-title {
+            will-change: background-position;
+            transform: translateZ(0);
+        }
 
-        /* 4) ALL IN: a box-shadow animáció helyett csak az átlátszóság pulzál (GPU-barát) */
+        /* 4) Poharak: az "előugró" animáció marad (csak mozgás + átlátszóság), de a szűrő (drop-shadow)
+              minden pohár SVG-jéről lekerül, mert az animáció közben képkockánként újraszámolódna */
+        svg.red-cup-shadow { filter: none; }
+        .cup-animate { will-change: transform, opacity; }
+
+        /* 5) ALL IN: ugyanaz a pulzáló ragyogás, de csak az átlátszóság animálódik (GPU-barát) */
         .all-in-btn {
             animation: none;
             position: relative;
@@ -785,11 +539,11 @@
             position: absolute;
             inset: -1px;
             border-radius: inherit;
-            box-shadow: 0 0 14px rgba(239, 68, 68, 0.85);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), 0 0 24px rgba(239, 68, 68, 0.6);
             opacity: 0;
             pointer-events: none;
             will-change: opacity;
-            animation: allinPulse 1.6s infinite ease-in-out;
+            animation: allinPulse 1.5s infinite ease-in-out;
         }
         .all-in-btn:disabled::after { animation: none; }
         @keyframes allinPulse {
@@ -797,21 +551,21 @@
             50% { opacity: 1; }
         }
 
-        /* 5) Kisebb elmosású, olcsóbb árnyékok */
+        /* 6) Kisebb elmosású, olcsóbb árnyékok (a hatás hasonló marad) */
         body > header.w-full { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
-        body .gold-glow { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
-        #start-screen > .caret-fix > div:first-child { box-shadow: 0 0 24px rgba(244, 114, 182, 0.30); }
-        #single-player-btn, #rival-menu-btn, #code-entry-btn { box-shadow: 0 6px 14px rgba(0, 0, 0, 0.30); }
+        body .gold-glow { box-shadow: 0 0 22px rgba(167, 139, 250, 0.16), 0 8px 24px rgba(0, 0, 0, 0.4); }
+        #start-screen > .caret-fix > div:first-child { box-shadow: 0 0 26px rgba(244, 114, 182, 0.32); }
+        #single-player-btn, #rival-menu-btn, #code-entry-btn { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.30); }
         #start-menu-overlay > div { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
-        .answer-card { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.30); transition: transform 0.15s ease, border-color 0.15s ease; }
-        .answer-card:hover:not(.disabled-card) { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.30); }
-        .answer-card.selected-card { box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.45); }
-        .answer-card.correct-card { box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.55) !important; }
+        .answer-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.30); }
+        .answer-card:hover:not(.disabled-card) { box-shadow: 0 6px 16px rgba(34, 211, 238, 0.14); }
+        .answer-card.selected-card { box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.45), 0 0 14px rgba(34, 211, 238, 0.22); }
+        .answer-card.correct-card { box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.55), 0 0 16px rgba(52, 211, 153, 0.3) !important; }
         @media (max-width: 767px) {
             #start-bottom-bar { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); }
         }
 
-        /* 6) Beállítások: a háttér elsötétítése egy olcsó rétegből (nem hatalmas árnyékból) */
+        /* 7) Beállítások: a háttér elsötétítése egy olcsó fedőrétegből (nem hatalmas árnyékból) */
         #settings-menu { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
         body:has(#settings-menu:not(.hidden))::after {
             content: '';
@@ -822,10 +576,14 @@
             pointer-events: none;
         }
 
-        /* 7) A kártyák újrarajzolása/elrendezése ne érintse a környezetüket */
+        /* 8) Átmenetek: csak a szükséges tulajdonságok (mozgás/keret), nem minden */
+        .answer-card { transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; }
+        #start-bottom-bar > button { transition: transform 0.2s ease, filter 0.2s ease; }
+
+        /* 9) A kártyák elrendezése ne érintse a környezetüket */
         #answers-grid > .answer-card { contain: layout style; }
 
-        /* 8) Gyorsabb érintés */
+        /* 10) Gyorsabb érintés */
         button, .answer-card { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     </style>
     <link rel="apple-touch-icon" href="./icon-512.png">
