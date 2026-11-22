@@ -43,8 +43,6 @@ jobs:
           cp easy.json app/src/main/assets/easy.json
           cp normal.json app/src/main/assets/normal.json
           cp hard.json app/src/main/assets/hard.json
-
-          # SAJÁT ALKALMAZÁS IKON
           cp icon-512.png app/src/main/res/mipmap-nodpi/ic_launcher.png
 
           echo "android.useAndroidX=true" >> gradle.properties
@@ -136,7 +134,6 @@ jobs:
           </resources>
           EOF
 
-          # ÚJ INDÍTÓ POHÁR – ÜRES, PIROS POHÁR
           cat > app/src/main/res/drawable/splash_cup.xml <<'EOF'
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
@@ -159,7 +156,6 @@ jobs:
               <path
                   android:fillColor="#991B1B"
                   android:pathData="M68,31 L76,31 L70,80 L63,80 Z" />
-
           </vector>
           EOF
 
@@ -183,7 +179,6 @@ jobs:
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
-
                   </activity>
               </application>
           </manifest>
@@ -208,7 +203,6 @@ jobs:
           import android.view.Gravity;
           import android.view.View;
           import android.view.Window;
-          import android.view.WindowManager;
           import android.view.WindowInsets;
           import android.view.WindowInsetsController;
           import android.widget.FrameLayout;
@@ -220,7 +214,9 @@ jobs:
           import android.webkit.WebChromeClient.FileChooserParams;
           import android.webkit.WebResourceRequest;
           import android.webkit.WebResourceResponse;
+          import android.webkit.WebViewClient;
 
+          import androidx.core.splashscreen.SplashScreen;
           import androidx.webkit.WebViewAssetLoader;
           import androidx.webkit.WebViewClientCompat;
 
@@ -243,6 +239,7 @@ jobs:
               private boolean checkingVersion = false;
               private boolean updateDialogShowing = false;
               private boolean gameDisplayed = false;
+              private boolean gameLoading = false;
 
               private String downloadUrl = "";
               private int latestVersionCode = 0;
@@ -252,9 +249,9 @@ jobs:
               private final Handler handler =
                   new Handler(Looper.getMainLooper());
 
-              private FrameLayout splashLayout;
               private SplashProgressView splashProgress;
               private int splashProgressValue = 0;
+              private WebView webView;
 
               private final Runnable splashProgressRunnable = new Runnable() {
                   @Override
@@ -275,27 +272,22 @@ jobs:
               private void enableFullscreen() {
                   Window window = getWindow();
 
-                  window.setStatusBarColor(
-                      Color.rgb(11, 15, 25)
-                  );
-
-                  window.setNavigationBarColor(
-                      Color.rgb(11, 15, 25)
-                  );
+                  window.setStatusBarColor(Color.rgb(11, 15, 25));
+                  window.setNavigationBarColor(Color.rgb(11, 15, 25));
 
                   if (android.os.Build.VERSION.SDK_INT >= 30) {
                       WindowInsetsController controller =
                           window.getInsetsController();
 
                       if (controller != null) {
-                          controller.hide(
-                              WindowInsets.Type.statusBars() |
-                              WindowInsets.Type.navigationBars()
-                          );
-
                           controller.setSystemBarsBehavior(
                               WindowInsetsController
                                   .BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                          );
+
+                          controller.hide(
+                              WindowInsets.Type.statusBars() |
+                              WindowInsets.Type.navigationBars()
                           );
                       }
                   } else {
@@ -312,10 +304,13 @@ jobs:
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
+
+                  // FONTOS: A SplashScreen inicializálása a super.onCreate előtt.
+                  SplashScreen.installSplashScreen(this);
+
                   super.onCreate(savedInstanceState);
 
                   enableFullscreen();
-
                   showSplashScreen();
                   checkVersion();
               }
@@ -329,12 +324,24 @@ jobs:
                   }
               }
 
-              // ÚJ INDÍTÓKÉPERNYŐ
+              @Override
+              protected void onDestroy() {
+                  handler.removeCallbacksAndMessages(null);
+
+                  if (webView != null) {
+                      webView.stopLoading();
+                      webView.destroy();
+                      webView = null;
+                  }
+
+                  super.onDestroy();
+              }
+
+              // INDÍTÓKÉPERNYŐ
               private void showSplashScreen() {
-                  splashLayout = new FrameLayout(this);
+                  FrameLayout splashLayout = new FrameLayout(this);
                   splashLayout.setBackgroundColor(Color.rgb(11, 15, 25));
 
-                  // KÖZÉPEN CSAK A PIROS POHÁR
                   ImageView cup = new ImageView(this);
                   cup.setImageResource(R.drawable.splash_cup);
                   cup.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -348,7 +355,6 @@ jobs:
 
                   splashLayout.addView(cup, cupParams);
 
-                  // ALSÓ BETÖLTŐCSÍK SZÁZALÉKOS KIJELZÉSSEL
                   splashProgress = new SplashProgressView(this);
 
                   FrameLayout.LayoutParams progressParams =
@@ -362,13 +368,9 @@ jobs:
                   progressParams.rightMargin = dp(28);
                   progressParams.bottomMargin = dp(24);
 
-                  splashLayout.addView(
-                      splashProgress,
-                      progressParams
-                  );
+                  splashLayout.addView(splashProgress, progressParams);
 
                   setContentView(splashLayout);
-
                   enableFullscreen();
 
                   updateSplashProgress(5);
@@ -397,12 +399,11 @@ jobs:
                   }
               }
 
-              // BETÖLTŐCSÍK – CLASH ROYALE STÍLUSÚ MEGJELENÉS
+              // BETÖLTŐCSÍK
               private class SplashProgressView extends View {
 
-                  private final Paint paint = new Paint(
-                      Paint.ANTI_ALIAS_FLAG
-                  );
+                  private final Paint paint =
+                      new Paint(Paint.ANTI_ALIAS_FLAG);
 
                   private final RectF barRect = new RectF();
                   private int progress = 0;
@@ -426,62 +427,39 @@ jobs:
                       float barHeight = dp(16);
                       float top = (height - barHeight) / 2f;
 
-                      // HÁTTÉRCSÍK
-                      barRect.set(
-                          0,
-                          top,
-                          width,
-                          top + barHeight
-                      );
+                      barRect.set(0, top, width, top + barHeight);
 
                       paint.setColor(Color.rgb(45, 48, 58));
                       paint.setStyle(Paint.Style.FILL);
 
                       canvas.drawRoundRect(
-                          barRect,
-                          dp(9),
-                          dp(9),
-                          paint
+                          barRect, dp(9), dp(9), paint
                       );
 
-                      // PIROS BETÖLTÉSI RÉSZ
-                      float fillWidth =
-                          width * progress / 100f;
+                      float fillWidth = width * progress / 100f;
 
                       if (fillWidth > 0) {
                           barRect.set(
-                              0,
-                              top,
-                              fillWidth,
-                              top + barHeight
+                              0, top, fillWidth, top + barHeight
                           );
 
                           paint.setColor(Color.rgb(220, 38, 38));
 
                           canvas.drawRoundRect(
-                              barRect,
-                              dp(9),
-                              dp(9),
-                              paint
+                              barRect, dp(9), dp(9), paint
                           );
                       }
 
-                      // SZÁZALÉK A CSÍK KÖZEPÉN
                       paint.setColor(Color.WHITE);
                       paint.setTextSize(dp(12));
                       paint.setTypeface(
-                          Typeface.create(
-                              "sans-serif",
-                              Typeface.BOLD
-                          )
+                          Typeface.create("sans-serif", Typeface.BOLD)
                       );
                       paint.setTextAlign(Paint.Align.CENTER);
 
-                      Paint.FontMetrics metrics =
-                          paint.getFontMetrics();
+                      Paint.FontMetrics metrics = paint.getFontMetrics();
 
-                      float textY =
-                          height / 2f -
+                      float textY = height / 2f -
                           (metrics.ascent + metrics.descent) / 2f;
 
                       canvas.drawText(
@@ -493,7 +471,7 @@ jobs:
                   }
               }
 
-              // TELEPÍTETT VERZIÓ LEKÉRÉSE
+              // TELEPÍTETT VERZIÓ
               private int getInstalledVersionCode() {
                   try {
                       PackageInfo info = getPackageManager()
@@ -524,9 +502,7 @@ jobs:
                       try {
                           URL url = new URL(VERSION_URL);
 
-                          connection = (HttpURLConnection)
-                              url.openConnection();
-
+                          connection = (HttpURLConnection) url.openConnection();
                           connection.setRequestMethod("GET");
                           connection.setConnectTimeout(10000);
                           connection.setReadTimeout(10000);
@@ -535,8 +511,7 @@ jobs:
                               "Cache-Control", "no-cache"
                           );
 
-                          int responseCode =
-                              connection.getResponseCode();
+                          int responseCode = connection.getResponseCode();
 
                           if (responseCode != 200) {
                               throw new Exception(
@@ -544,17 +519,13 @@ jobs:
                               );
                           }
 
-                          InputStream input =
-                              connection.getInputStream();
+                          InputStream input = connection.getInputStream();
 
-                          BufferedReader reader =
-                              new BufferedReader(
-                                  new InputStreamReader(input, "UTF-8")
-                              );
+                          BufferedReader reader = new BufferedReader(
+                              new InputStreamReader(input, "UTF-8")
+                          );
 
-                          StringBuilder response =
-                              new StringBuilder();
-
+                          StringBuilder response = new StringBuilder();
                           String line;
 
                           while ((line = reader.readLine()) != null) {
@@ -572,9 +543,7 @@ jobs:
                               );
                           }
 
-                          latestVersionCode =
-                              json.getInt("versionCode");
-
+                          latestVersionCode = json.getInt("versionCode");
                           latestVersionName =
                               json.optString("versionName", "");
 
@@ -598,9 +567,7 @@ jobs:
 
                               updateSplashProgress(55);
 
-                              if (installedVersion <
-                                  minimumVersionCode) {
-
+                              if (installedVersion < minimumVersionCode) {
                                   showUpdateRequiredDialog();
                               } else {
                                   loadGame();
@@ -627,11 +594,10 @@ jobs:
                               connection.disconnect();
                           }
                       }
-
                   }).start();
               }
 
-              // KÖTELEZŐ FRISSÍTÉSI KÉPERNYŐ
+              // KÖTELEZŐ FRISSÍTÉS
               private void showUpdateRequiredDialog() {
                   if (updateDialogShowing || isFinishing()) {
                       return;
@@ -679,7 +645,6 @@ jobs:
                   builder.setCancelable(false);
 
                   AlertDialog dialog = builder.create();
-
                   dialog.setCanceledOnTouchOutside(false);
 
                   dialog.setOnDismissListener(
@@ -689,7 +654,7 @@ jobs:
                   dialog.show();
               }
 
-              // APK LETÖLTÉSI OLDAL MEGNYITÁSA
+              // LETÖLTÉS
               private void openDownload() {
                   try {
                       Intent intent = new Intent(
@@ -708,7 +673,7 @@ jobs:
                   }
               }
 
-              // KAPCSOLATI HIBA – OFFLINE JÁTÉK LEHETŐSÉGGEL
+              // KAPCSOLATI HIBA – OFFLINE MÓD
               private void showConnectionErrorDialog() {
                   if (isFinishing()) return;
 
@@ -734,107 +699,180 @@ jobs:
                       .show();
               }
 
-              // JÁTÉK BETÖLTÉSE – HELYI ASSETS ÉS OFFLINE JSON
+              // JÁTÉK BETÖLTÉSE
               private void loadGame() {
-                  if (isFinishing()) return;
+                  if (isFinishing() || gameLoading || gameDisplayed) {
+                      return;
+                  }
 
+                  gameLoading = true;
                   updateSplashProgress(65);
 
-                  WebView webView = new WebView(this);
-                  WebSettings settings = webView.getSettings();
+                  try {
+                      webView = new WebView(this);
 
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-                  settings.setAllowFileAccess(true);
-                  settings.setAllowContentAccess(true);
+                      WebSettings settings = webView.getSettings();
+                      settings.setJavaScriptEnabled(true);
+                      settings.setDomStorageEnabled(true);
+                      settings.setAllowFileAccess(true);
+                      settings.setAllowContentAccess(true);
 
-                  WebViewAssetLoader assetLoader =
-                      new WebViewAssetLoader.Builder()
-                          .addPathHandler(
-                              "/assets/",
-                              new WebViewAssetLoader.AssetsPathHandler(this)
-                          )
-                          .build();
+                      WebViewAssetLoader assetLoader =
+                          new WebViewAssetLoader.Builder()
+                              .addPathHandler(
+                                  "/assets/",
+                                  new WebViewAssetLoader.AssetsPathHandler(this)
+                              )
+                              .build();
 
-                  webView.setWebViewClient(new WebViewClientCompat() {
+                      webView.setWebViewClient(
+                          new WebViewClientCompat() {
 
-                      @Override
-                      public WebResourceResponse shouldInterceptRequest(
-                          WebView view,
-                          WebResourceRequest request
-                      ) {
-                          return assetLoader.shouldInterceptRequest(
-                              request.getUrl()
-                          );
-                      }
-
-                      @Override
-                      public void onPageFinished(
-                          WebView view,
-                          String url
-                      ) {
-                          if (gameDisplayed) return;
-
-                          updateSplashProgress(100);
-
-                          gameDisplayed = true;
-
-                          handler.postDelayed(() -> {
-                              if (!isFinishing()) {
-                                  setContentView(webView);
-                                  enableFullscreen();
+                              @Override
+                              public WebResourceResponse shouldInterceptRequest(
+                                  WebView view,
+                                  WebResourceRequest request
+                              ) {
+                                  return assetLoader.shouldInterceptRequest(
+                                      request.getUrl()
+                                  );
                               }
-                          }, 350);
-                      }
-                  });
 
-                  webView.setWebChromeClient(new WebChromeClient() {
+                              @Override
+                              public void onPageFinished(
+                                  WebView view,
+                                  String url
+                              ) {
+                                  super.onPageFinished(view, url);
 
-                      @Override
-                      public void onProgressChanged(
-                          WebView view,
-                          int newProgress
-                      ) {
-                          int loadingProgress =
-                              65 + (newProgress * 35 / 100);
+                                  if (gameDisplayed || isFinishing()) {
+                                      return;
+                                  }
 
-                          updateSplashProgress(loadingProgress);
-                      }
+                                  gameDisplayed = true;
+                                  gameLoading = false;
 
-                      @Override
-                      public boolean onShowFileChooser(
-                          WebView webView,
-                          ValueCallback<Uri[]> callback,
-                          FileChooserParams params
-                      ) {
+                                  updateSplashProgress(100);
 
-                          if (filePathCallback != null) {
-                              filePathCallback.onReceiveValue(null);
+                                  handler.postDelayed(() -> {
+                                      if (!isFinishing() && webView != null) {
+                                          setContentView(webView);
+                                          enableFullscreen();
+                                      }
+                                  }, 350);
+                              }
+
+                              @Override
+                              public void onReceivedError(
+                                  WebView view,
+                                  WebResourceRequest request,
+                                  android.webkit.WebResourceError error
+                              ) {
+                                  super.onReceivedError(
+                                      view, request, error
+                                  );
+
+                                  if (android.os.Build.VERSION.SDK_INT >= 23 &&
+                                      request.isForMainFrame() &&
+                                      !gameDisplayed) {
+
+                                      gameLoading = false;
+
+                                      handler.post(() -> {
+                                          if (!isFinishing()) {
+                                              showWebViewErrorDialog();
+                                          }
+                                      });
+                                  }
+                              }
                           }
+                      );
 
-                          filePathCallback = callback;
+                      webView.setWebChromeClient(
+                          new WebChromeClient() {
 
-                          try {
-                              Intent intent = params.createIntent();
+                              @Override
+                              public void onProgressChanged(
+                                  WebView view,
+                                  int newProgress
+                              ) {
+                                  int loadingProgress =
+                                      65 + (newProgress * 35 / 100);
 
-                              startActivityForResult(
-                                  intent,
-                                  FILE_CHOOSER_REQUEST_CODE
-                              );
+                                  updateSplashProgress(loadingProgress);
+                              }
 
-                          } catch (Exception e) {
-                              filePathCallback.onReceiveValue(null);
-                              filePathCallback = null;
-                              return false;
+                              @Override
+                              public boolean onShowFileChooser(
+                                  WebView webView,
+                                  ValueCallback<Uri[]> callback,
+                                  FileChooserParams params
+                              ) {
+                                  if (filePathCallback != null) {
+                                      filePathCallback.onReceiveValue(null);
+                                  }
+
+                                  filePathCallback = callback;
+
+                                  try {
+                                      Intent intent = params.createIntent();
+
+                                      startActivityForResult(
+                                          intent,
+                                          FILE_CHOOSER_REQUEST_CODE
+                                      );
+
+                                  } catch (Exception e) {
+                                      filePathCallback.onReceiveValue(null);
+                                      filePathCallback = null;
+                                      return false;
+                                  }
+
+                                  return true;
+                              }
                           }
+                      );
 
-                          return true;
-                      }
-                  });
+                      webView.loadUrl(
+                          "https://appassets.androidplatform.net/assets/index.html"
+                      );
 
-                  webView.loadUrl(
-                      "https://appassets.androidplatform.net/assets/index.html"
-                  );
+                  } catch (Exception e) {
+                      gameLoading = false;
+                      showWebViewErrorDialog();
+                  }
+              }
+
+              // WEBVIEW BETÖLTÉSI HIBA
+              private void showWebViewErrorDialog() {
+                  if (isFinishing()) return;
+
+                  new AlertDialog.Builder(this)
+                      .setTitle("Betöltési hiba")
+                      .setMessage(
+                          "A játék betöltése nem sikerült.\n\n" +
+                          "Próbáld újra elindítani az alkalmazást."
+                      )
+                      .setPositiveButton(
+                          "ÚJRA",
+                          (dialog, which) -> {
+                              gameDisplayed = false;
+                              gameLoading = false;
+
+                              if (webView != null) {
+                                  webView.destroy();
+                                  webView = null;
+                              }
+
+                              loadGame();
+                          }
+                      )
+                      .setNegativeButton(
+                          "KILÉPÉS",
+                          (dialog, which) -> finish()
+                      )
+                      .setCancelable(false)
+                      .show();
               }
 
               @Override
