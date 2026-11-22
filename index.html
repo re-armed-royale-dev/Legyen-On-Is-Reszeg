@@ -1033,7 +1033,7 @@
                     <span class="text-sm font-bold text-slate-300">Elhelyezésre váró piros poharak:</span>
                     <span id="unplaced-count" class="bg-red-600 text-white font-black text-sm px-3 py-0.5 rounded-full">10</span>
                 </div>
-                <div class="text-xs text-slate-400">
+                <div id="tray-help-text" class="text-xs text-slate-400">
                     Kattints egy pohárra a kiválasztott válaszra rakáshoz, vagy használd az ALL-IN gombot!
                 </div>
             </div>
@@ -3227,6 +3227,24 @@ async function loadDifficulty(diffKey) {
             document.getElementById('total-glasses-badge').textContent = `${totalGlasses} db`;
             document.getElementById('question-text').textContent = currentQ.question;
 
+            // Ha a kérdéssorban ki van kapcsolva az ALL-IN, a súgó szövegek sem említik.
+            const hintEl = document.getElementById('instruction-hint');
+            if (hintEl) {
+                if (!hintEl.dataset.defaultText) hintEl.dataset.defaultText = hintEl.textContent.trim();
+                const wanted = currentQ.noAllIn
+                    ? 'Válassz ki egy választ (vagy használd a + / − gombokat), és helyezd el az összes poharadat!'
+                    : hintEl.dataset.defaultText;
+                if (hintEl.textContent.trim() !== wanted) hintEl.textContent = wanted;
+            }
+            const trayHelpEl = document.getElementById('tray-help-text');
+            if (trayHelpEl) {
+                if (!trayHelpEl.dataset.defaultText) trayHelpEl.dataset.defaultText = trayHelpEl.textContent.trim();
+                const wantedTray = currentQ.noAllIn
+                    ? 'Kattints egy pohárra a kiválasztott válaszra rakáshoz!'
+                    : trayHelpEl.dataset.defaultText;
+                if (trayHelpEl.textContent.trim() !== wantedTray) trayHelpEl.textContent = wantedTray;
+            }
+
             const questionImageWrap = document.getElementById('question-image-wrap');
             const questionImageEl = document.getElementById('question-image');
             if (questionImageWrap && questionImageEl) {
@@ -3371,9 +3389,9 @@ async function loadDifficulty(diffKey) {
                         </div>
                         ${!isRoundChecked ? `
                         <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                            <button onclick="triggerAllIn(${index})" ${allInDisabledAttr} class="${allInBtnClass}" title="${allInTitle}">
+                            ${currentQ.noAllIn ? '' : `<button onclick="triggerAllIn(${index})" ${allInDisabledAttr} class="${allInBtnClass}" title="${allInTitle}">
                                 ALL IN
-                            </button>
+                            </button>`}
                             <div class="flex items-center gap-1">
                                 <button onclick="removeCupFromAnswer(${index})" ${stepBtnDisabledAttr} class="w-8 h-8 rounded-lg bg-slate-800 ${!isAllInLocked ? 'hover:bg-red-600' : ''} text-white font-black flex items-center justify-center border border-slate-600 ${stepBtnDisabledClass}">−</button>
                                 <span class="w-6 text-center font-black text-yellow-400 text-sm">${answerBets[index]}</span>
@@ -3395,6 +3413,7 @@ async function loadDifficulty(diffKey) {
         }
 
         function triggerAllIn(index) {
+            if (questions[currentQuestionIndex] && questions[currentQuestionIndex].noAllIn) return;
             if (isRoundChecked || isAllInLocked || displayedAnswers[index].hidden) return;
 
             answerBets = [0, 0, 0, 0];
@@ -3784,6 +3803,7 @@ async function loadDifficulty(diffKey) {
                 const container = document.getElementById('questions-container');
                 const nameInput = document.getElementById('question-set-name');
                 container.innerHTML = '';
+                editorNoAllIn = false;
                 if (editName) {
                     const saved = lsGetJSON('SavedQuestions', {});
                     const set = saved[editName];
@@ -3791,6 +3811,7 @@ async function loadDifficulty(diffKey) {
                         nameInput.value = editName;
                         hydrateSetMedia(editName, set).then(fullSet => {
                             container.innerHTML = '';
+                            editorNoAllIn = fullSet.some(q => q && q.noAllIn);
                             fullSet.forEach(q => addQuestionItem(q));
                         });
                     }
@@ -3824,6 +3845,9 @@ async function loadDifficulty(diffKey) {
                     <button type="button" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openAudioUploadModal(this)" class="q-audio-btn bg-violet-600 hover:bg-violet-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">🔊 Hang hozzáadása</button>
                     <span class="q-audio-status hidden text-xs text-emerald-400 font-semibold">✅ Hang csatolva</span>
                 </div>
+                <div class="flex items-center gap-2 mb-2.5">
+                    <button type="button" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleEditorNoAllIn()" class="q-allin-btn bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">🚫 ALL-IN kikapcsolása</button>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
                     <input type="text" class="q-ans-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 1" value="${prefill ? prefill.answers[0].replace(/"/g, '&quot;') : ''}">
                     <input type="text" class="q-ans-2 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-white" placeholder="Válasz 2" value="${prefill ? prefill.answers[1].replace(/"/g, '&quot;') : ''}">
@@ -3850,6 +3874,7 @@ async function loadDifficulty(diffKey) {
                 div.dataset.audio = prefill.audio;
                 updateQuestionAudioUI(div);
             }
+            updateEditorAllInUI();
         }
 
         // ===== Képek a kérdésekhez =====
@@ -3978,6 +4003,27 @@ async function loadDifficulty(diffKey) {
                 console.error('Képfeldolgozási hiba:', e);
                 showFeedback("Képhiba", "A képet nem sikerült feldolgozni. Próbálj meg egy másik képet!", "⚠️");
             }
+        }
+
+        // ===== ALL-IN kikapcsolása a kérdéssorban =====
+        // A beállítás a teljes kérdéssorra vonatkozik: bármelyik kérdés gombjával kapcsolható, mindegyik gomb ugyanazt mutatja.
+        let editorNoAllIn = false;
+
+        function updateEditorAllInUI() {
+            document.querySelectorAll('#questions-container .q-allin-btn').forEach(btn => {
+                if (editorNoAllIn) {
+                    btn.textContent = '✅ ALL-IN ki van kapcsolva';
+                    btn.className = 'q-allin-btn bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer';
+                } else {
+                    btn.textContent = '🚫 ALL-IN kikapcsolása';
+                    btn.className = 'q-allin-btn bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer';
+                }
+            });
+        }
+
+        function toggleEditorNoAllIn() {
+            editorNoAllIn = !editorNoAllIn;
+            updateEditorAllInUI();
         }
 
         // ===== Hangok a kérdésekhez =====
@@ -4230,6 +4276,7 @@ async function loadDifficulty(diffKey) {
                 const questionObj = { question: qText, answers: [a1, a2, a3, a4], correct: correctIdx };
                 if (items[i].dataset.image) questionObj.image = items[i].dataset.image;
                 if (items[i].dataset.audio) questionObj.audio = items[i].dataset.audio;
+                if (editorNoAllIn) questionObj.noAllIn = true;
                 parsedQuestions.push(questionObj);
             }
 
@@ -4308,16 +4355,38 @@ async function loadDifficulty(diffKey) {
 
             try {
                 const set = (await hydrateSetMedia(name, rawSet)).map(({ media, ...rest }) => rest);
-                const response = await fetch(`${QUIZ_API_BASE}/api/share`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ questions: set })
-                });
-                const data = await response.json().catch(() => ({}));
-                
+                const hasMedia = set.some(q => q.audio || q.image);
+
+                const postShare = async (questionsToShare) => {
+                    const response = await fetch(`${QUIZ_API_BASE}/api/share`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ questions: questionsToShare })
+                    });
+                    const data = await response.json().catch(() => ({}));
+                    return { ok: !!(response.ok && data.success && data.code), data };
+                };
+
+                // Először a hangokkal és képekkel együtt osztjuk meg.
+                let result = null;
+                try {
+                    result = await postShare(set);
+                } catch (networkError) {
+                    if (!hasMedia) throw networkError;
+                    console.warn('A médiás megosztás nem ment át, újrapróbáljuk média nélkül:', networkError);
+                }
+
+                // Ha a szerver a méret miatt elutasította, a kérdéssor média nélkül is megosztható.
+                let sharedWithoutMedia = false;
+                if ((!result || !result.ok) && hasMedia) {
+                    result = await postShare(set.map(({ audio, image, ...rest }) => rest));
+                    sharedWithoutMedia = result.ok;
+                }
+                const data = result.data;
+
                 stopShareDotsAnimation();
                 toggleModal('share-loading-modal', false);
 
-                if (!response.ok || !data.success || !data.code) {
+                if (!result.ok) {
                     throw new Error(data.error || 'A szerver nem adott megosztási kódot.');
                 }
                 const code = String(data.code);
@@ -4325,7 +4394,7 @@ async function loadDifficulty(diffKey) {
                 setCodes[name] = code;
                 lsSetJSON('SavedSetCodes', setCodes);
 
-                showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.`, "📤");
+                showFeedback("Online megosztási kód", `A(z) <strong>"${name}"</strong> kérdéssor más telefonról is betölthető ezzel a 6 jegyű kóddal:<br><br><code class="text-2xl text-yellow-400 font-mono font-black">${code}</code><br><br>A kódot küldd el a másik játékosnak. Ha később módosítod a kérdéssort, nyomd meg újra a Megosztás gombot, és küldd el az új kódot.${sharedWithoutMedia ? '<br><br><span class="text-xs text-yellow-400">A hangok és képek a szerver méretkorlátja miatt nem kerültek a megosztásba.</span>' : ''}`, "📤");
             } catch (error) {
                 console.error('Megosztási hiba:', error);
                 stopShareDotsAnimation();
