@@ -585,6 +585,259 @@
 
         /* 10) Gyorsabb érintés */
         button, .answer-card { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    
+        /* =====================================================================
+           ÚJ UI v2 (TESZT) – "Frosted Aurora"
+           Teljesen újragondolt felületek: valódi üveg-hatás (áttetsző rétegek, fényes felső él,
+           lágy színes ragyogás), kapszula gombok, finoman úszó aurora háttér.
+           Az elmosás (backdrop-filter) helyett olcsó, GPU-barát megoldásokat használ.
+           ===================================================================== */
+        :root {
+            --g-border: rgba(255, 255, 255, 0.16);
+            --g-border-soft: rgba(255, 255, 255, 0.10);
+            --g-hl: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+            --g-cyan: #22d3ee;
+            --g-violet: #a78bfa;
+            --g-pink: #f472b6;
+        }
+
+        /* ---------- Háttér: lassan úszó aurora (csak transzformáció, így olcsó) ---------- */
+        html { background: #06051a; }
+        body {
+            background: transparent;
+            background-image: none;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: -25%;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(40% 35% at 20% 25%, rgba(34, 211, 238, 0.30), transparent 70%),
+                radial-gradient(38% 40% at 80% 20%, rgba(167, 139, 250, 0.34), transparent 70%),
+                radial-gradient(45% 40% at 55% 85%, rgba(244, 114, 182, 0.26), transparent 70%);
+            will-change: transform;
+            animation: auroraDrift 40s ease-in-out infinite alternate;
+        }
+        @keyframes auroraDrift {
+            from { transform: translate3d(-3%, -2%, 0) rotate(0deg) scale(1); }
+            to   { transform: translate3d(3%, 3%, 0) rotate(6deg) scale(1.08); }
+        }
+        @media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+
+        /* ---------- Görgetősáv és kijelölés ---------- */
+        * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.28) transparent; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.24); border-radius: 9999px; }
+        ::selection { background: rgba(34, 211, 238, 0.35); }
+
+        /* ---------- 1) Üveg felületek a korábbi tömör sötét dobozok helyett ---------- */
+        body [class*="bg-slate-950"]:not(.fixed),
+        body [class*="bg-slate-900"]:not(.fixed) {
+            background-color: rgba(16, 13, 52, 0.55);
+            background-image: linear-gradient(155deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 50%);
+            border-color: var(--g-border-soft);
+        }
+        body [class*="bg-slate-800"]:not(.fixed),
+        body [class*="bg-slate-700"]:not(.fixed) {
+            background-color: rgba(255, 255, 255, 0.08);
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0));
+            border-color: var(--g-border-soft);
+        }
+
+        /* ---------- 2) Panelek és ablakok: nagy, üvegszerű lapok ---------- */
+        body .fixed.inset-0 > div:not(#_),
+        body #start-menu-overlay > div:not(#_),
+        body #settings-menu:not(#_) {
+            background: linear-gradient(160deg, rgba(66, 58, 155, 0.55) 0%, rgba(18, 15, 56, 0.93) 62%);
+            border: 1px solid var(--g-border);
+            border-radius: 28px;
+            box-shadow: var(--g-hl), 0 24px 60px rgba(3, 2, 16, 0.6);
+        }
+
+        /* ---------- 3) Gombok: kapszula forma, fényes felső él, lágy ragyogás ---------- */
+        body button[class*="bg-"]:not(#_) {
+            border-radius: 9999px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 6px 14px rgba(3, 2, 16, 0.32);
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        body button[class*="bg-"]:not([class*="bg-gradient"]):not(#_) {
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 58%);
+        }
+        body button[class*="bg-"]:not(:disabled):not(#_):hover { filter: brightness(1.12); transform: translateY(-1px); }
+        body button[class*="bg-"]:not(:disabled):not(#_):active { filter: brightness(0.96); transform: scale(0.97); }
+        body button:disabled:not(#_) { opacity: 0.55; }
+
+        /* színes ragyogás a fő gomboknak */
+        body button[class*="bg-yellow-500"]:not(#_),
+        body button[class*="bg-yellow-400"]:not(#_) {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 8px 20px rgba(6, 182, 212, 0.30);
+        }
+        body button[class*="bg-emerald-"]:not(#_) {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 8px 20px rgba(16, 185, 129, 0.28);
+        }
+        body button[class*="bg-red-6"]:not(#_),
+        body button[class*="bg-red-7"]:not(#_) {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 8px 20px rgba(244, 63, 94, 0.28);
+        }
+        body button[class*="bg-amber-"]:not(#_),
+        body button[class*="bg-violet-"]:not(#_),
+        body button[class*="bg-purple-"]:not(#_) {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 8px 20px rgba(139, 92, 246, 0.28);
+        }
+        body .all-in-btn:not(#_) {
+            border-radius: 9999px;
+            background: linear-gradient(180deg, #fb7185, #e11d48);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 10px rgba(244, 63, 94, 0.5);
+        }
+        /* a pohár-tálca gombjai nem kapnak gombkeretet */
+        body #cup-tray button:not(#_) {
+            box-shadow: none;
+            background-image: none;
+            border-radius: 14px;
+        }
+
+        /* ---------- 4) Beviteli mezők: süllyesztett üveg ---------- */
+        body input[type="text"]:not(#_),
+        body input[type="number"]:not(#_),
+        body textarea:not(#_),
+        body select:not(#_) {
+            background: rgba(5, 4, 24, 0.5);
+            border: 1px solid var(--g-border);
+            border-radius: 16px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+        }
+        body input[type="text"]:not(#_):focus,
+        body input[type="number"]:not(#_):focus,
+        body textarea:not(#_):focus,
+        body select:not(#_):focus {
+            outline: none;
+            border-color: rgba(34, 211, 238, 0.85);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(34, 211, 238, 0.25);
+        }
+
+        /* ---------- 5) Fejléc: lebegő üveg-kapszula ---------- */
+        body > header.w-full:not(#_) {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
+            border: 1px solid var(--g-border);
+            box-shadow: var(--g-hl), 0 10px 30px rgba(3, 2, 16, 0.4);
+        }
+        body > header span.bg-red-600 { box-shadow: 0 0 10px rgba(244, 63, 94, 0.85); }
+
+        /* ---------- 6) Főmenü ---------- */
+        #start-screen > .caret-fix > div:first-child {
+            background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.45), rgba(244, 114, 182, 0.28) 38%, rgba(124, 58, 237, 0.22) 72%);
+            border: 1px solid rgba(255, 255, 255, 0.30);
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.35), 0 0 30px rgba(244, 114, 182, 0.30);
+        }
+        body #start-bottom-bar > button:not(#_) {
+            isolation: isolate;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05)), rgba(16, 13, 52, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 32px;
+            color: #ffffff;
+            box-shadow: var(--g-hl), 0 14px 34px rgba(3, 2, 16, 0.45);
+        }
+        body #start-bottom-bar > button:not(#_)::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(95% 75% at 8% 0%, var(--tile-accent, rgba(34, 211, 238, 0.45)), transparent 62%);
+            opacity: 0.85;
+        }
+        #single-player-btn { --tile-accent: rgba(34, 211, 238, 0.50); }
+        #rival-menu-btn { --tile-accent: rgba(244, 114, 182, 0.48); }
+        #code-entry-btn { --tile-accent: rgba(167, 139, 250, 0.50); }
+        body #start-bottom-bar > button:not(#_):hover { transform: translateY(-4px); filter: brightness(1.08); }
+        @media (max-width: 767px) {
+            body #start-bottom-bar:not(#_) {
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05)), rgba(14, 12, 43, 0.72);
+                border: 1px solid rgba(255, 255, 255, 0.20);
+                border-radius: 30px;
+                box-shadow: var(--g-hl), 0 12px 34px rgba(3, 2, 16, 0.55);
+            }
+            body #start-bottom-bar > button:not(#_) {
+                border-radius: 22px;
+                background: rgba(255, 255, 255, 0.07);
+                border-color: rgba(255, 255, 255, 0.12);
+                box-shadow: none;
+            }
+            body #start-bottom-bar > button:not(#_)::before { opacity: 0.6; }
+            body #start-bottom-bar > button:not(#_):hover { transform: none; }
+        }
+
+        /* ---------- 7) Játék ---------- */
+        body #game-screen > div:nth-child(2):not(#_) {
+            border-radius: 26px;
+            box-shadow: var(--g-hl), 0 10px 28px rgba(3, 2, 16, 0.35);
+        }
+        body #game-screen > div:last-child:not(#_) {
+            border-radius: 28px;
+            box-shadow: var(--g-hl), 0 10px 28px rgba(3, 2, 16, 0.35);
+        }
+        body .gold-glow:not(.caret-fix):not(#_) {
+            border: 1.5px solid transparent;
+            border-radius: 30px;
+            background:
+                linear-gradient(160deg, rgba(40, 35, 110, 0.86), rgba(12, 10, 40, 0.93)) padding-box,
+                linear-gradient(135deg, rgba(103, 232, 249, 0.95), rgba(196, 181, 253, 0.9), rgba(249, 168, 212, 0.95)) border-box;
+            box-shadow: 0 16px 40px rgba(3, 2, 16, 0.5), 0 0 36px rgba(167, 139, 250, 0.14);
+        }
+        body #question-text { letter-spacing: -0.01em; }
+
+        /* válaszkártyák: üveg csempék */
+        body .answer-card:not(#_) {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04) 55%), rgba(18, 15, 56, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 26px;
+            box-shadow: var(--g-hl), 0 8px 22px rgba(3, 2, 16, 0.38);
+            transition: transform 0.16s ease, border-color 0.16s ease;
+        }
+        body .answer-card:not(#_):hover:not(.disabled-card) {
+            border-color: rgba(103, 232, 249, 0.7);
+            transform: translateY(-2px);
+        }
+        body .answer-card.selected-card:not(#_) {
+            border-color: rgba(34, 211, 238, 0.95);
+            background: linear-gradient(160deg, rgba(34, 211, 238, 0.28), rgba(124, 58, 237, 0.14) 70%), rgba(18, 15, 56, 0.6);
+            box-shadow: var(--g-hl), 0 0 0 2px rgba(34, 211, 238, 0.4), 0 0 22px rgba(34, 211, 238, 0.25);
+        }
+        body .answer-card.correct-card:not(#_) {
+            border-color: rgba(52, 211, 153, 0.95) !important;
+            background: linear-gradient(160deg, rgba(16, 185, 129, 0.34), rgba(5, 40, 30, 0.7) 75%) !important;
+            box-shadow: var(--g-hl), 0 0 0 2px rgba(52, 211, 153, 0.45), 0 0 22px rgba(52, 211, 153, 0.28) !important;
+        }
+        body .answer-card.wrong-card:not(#_) {
+            border-color: rgba(251, 113, 133, 0.95) !important;
+            background: linear-gradient(160deg, rgba(244, 63, 94, 0.30), rgba(50, 8, 20, 0.7) 75%) !important;
+            box-shadow: var(--g-hl) !important;
+        }
+        body .answer-card > div:first-child > div:first-child > span:first-child:not(#_) {
+            border-radius: 9999px;
+            background: linear-gradient(145deg, rgba(34, 211, 238, 0.38), rgba(167, 139, 250, 0.32));
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #ffffff;
+            box-shadow: var(--g-hl);
+        }
+        body .answer-card > div:last-child:not(#_) {
+            background: rgba(4, 3, 22, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+        body #cup-tray:not(#_) {
+            background: rgba(4, 3, 22, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+        body #rival-p1-card:not(#_), body #rival-p2-card:not(#_) { border-radius: 20px; }
     </style>
     <link rel="apple-touch-icon" href="./icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
