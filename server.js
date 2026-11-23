@@ -57,10 +57,10 @@ registerLicenseRoutes(app, pool);
 registerIosActivationRoutes(app, pool);
 
 // ANDROID ALKALMAZÁS FRISSÍTÉSI BEÁLLÍTÁSAI
-const APP_VERSION_CODE = Number(process.env.APP_VERSION_CODE || 2);
-const APP_VERSION_NAME = process.env.APP_VERSION_NAME || "1.1";
+const APP_VERSION_CODE = Number(process.env.APP_VERSION_CODE || 500);
+const APP_VERSION_NAME = process.env.APP_VERSION_NAME || "5.0";
 const MIN_SUPPORTED_VERSION_CODE = Number(
-  process.env.MIN_SUPPORTED_VERSION_CODE || 2
+  process.env.MIN_SUPPORTED_VERSION_CODE || 500
 );
 const APK_DOWNLOAD_URL = process.env.APK_DOWNLOAD_URL || "";
 
