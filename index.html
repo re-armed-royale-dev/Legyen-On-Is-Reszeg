@@ -313,8 +313,8 @@
             animation: auroraFlow 10s linear infinite;
         }
         @keyframes auroraFlow {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
+            0% { background-position: 200% center; }
+            100% { background-position: 0% center; }
         }
 
         /* Átmenetes keretű "kártyák" (kérdés doboz) */
@@ -838,6 +838,43 @@
             box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
         }
         body #rival-p1-card:not(#_), body #rival-p2-card:not(#_) { border-radius: 20px; }
+    
+        /* =====================================================================
+           GRAFIKA (TESZT) – minőség (Low / Medium / Epic / Ultra), FPS limit, FPS kijelző
+           A mozgó háttér-fénygömbök és a cím színáramlása JS-ből, a választott FPS limittel futnak.
+           ===================================================================== */
+        body::before { display: none !important; }   /* a régi, CSS-es aurora helyett a JS-vezérelt gömbök */
+        #bg-orbs { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .bg-orb { position: absolute; left: 0; top: 0; border-radius: 50%; will-change: transform; }
+
+        #fps-counter {
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 6px);
+            right: 8px;
+            z-index: 9999;
+            padding: 3px 9px;
+            border-radius: 9999px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font: 700 12px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #4ade80;
+            pointer-events: none;
+        }
+        #fps-counter.hidden { display: none; }
+
+        /* LOW: nincs folyamatos animáció és átmenet */
+        html[data-gfx="low"] *, html[data-gfx="low"] *::before, html[data-gfx="low"] *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+        html[data-gfx="low"] .all-in-btn::after, html[data-gfx="medium"] .all-in-btn::after { opacity: 0.7; }
+        /* MEDIUM: a mozgó háttér marad, de a folyamatosan pulzáló effektek nem */
+        html[data-gfx="medium"] .all-in-btn::after,
+        html[data-gfx="medium"] .animate-pulse,
+        html[data-gfx="medium"] .cup-animate { animation: none !important; }
+        /* ULTRA: extra ragyogás */
+        html[data-gfx="ultra"] .rgb-title { filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.55)); }
+        html[data-gfx="ultra"] .all-in-btn::after { animation-duration: 1s; }
     </style>
     <link rel="apple-touch-icon" href="./icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -901,18 +938,12 @@
             <input type="range" id="sfx-volume" min="0" max="1" step="0.05" value="0.5" oninput="updateSfxVolume(this.value)" class="w-full accent-yellow-400 cursor-pointer">
         </div>
 
-        <hr class="border-slate-800 my-2">
-        
-        <label class="block text-xs text-slate-300 mb-1">Háttérszín testreszabása:</label>
-        <div class="flex gap-2 mb-3">
-            <input type="color" id="palette-color-input" value="#0b0f19" class="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-slate-600">
-            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setPaletteColor()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg cursor-pointer">
-                Alkalmaz
+        <div class="mb-3">
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openGraphicsModal()" class="w-full bg-amber-600/90 hover:bg-amber-500 text-white font-bold text-xs py-2 px-3 rounded-xl border border-amber-400/50 flex items-center justify-center gap-2 cursor-pointer">
+                🎮 Grafika
             </button>
         </div>
-        <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); resetBackgroundColor()" class="w-full mb-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-2 rounded-lg border border-slate-700 cursor-pointer">
-            Alapértelmezett háttér
-        </button>
+
         <hr class="border-slate-800 my-2">
         <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); exitToMenu()" class="w-full bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg cursor-pointer">
             🚪 Kilépés a főmenübe
@@ -976,6 +1007,51 @@
         </div>
     </div>
 
+    <!-- GRAFIKA ABLAK -->
+    <div id="graphics-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50" onclick="closeGraphicsModal()">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-md w-full p-6 shadow-2xl relative" onclick="event.stopPropagation()">
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeGraphicsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl font-bold cursor-pointer">&times;</button>
+
+            <div class="text-3xl mb-2">🎮</div>
+            <h3 class="text-xl font-black text-amber-400 mb-4">Grafika</h3>
+
+            <div class="mb-4">
+                <div class="text-xs font-bold text-slate-200 mb-2">Grafikai minőség</div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button id="gfx-q-low" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setGraphicsQuality('low')" class="text-xs py-2.5 rounded-xl cursor-pointer">Low</button>
+                    <button id="gfx-q-medium" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setGraphicsQuality('medium')" class="text-xs py-2.5 rounded-xl cursor-pointer">Medium</button>
+                    <button id="gfx-q-epic" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setGraphicsQuality('epic')" class="text-xs py-2.5 rounded-xl cursor-pointer">Epic</button>
+                    <button id="gfx-q-ultra" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setGraphicsQuality('ultra')" class="text-xs py-2.5 rounded-xl cursor-pointer">Ultra</button>
+                </div>
+                <p id="gfx-q-desc" class="text-[11px] text-slate-400 mt-2 leading-snug"></p>
+            </div>
+
+            <div class="mb-4">
+                <div class="text-xs font-bold text-slate-200 mb-2">FPS limit</div>
+                <div class="grid grid-cols-6 gap-1.5">
+                    <button id="gfx-fps-20" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setFpsLimit(20)" class="text-xs py-2.5 rounded-xl cursor-pointer">20</button>
+                    <button id="gfx-fps-30" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setFpsLimit(30)" class="text-xs py-2.5 rounded-xl cursor-pointer">30</button>
+                    <button id="gfx-fps-60" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setFpsLimit(60)" class="text-xs py-2.5 rounded-xl cursor-pointer">60</button>
+                    <button id="gfx-fps-120" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setFpsLimit(120)" class="text-xs py-2.5 rounded-xl cursor-pointer">120</button>
+                    <button id="gfx-fps-140" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setFpsLimit(140)" class="text-xs py-2.5 rounded-xl cursor-pointer">140</button>
+                    <button id="gfx-fps-240" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); setFpsLimit(240)" class="text-xs py-2.5 rounded-xl cursor-pointer">240</button>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2 leading-snug">A tényleges FPS-t a kijelződ frissítési sebessége is korlátozza (pl. 60 Hz-es kijelzőn max. 60).</p>
+            </div>
+
+            <div class="mb-5 flex items-center justify-between bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+                <span class="text-xs font-bold text-slate-200">📈 Show FPS</span>
+                <button id="gfx-showfps-btn" onclick="toggleShowFps()" class="text-xs px-2.5 py-1 rounded-lg font-bold bg-red-600 text-white cursor-pointer">KI</button>
+            </div>
+
+            <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); closeGraphicsModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-3 rounded-xl cursor-pointer">
+                Bezárás
+            </button>
+        </div>
+    </div>
+
+    <div id="fps-counter" class="hidden">FPS: --</div>
+
     <!-- ÚJDONSÁGOK MODÁL -->
     <div id="updates-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onclick="toggleModal('updates-modal', false)">
         <div class="bg-slate-900 border-2 border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
@@ -991,9 +1067,9 @@
 
             <ul class="space-y-3 text-sm sm:text-base text-slate-300">
                 <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Activate Key funkció:</strong> iOS eszközökön mostantól kulccsal is teljes körűen feloldhatók a korlátozott funkciók. De vigyázz csak 3 probálkozás engedett! A 3. próbálkozás után a szerver 30 napra letilt igy nem tudod használni az Activate Key Funkciót!</span></li>
-                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Új Újdonságok menüpont:</strong> Mostantól közvetlenül a fejlécből elérheted az aktuális verzió változásait.</span></li>
-                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Hotfix - iOS letiltott gombok:</strong> A letiltott rivális gomb mostantól finoman szürke stílust kap iOS eszközökön.</span></li>
-                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Teljesítmény javítások:</strong> Stabilabb hangkezelés és reszponzívabb UI elemek. Legújabb Theme: Aurora Glass!</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Új Grafikai beállítások:</strong> Mostantól elérhető az új grafikai beállítások ahol a grafikai minőséget és az fps-t is szabadon álithatod!</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Hotfix - Hibajavítás:</strong> Egy hiba miatt eltávolitottuk a hátér szin beálitása funkciót helyetadva az újdonságoknak illetve a kérdésor készítése menü pont alatt hamarosan elérhetővé válik a hang hozáadása a kérdéssorhoz!.</span></li>
+                <li class="flex gap-2.5"><span class="text-yellow-400 font-bold">•</span> <span><strong>Teljesítmény javítások:</strong> Stabilabb és kifinomult mozgás minden animációhoz! Legújabb Theme: Aurora Glass!</span></li>
             </ul>
             <button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); toggleModal('updates-modal', false)" class="mt-6 w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-3 rounded-xl cursor-pointer">
                 Rendben, veszem a lapot!
@@ -4076,6 +4152,14 @@ async function loadDifficulty(diffKey) {
             });
         }
 
+        // Törlés után a megmaradt kérdések számozása újraszámolódik (pl. 18, 19, 20 -> a 19. törlésekor 18, 19).
+        function renumberQuestionItems() {
+            document.querySelectorAll('#questions-container .question-item').forEach((item, i) => {
+                const label = item.querySelector('span.uppercase');
+                if (label) label.textContent = `Kérdés #${i + 1}`;
+            });
+        }
+
         function addQuestionItem(prefill = null) {
             const container = document.getElementById('questions-container');
             const count = container.getElementsByClassName('question-item').length;
@@ -4086,7 +4170,7 @@ async function loadDifficulty(diffKey) {
             div.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-black uppercase text-yellow-400">Kérdés #${count + 1}</span>
-                    ${count > 0 ? `<button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); this.closest('.question-item').remove()" class="text-xs text-red-400 font-bold cursor-pointer">Törlés</button>` : ''}
+                    ${count > 0 ? `<button onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); this.closest('.question-item').remove(); renumberQuestionItems()" class="text-xs text-red-400 font-bold cursor-pointer">Törlés</button>` : ''}
                 </div>
                 <input type="text" class="q-text w-full bg-slate-900 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white mb-2.5" placeholder="Kérdés" value="${prefill ? prefill.question.replace(/"/g, '&quot;') : ''}">
                 <div class="flex items-center gap-2 mb-2.5">
@@ -4095,7 +4179,7 @@ async function loadDifficulty(diffKey) {
                     <img class="q-image-thumb hidden h-9 w-16 object-cover rounded-md border border-slate-600" alt="">
                 </div>
                 <div class="flex items-center gap-2 mb-2.5">
-                    <button type="button" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); openAudioUploadModal(this)" class="q-audio-btn bg-violet-600 hover:bg-violet-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">🔊 Hang hozzáadása</button>
+                    <button type="button" onclick="playTone(587.33, 'sine', 0.14, 0.12, 'sfx'); showFeedback('Hamarosan!', 'A hang hozzáadása funkció hamarosan érkezik!', '🔊')" class="q-audio-btn bg-violet-600 hover:bg-violet-500 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">🔊 Hang hozzáadása</button>
                     <span class="q-audio-status hidden text-xs text-emerald-400 font-semibold">✅ Hang csatolva</span>
                 </div>
                 <div class="flex items-center gap-2 mb-2.5">
@@ -4833,16 +4917,218 @@ async function loadDifficulty(diffKey) {
             if (p1Input) p1Input.addEventListener('input', saveRivalNames);
             if (p2Input) p2Input.addEventListener('input', saveRivalNames);
 
-            const savedColor = localStorage.getItem("backgroundColor");
-
-            if (savedColor) {
-                document.body.style.backgroundImage = "none";
-                document.body.style.backgroundColor = savedColor;
-
-                document.getElementById("palette-color-input").value =
-                    savedColor;
-            }
+            // A háttérszín testreszabása kikerült a beállításokból: a korábban mentett szín is törlődik.
+            localStorage.removeItem("backgroundColor");
         });
+    </script>
+
+    <script>
+    // ===== GRAFIKA (TESZT) =====
+    // A mozgó háttér-fénygömbök és a cím színáramlása egy saját, FPS-korlátos ciklusból frissülnek,
+    // ezért a választott FPS limit (20–240) és a minőség (Low/Medium/Epic/Ultra) ténylegesen számít.
+    (function () {
+        'use strict';
+        const QUALITIES = {
+            low:    { speed: 0,    titleFlow: false, orbs: 3, desc: 'Nincs folyamatos animáció és mozgó háttér: a leggyorsabb, legkíméletesebb mód.' },
+            medium: { speed: 0.55, titleFlow: true,  orbs: 3, desc: 'Lassan mozgó háttér és színáramló cím, de a pulzáló effektek nélkül.' },
+            epic:   { speed: 1,    titleFlow: true,  orbs: 3, desc: 'Minden animáció és effekt bekapcsolva (alapértelmezett).' },
+            ultra:  { speed: 1.5,  titleFlow: true,  orbs: 5, desc: 'Epic + több, gyorsabb fénygömb és ragyogó cím.' }
+        };
+        const FPS_OPTIONS = [20, 30, 60, 120, 140, 240];
+        const ORB_DEFS = [
+            { c: '34, 211, 238',  a: 0.40, size: 0.80, bx: 0.18, by: 0.22, ax: 0.30, ay: 0.22, fx: 0.36, fy: 0.29, ph: 0.0 },
+            { c: '167, 139, 250', a: 0.44, size: 0.76, bx: 0.82, by: 0.20, ax: 0.28, ay: 0.26, fx: 0.30, fy: 0.38, ph: 2.1 },
+            { c: '244, 114, 182', a: 0.30, size: 0.68, bx: 0.55, by: 0.92, ax: 0.26, ay: 0.12, fx: 0.22, fy: 0.27, ph: 4.2 },
+            { c: '103, 232, 249', a: 0.30, size: 0.52, bx: 0.75, by: 0.60, ax: 0.30, ay: 0.22, fx: 0.45, fy: 0.33, ph: 1.0 },
+            { c: '196, 181, 253', a: 0.32, size: 0.50, bx: 0.25, by: 0.70, ax: 0.28, ay: 0.24, fx: 0.40, fy: 0.50, ph: 3.3 }
+        ];
+
+        function load(key, fallback) {
+            try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; }
+        }
+        function save(key, value) {
+            try { localStorage.setItem(key, String(value)); } catch (e) {}
+        }
+
+        const state = {
+            quality: QUALITIES[load('gfxQuality', 'epic')] ? load('gfxQuality', 'epic') : 'epic',
+            fps: FPS_OPTIONS.includes(Number(load('gfxFpsLimit', 60))) ? Number(load('gfxFpsLimit', 60)) : 60,
+            showFps: load('gfxShowFps', 'false') === 'true'
+        };
+
+        let orbs = [];
+        let W = window.innerWidth, H = window.innerHeight;
+        let raf = null;
+        let lastFrame = 0;
+        let lastUpdate = 0;
+        let animTime = 0;      // gömbök ideje (a sebességgel szorozva)
+        let titleTime = 0;     // cím színáramlás ideje
+        let frames = 0;
+        let fpsStart = 0;
+        let titleEl = null;
+
+        function buildOrbs() {
+            const container = document.createElement('div');
+            container.id = 'bg-orbs';
+            ORB_DEFS.forEach(def => {
+                const el = document.createElement('div');
+                el.className = 'bg-orb';
+                el.style.background = `radial-gradient(circle at 50% 50%, rgba(${def.c}, ${def.a}) 0%, rgba(${def.c}, ${(def.a * 0.45).toFixed(3)}) 35%, rgba(${def.c}, 0) 68%)`;
+                container.appendChild(el);
+                orbs.push({ el, def, px: 0 });
+            });
+            document.body.insertBefore(container, document.body.firstChild);
+            resize();
+        }
+
+        function resize() {
+            W = window.innerWidth;
+            H = window.innerHeight;
+            const big = Math.max(W, H);
+            orbs.forEach(o => {
+                o.px = Math.round(o.def.size * big);
+                o.el.style.width = o.px + 'px';
+                o.el.style.height = o.px + 'px';
+            });
+            positionOrbs();
+        }
+
+        function positionOrbs() {
+            orbs.forEach(o => {
+                const d = o.def;
+                const x = (d.bx + d.ax * Math.sin(animTime * d.fx + d.ph)) * W - o.px / 2;
+                const y = (d.by + d.ay * Math.cos(animTime * d.fy + d.ph)) * H - o.px / 2;
+                o.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+            });
+        }
+
+        function positionTitle() {
+            if (!titleEl) return;
+            // 200% -> 0%: a színek balról jobbra (-->) áramlanak
+            const pos = QUALITIES[state.quality].titleFlow ? 200 - ((titleTime / 10) % 1) * 200 : 30;
+            titleEl.style.backgroundPosition = pos.toFixed(1) + '% center';
+        }
+
+        function frame(now) {
+            raf = requestAnimationFrame(frame);
+            const interval = 1000 / state.fps;
+            const elapsed = now - lastFrame;
+            if (elapsed < interval - 1) return;       // az FPS limit: ennél gyakrabban nem frissítünk
+            lastFrame = now - (elapsed % interval);
+
+            const dt = Math.min((now - lastUpdate) / 1000, 0.25);
+            lastUpdate = now;
+            const q = QUALITIES[state.quality];
+            if (q.speed > 0) {
+                animTime += dt * q.speed;
+                positionOrbs();
+            }
+            if (q.titleFlow) {
+                titleTime += dt;
+                positionTitle();
+            }
+
+            frames++;
+            if (now - fpsStart >= 500) {
+                const fps = Math.round(frames * 1000 / (now - fpsStart));
+                frames = 0;
+                fpsStart = now;
+                const el = document.getElementById('fps-counter');
+                if (el && state.showFps) {
+                    el.textContent = 'FPS: ' + fps;
+                    el.style.color = fps >= 50 ? '#4ade80' : (fps >= 30 ? '#fbbf24' : '#f87171');
+                }
+            }
+        }
+
+        function startLoop() {
+            const q = QUALITIES[state.quality];
+            const need = state.showFps || q.speed > 0 || q.titleFlow;
+            if (!need) { stopLoop(); return; }
+            if (raf === null) {
+                const now = performance.now();
+                lastFrame = now; lastUpdate = now; fpsStart = now; frames = 0;
+                raf = requestAnimationFrame(frame);
+            }
+        }
+        function stopLoop() {
+            if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+        }
+
+        function styleChoice(btn, active) {
+            if (!btn) return;
+            btn.className = (active
+                ? 'ring-2 ring-yellow-300 bg-yellow-500 text-slate-950 font-black'
+                : 'bg-slate-800 text-slate-200 font-bold') + ' text-xs py-2.5 rounded-xl cursor-pointer';
+        }
+
+        function refreshUI() {
+            Object.keys(QUALITIES).forEach(k => styleChoice(document.getElementById('gfx-q-' + k), k === state.quality));
+            FPS_OPTIONS.forEach(f => styleChoice(document.getElementById('gfx-fps-' + f), f === state.fps));
+            const desc = document.getElementById('gfx-q-desc');
+            if (desc) desc.textContent = QUALITIES[state.quality].desc;
+            const btn = document.getElementById('gfx-showfps-btn');
+            if (btn) {
+                btn.textContent = state.showFps ? 'BE' : 'KI';
+                btn.className = 'text-xs px-2.5 py-1 rounded-lg font-bold text-white cursor-pointer ' + (state.showFps ? 'bg-emerald-600' : 'bg-red-600');
+            }
+            const counter = document.getElementById('fps-counter');
+            if (counter) counter.classList.toggle('hidden', !state.showFps);
+        }
+
+        function apply() {
+            document.documentElement.setAttribute('data-gfx', state.quality);
+            const q = QUALITIES[state.quality];
+            orbs.forEach((o, i) => { o.el.style.display = i < q.orbs ? '' : 'none'; });
+            if (q.speed === 0) animTime = 0;
+            positionOrbs();
+            positionTitle();
+            refreshUI();
+            startLoop();
+        }
+
+        window.openGraphicsModal = function () {
+            refreshUI();
+            if (typeof toggleSettingsMenu === 'function') {
+                const menu = document.getElementById('settings-menu');
+                if (menu && !menu.classList.contains('hidden')) toggleSettingsMenu();
+            }
+            toggleModal('graphics-modal', true);
+        };
+        window.closeGraphicsModal = function () { toggleModal('graphics-modal', false); };
+        window.setGraphicsQuality = function (q) {
+            if (!QUALITIES[q]) return;
+            state.quality = q;
+            save('gfxQuality', q);
+            apply();
+        };
+        window.setFpsLimit = function (n) {
+            n = Number(n);
+            if (!FPS_OPTIONS.includes(n)) return;
+            state.fps = n;
+            save('gfxFpsLimit', n);
+            refreshUI();
+        };
+        window.toggleShowFps = function () {
+            state.showFps = !state.showFps;
+            save('gfxShowFps', state.showFps);
+            frames = 0; fpsStart = performance.now();
+            const el = document.getElementById('fps-counter');
+            if (el && state.showFps) el.textContent = 'FPS: --';
+            refreshUI();
+            startLoop();
+        };
+
+        function init() {
+            titleEl = document.querySelector('.rgb-title');
+            if (titleEl) titleEl.style.animation = 'none';   // a színáramlást innentől a JS ciklus vezérli
+            buildOrbs();
+            window.addEventListener('resize', resize);
+            apply();
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+    })();
     </script>
 </body>
 </html>
