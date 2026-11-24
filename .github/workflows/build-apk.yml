@@ -324,9 +324,9 @@ jobs:
               }
 
               // BETÖLTÉSI ANIMÁCIÓ
-              // 0 -> 79: nagyon gyors
-              // 79 -> 96: gyors
-              // 96 -> 99: Render-várakozáskor lassú
+              // 0 -> 79: egyesével, jól láthatóan halad
+              // 79 -> 97: lassabban, egyesével halad
+              // 97 -> 99: lassú várakozás
               // 99 -> 100: csak a játék betöltése után
 
               private final Runnable splashProgressRunnable = new Runnable() {
@@ -340,17 +340,17 @@ jobs:
 
                       if (splashProgressValue < 79) {
                           updateSplashProgress(
-                              Math.min(79, splashProgressValue + 7)
+                              splashProgressValue + 1
                           );
 
-                          delay = 12;
+                          delay = 45;
 
-                      } else if (splashProgressValue < 96) {
+                      } else if (splashProgressValue < 97) {
                           updateSplashProgress(
                               splashProgressValue + 1
                           );
 
-                          delay = 22;
+                          delay = 100;
 
                       } else if (splashProgressValue < 99) {
                           updateSplashProgress(
@@ -367,12 +367,7 @@ jobs:
                           if (!splashFinishScheduled) {
                               splashFinishScheduled = true;
 
-                              handler.postDelayed(() -> {
-                                  if (!isFinishing() &&
-                                      gameWebView != null) {
-                                      showGameWithTransition();
-                                  }
-                              }, 300);
+                              showGameWithTransition();
                           }
 
                           return;
@@ -385,7 +380,7 @@ jobs:
                   }
               };
 
-              // FINOM ÁTMENET A BETÖLTŐKÉPERNYŐRŐL A JÁTÉKRA
+              // FINOM ELŐTŰNÉS A 100% ELÉRÉSEKOR
               private void showGameWithTransition() {
                   if (isFinishing() ||
                       gameWebView == null ||
