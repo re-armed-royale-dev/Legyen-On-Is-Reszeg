@@ -621,7 +621,7 @@ jobs:
                                   splashProgressRunnable
                               );
 
-                              updateSplashProgress(48);
+                              updateSplashProgress(50);
 
                               if (installedVersion <
                                   minimumVersionCode) {
@@ -640,7 +640,7 @@ jobs:
                                   splashProgressRunnable
                               );
 
-                              updateSplashProgress(48);
+                              updateSplashProgress(50);
 
                               if (!isFinishing()) {
                                   showConnectionErrorDialog();
@@ -738,8 +738,6 @@ jobs:
               // KAPCSOLATI HIBA – OFFLINE JÁTÉK LEHETŐSÉGGEL
               private void showConnectionErrorDialog() {
                   if (isFinishing()) return;
-
-                  webViewReady = true;
 
                   new AlertDialog.Builder(this)
                       .setTitle("Kapcsolódási hiba")
