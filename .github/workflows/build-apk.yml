@@ -1,3 +1,4 @@
+
 name: Android APK Build
 
 on:
@@ -754,10 +755,8 @@ jobs:
 
                               if (!isFinishing()) {
                                   if (isInternetAvailable()) {
-                                      setSplashStatus("Connecting");
                                       loadGame();
                                   } else {
-                                      setSplashStatus("No internet connection");
                                       showConnectionErrorDialog();
                                   }
                               }
@@ -892,8 +891,15 @@ jobs:
                   }
 
                   // VILÁGOS SZÖVEG
-                  TextView title =
-                      dialog.findViewById(android.R.id.alertTitle);
+                  int titleId = getResources().getIdentifier(
+                      "alertTitle",
+                      "id",
+                      "android"
+                  );
+
+                  TextView title = titleId != 0
+                      ? dialog.findViewById(titleId)
+                      : null;
 
                   TextView message =
                       dialog.findViewById(android.R.id.message);
@@ -936,7 +942,6 @@ jobs:
                   if (isFinishing() || gameLoading) return;
 
                   gameLoading = true;
-                  setSplashStatus("Loading game");
                   updateSplashProgress(55);
 
                   try {
