@@ -210,6 +210,11 @@ jobs:
           import android.os.Bundle;
           import android.os.Handler;
           import android.os.Looper;
+          import android.animation.Animator;
+          import android.animation.AnimatorListenerAdapter;
+          import android.animation.AnimatorSet;
+          import android.animation.ObjectAnimator;
+          import android.view.animation.DecelerateInterpolator;
           import android.content.Intent;
           import android.content.pm.PackageInfo;
           import android.net.Uri;
@@ -265,6 +270,9 @@ jobs:
               private boolean updateDialogShowing = false;
               private boolean gameLoading = false;
 
+              private boolean splashLoadingComplete = false;
+              private boolean splashFinishScheduled = false;
+
               private String downloadUrl = "";
               private int latestVersionCode = 0;
               private int minimumVersionCode = 0;
@@ -315,20 +323,143 @@ jobs:
                   handler.postDelayed(splashStatusRunnable, 450);
               }
 
+              // BETÖLTÉSI ANIMÁCIÓ
+              // 0 -> 79: nagyon gyors
+              // 79 -> 96: gyors
+              // 96 -> 99: Render-várakozáskor lassú
+              // 99 -> 100: csak a játék betöltése után
+
               private final Runnable splashProgressRunnable = new Runnable() {
                   @Override
                   public void run() {
-                      if (splashProgress != null &&
-                          splashProgressValue < 50) {
+                      if (splashProgress == null || isFinishing()) {
+                          return;
+                      }
 
+                      int delay;
+
+                      if (splashProgressValue < 79) {
                           updateSplashProgress(
-                              Math.min(50, splashProgressValue + 1)
+                              Math.min(79, splashProgressValue + 7)
                           );
 
-                          handler.postDelayed(this, 100);
+                          delay = 12;
+
+                      } else if (splashProgressValue < 96) {
+                          updateSplashProgress(
+                              splashProgressValue + 1
+                          );
+
+                          delay = 22;
+
+                      } else if (splashProgressValue < 99) {
+                          updateSplashProgress(
+                              splashProgressValue + 1
+                          );
+
+                          delay = checkingVersion ? 1200 : 350;
+
+                      } else if (splashLoadingComplete &&
+                                 splashProgressValue < 100) {
+
+                          updateSplashProgress(100);
+
+                          if (!splashFinishScheduled) {
+                              splashFinishScheduled = true;
+
+                              handler.postDelayed(() -> {
+                                  if (!isFinishing() &&
+                                      gameWebView != null) {
+                                      showGameWithTransition();
+                                  }
+                              }, 300);
+                          }
+
+                          return;
+
+                      } else {
+                          delay = 500;
                       }
+
+                      handler.postDelayed(this, delay);
                   }
               };
+
+              // FINOM ÁTMENET A BETÖLTŐKÉPERNYŐRŐL A JÁTÉKRA
+              private void showGameWithTransition() {
+                  if (isFinishing() ||
+                      gameWebView == null ||
+                      splashLayout == null) {
+                      return;
+                  }
+
+                  gameWebView.setAlpha(0f);
+                  gameWebView.setScaleX(0.985f);
+                  gameWebView.setScaleY(0.985f);
+
+                  setContentView(gameWebView);
+                  enableFullscreen();
+
+                  View splash = splashLayout;
+
+                  ObjectAnimator gameFade =
+                      ObjectAnimator.ofFloat(
+                          gameWebView,
+                          View.ALPHA,
+                          0f,
+                          1f
+                      );
+
+                  ObjectAnimator gameScaleX =
+                      ObjectAnimator.ofFloat(
+                          gameWebView,
+                          View.SCALE_X,
+                          0.985f,
+                          1f
+                      );
+
+                  ObjectAnimator gameScaleY =
+                      ObjectAnimator.ofFloat(
+                          gameWebView,
+                          View.SCALE_Y,
+                          0.985f,
+                          1f
+                      );
+
+                  ObjectAnimator splashFade =
+                      ObjectAnimator.ofFloat(
+                          splash,
+                          View.ALPHA,
+                          1f,
+                          0f
+                      );
+
+                  AnimatorSet transition = new AnimatorSet();
+
+                  transition.playTogether(
+                      gameFade,
+                      gameScaleX,
+                      gameScaleY,
+                      splashFade
+                  );
+
+                  transition.setDuration(450);
+                  transition.setInterpolator(
+                      new DecelerateInterpolator()
+                  );
+
+                  transition.addListener(
+                      new AnimatorListenerAdapter() {
+                          @Override
+                          public void onAnimationEnd(Animator animation) {
+                              splash.setAlpha(1f);
+                              splashLayout = null;
+                          }
+                      }
+                  );
+
+                  transition.start();
+              }
 
               // TELJES KÉPERNYŐS MÓD
               private void enableFullscreen() {
@@ -447,7 +578,7 @@ jobs:
 
                   setSplashStatus("Connecting to the server");
 
-                  // LEGALUL A BETÖLTŐCSÍK
+                  // BETÖLTŐCSÍK
                   splashProgress = new SplashProgressView(this);
 
                   FrameLayout.LayoutParams progressParams =
@@ -469,12 +600,15 @@ jobs:
                   setContentView(splashLayout);
                   enableFullscreen();
 
-                  updateSplashProgress(2);
+                  // INDULÁS 0%-RÓL
+                  splashProgressValue = 0;
+                  splashLoadingComplete = false;
+                  splashFinishScheduled = false;
 
-                  handler.postDelayed(
-                      splashProgressRunnable,
-                      100
-                  );
+                  updateSplashProgress(0);
+
+                  handler.removeCallbacks(splashProgressRunnable);
+                  handler.post(splashProgressRunnable);
               }
 
               private int dp(float value) {
@@ -727,11 +861,6 @@ jobs:
 
                               if (isFinishing()) return;
 
-                              handler.removeCallbacks(
-                                  splashProgressRunnable
-                              );
-
-                              updateSplashProgress(50);
                               setSplashStatus("Connecting");
 
                               if (installedVersion <
@@ -746,12 +875,6 @@ jobs:
                       } catch (Exception e) {
                           handler.post(() -> {
                               checkingVersion = false;
-
-                              handler.removeCallbacks(
-                                  splashProgressRunnable
-                              );
-
-                              updateSplashProgress(50);
 
                               if (!isFinishing()) {
                                   if (isInternetAvailable()) {
@@ -942,7 +1065,6 @@ jobs:
                   if (isFinishing() || gameLoading) return;
 
                   gameLoading = true;
-                  updateSplashProgress(55);
 
                   try {
                       gameWebView = new WebView(this);
@@ -986,18 +1108,16 @@ jobs:
                                       return;
                                   }
 
-                                  updateSplashProgress(100);
-
+                                  // A JÁTÉK TÉNYLEGESEN BETÖLTÖTT
                                   webViewReady = true;
+                                  splashLoadingComplete = true;
 
-                                  handler.postDelayed(() -> {
-                                      if (!isFinishing() &&
-                                          gameWebView != null) {
+                                  // A BETÖLTŐCSÍK EZUTÁN ÉRI EL A 100%-OT
+                                  handler.removeCallbacks(
+                                      splashProgressRunnable
+                                  );
 
-                                          setContentView(gameWebView);
-                                          enableFullscreen();
-                                      }
-                                  }, 300);
+                                  handler.post(splashProgressRunnable);
                               }
                           }
                       );
@@ -1010,10 +1130,9 @@ jobs:
                                   WebView view,
                                   int newProgress
                               ) {
-                                  int loadingProgress =
-                                      55 + (newProgress * 45 / 100);
-
-                                  updateSplashProgress(loadingProgress);
+                                  // A BETÖLTÉSI SZÁZALÉKOT A SAJÁT
+                                  // ANIMÁCIÓ KEZELI.
+                                  // A 100%-OT AZ onPageFinished ÁLLÍTJA BE.
                               }
 
                               @Override
