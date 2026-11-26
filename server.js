@@ -300,6 +300,44 @@ app.get("/api/version", (req, res) => {
   });
 });
 
+// =====================================================
+// LIMITÁLT SZEZONÁLIS ESEMÉNYEK
+// KARÁCSONY ÉS SZILVESZTER
+// =====================================================
+
+function getEventMode(name) {
+  const value = String(process.env[name] || "auto")
+    .trim()
+    .toLowerCase();
+
+  return ["auto", "on", "off"].includes(value)
+    ? value
+    : "auto";
+}
+
+// Események szerveroldali vezérlése
+app.get("/api/events", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+
+  res.json({
+    serverTime: new Date().toISOString(),
+
+    events: {
+      christmas: {
+        mode: getEventMode("CHRISTMAS_EVENT"),
+        start: "2026-12-18T00:00:00+01:00",
+        end: "2026-12-28T00:00:00+01:00"
+      },
+
+      newyear: {
+        mode: getEventMode("NEWYEAR_EVENT"),
+        start: "2026-12-28T00:00:00+01:00",
+        end: "2027-01-05T00:00:00+01:00"
+      }
+    }
+  });
+});
+
 // Kérdéssor megosztása – mentés Supabase-be
 app.post("/api/share", async (req, res) => {
   const { questions } = req.body || {};
