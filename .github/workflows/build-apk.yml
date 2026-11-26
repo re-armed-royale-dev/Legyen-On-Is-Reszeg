@@ -1,14 +1,9 @@
-
 name: Android APK Build
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'index.html'
-      - 'easy.json'
-      - 'normal.json'
-      - 'hard.json'
       - 'icon-512.png'
       - '.github/workflows/build-apk.yml'
 
@@ -97,8 +92,8 @@ jobs:
                   applicationId 'com.party.reszegkviz'
                   minSdk 23
                   targetSdk 35
-                  versionCode 500
-                  versionName '5.0'
+                  versionCode 510
+                  versionName '5.1'
               }
 
               buildTypes {
@@ -202,6 +197,649 @@ jobs:
           </manifest>
           EOF
 
+          # LIVE UPDATE RENDSZER
+          cat > app/src/main/java/com/party/reszegkviz/LiveUpdateManager.java <<'EOF'
+          package com.party.reszegkviz;
+
+          import android.content.Context;
+          import android.content.SharedPreferences;
+
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+
+          import java.io.File;
+          import java.io.FileInputStream;
+          import java.io.FileOutputStream;
+          import java.io.InputStream;
+          import java.io.ByteArrayOutputStream;
+          import java.io.IOException;
+          import java.net.URL;
+          import java.net.HttpURLConnection;
+          import java.security.MessageDigest;
+          import java.util.HashMap;
+          import java.util.Map;
+          import java.util.UUID;
+
+          public class LiveUpdateManager {
+
+              private static final String SERVER =
+                  "https://legyen-on-is-reszeg.onrender.com";
+
+              private static final String MANIFEST_URL =
+                  SERVER + "/api/content/version";
+
+              private static final String DOWNLOAD_URL =
+                  SERVER + "/api/content/download/";
+
+              private static final String[] CONTENT_FILES = {
+                  "index.html",
+                  "easy.json",
+                  "normal.json",
+                  "hard.json"
+              };
+
+              private static final long MAX_FILE_SIZE =
+                  25L * 1024L * 1024L;
+
+              private static final long MAX_TOTAL_SIZE =
+                  80L * 1024L * 1024L;
+
+              private final Context context;
+              private final File root;
+              private final SharedPreferences preferences;
+
+              public interface Listener {
+                  void onUpdateStarted();
+                  void onProgress(int progress);
+              }
+
+              private static class ContentFile {
+                  String name;
+                  long size;
+                  String sha256;
+              }
+
+              public LiveUpdateManager(
+                  Context context,
+                  int installedVersion
+              ) {
+                  this.context = context.getApplicationContext();
+
+                  root = new File(
+                      context.getFilesDir(),
+                      "live-content-" + installedVersion
+                  );
+
+                  preferences = context.getSharedPreferences(
+                      "live_update_" + installedVersion,
+                      Context.MODE_PRIVATE
+                  );
+              }
+
+              private boolean isAllowedFile(String name) {
+                  for (String allowed : CONTENT_FILES) {
+                      if (allowed.equals(name)) {
+                          return true;
+                      }
+                  }
+
+                  return false;
+              }
+
+              private HttpURLConnection openConnection(
+                  String address
+              ) throws Exception {
+
+                  URL url = new URL(address);
+
+                  if (!"https".equals(url.getProtocol()) ||
+                      !"legyen-on-is-reszeg.onrender.com"
+                          .equals(url.getHost())) {
+
+                      throw new IOException(
+                          "Nem engedélyezett szerver."
+                      );
+                  }
+
+                  HttpURLConnection connection =
+                      (HttpURLConnection) url.openConnection();
+
+                  connection.setRequestMethod("GET");
+                  connection.setConnectTimeout(15000);
+                  connection.setReadTimeout(20000);
+                  connection.setUseCaches(false);
+                  connection.setInstanceFollowRedirects(false);
+
+                  connection.setRequestProperty(
+                      "Cache-Control", "no-cache"
+                  );
+
+                  connection.setRequestProperty(
+                      "Accept-Encoding", "identity"
+                  );
+
+                  return connection;
+              }
+
+              private String toHex(byte[] bytes) {
+                  StringBuilder result = new StringBuilder();
+
+                  for (byte value : bytes) {
+                      result.append(
+                          String.format(
+                              java.util.Locale.US,
+                              "%02x",
+                              value & 0xff
+                          )
+                      );
+                  }
+
+                  return result.toString();
+              }
+
+              private String calculateHash(
+                  InputStream input
+              ) throws Exception {
+
+                  MessageDigest digest =
+                      MessageDigest.getInstance("SHA-256");
+
+                  byte[] buffer = new byte[16384];
+                  int count;
+
+                  while ((count = input.read(buffer)) != -1) {
+                      digest.update(buffer, 0, count);
+                  }
+
+                  return toHex(digest.digest());
+              }
+
+              private JSONObject readManifest() throws Exception {
+
+                  HttpURLConnection connection =
+                      openConnection(MANIFEST_URL);
+
+                  try {
+                      if (connection.getResponseCode() != 200) {
+                          throw new IOException(
+                              "Live Update szerverhiba."
+                          );
+                      }
+
+                      try (
+                          InputStream input =
+                              connection.getInputStream();
+
+                          ByteArrayOutputStream output =
+                              new ByteArrayOutputStream()
+                      ) {
+                          byte[] buffer = new byte[4096];
+                          int count;
+
+                          while ((count = input.read(buffer)) != -1) {
+                              output.write(buffer, 0, count);
+
+                              if (output.size() > 65536) {
+                                  throw new IOException(
+                                      "Túl nagy manifest."
+                                  );
+                              }
+                          }
+
+                          JSONObject manifest = new JSONObject(
+                              output.toString("UTF-8")
+                          );
+
+                          if (!manifest.optBoolean("success", false)) {
+                              throw new IOException(
+                                  "Érvénytelen manifest."
+                              );
+                          }
+
+                          return manifest;
+                      }
+
+                  } finally {
+                      connection.disconnect();
+                  }
+              }
+
+              private Map<String, ContentFile> parseFiles(
+                  JSONObject manifest
+              ) throws Exception {
+
+                  JSONArray array = manifest.getJSONArray("files");
+
+                  if (array.length() != CONTENT_FILES.length) {
+                      throw new IOException(
+                          "Hiányos tartalomlista."
+                      );
+                  }
+
+                  Map<String, ContentFile> files =
+                      new HashMap<>();
+
+                  long totalSize = 0;
+
+                  for (int i = 0; i < array.length(); i++) {
+                      JSONObject item = array.getJSONObject(i);
+
+                      ContentFile file = new ContentFile();
+
+                      file.name = item.getString("name");
+                      file.size = item.getLong("size");
+                      file.sha256 = item.getString("sha256");
+
+                      if (
+                          !isAllowedFile(file.name) ||
+                          files.containsKey(file.name) ||
+                          file.size <= 0 ||
+                          file.size > MAX_FILE_SIZE ||
+                          !file.sha256.matches("[a-f0-9]{64}")
+                      ) {
+                          throw new IOException(
+                              "Érvénytelen fájladat."
+                          );
+                      }
+
+                      totalSize += file.size;
+
+                      if (totalSize > MAX_TOTAL_SIZE) {
+                          throw new IOException(
+                              "Túl nagy frissítés."
+                          );
+                      }
+
+                      files.put(file.name, file);
+                  }
+
+                  return files;
+              }
+
+              public File getActiveDirectory() {
+                  String active = preferences.getString(
+                      "active_directory", ""
+                  );
+
+                  if (!active.matches(
+                      "[a-f0-9]{64}-[a-f0-9-]{36}"
+                  )) {
+                      return null;
+                  }
+
+                  File directory = new File(root, active);
+
+                  if (!directory.isDirectory()) {
+                      return null;
+                  }
+
+                  try {
+                      JSONObject manifest;
+
+                      try (
+                          InputStream input = new FileInputStream(
+                              new File(directory, "manifest.json")
+                          );
+
+                          ByteArrayOutputStream output =
+                              new ByteArrayOutputStream()
+                      ) {
+                          byte[] buffer = new byte[4096];
+                          int count;
+
+                          while ((count = input.read(buffer)) != -1) {
+                              output.write(buffer, 0, count);
+
+                              if (output.size() > 65536) {
+                                  return null;
+                              }
+                          }
+
+                          manifest = new JSONObject(
+                              output.toString("UTF-8")
+                          );
+                      }
+
+                      Map<String, ContentFile> files =
+                          parseFiles(manifest);
+
+                      for (String name : CONTENT_FILES) {
+                          File file = new File(directory, name);
+                          ContentFile expected = files.get(name);
+
+                          if (!file.isFile() ||
+                              file.length() != expected.size) {
+                              return null;
+                          }
+
+                          try (
+                              InputStream input =
+                                  new FileInputStream(file)
+                          ) {
+                              if (!expected.sha256.equals(
+                                  calculateHash(input)
+                              )) {
+                                  return null;
+                              }
+                          }
+                      }
+
+                      return directory;
+
+                  } catch (Exception e) {
+                      return null;
+                  }
+              }
+
+              private boolean localContentMatches(
+                  Map<String, ContentFile> files,
+                  File active
+              ) {
+                  try {
+                      for (String name : CONTENT_FILES) {
+                          ContentFile expected = files.get(name);
+
+                          InputStream source;
+
+                          if (active != null) {
+                              File local = new File(active, name);
+
+                              if (!local.isFile() ||
+                                  local.length() != expected.size) {
+                                  return false;
+                              }
+
+                              source = new FileInputStream(local);
+
+                          } else {
+                              source = context.getAssets().open(name);
+                          }
+
+                          try (InputStream input = source) {
+                              String hash = calculateHash(input);
+
+                              if (!expected.sha256.equals(hash)) {
+                                  return false;
+                              }
+                          }
+                      }
+
+                      return true;
+
+                  } catch (Exception e) {
+                      return false;
+                  }
+              }
+
+              private void deleteDirectory(File file) {
+                  if (file == null || !file.exists()) {
+                      return;
+                  }
+
+                  if (file.isDirectory()) {
+                      File[] children = file.listFiles();
+
+                      if (children != null) {
+                          for (File child : children) {
+                              deleteDirectory(child);
+                          }
+                      }
+                  }
+
+                  file.delete();
+              }
+
+              private void cleanupOldDirectories(
+                  String current,
+                  String previous
+              ) {
+                  File[] directories = root.listFiles();
+
+                  if (directories == null) {
+                      return;
+                  }
+
+                  for (File directory : directories) {
+                      String name = directory.getName();
+
+                      if (!name.equals(current) &&
+                          !name.equals(previous)) {
+                          deleteDirectory(directory);
+                      }
+                  }
+              }
+
+              public boolean checkForUpdate(
+                  Listener listener
+              ) throws Exception {
+
+                  JSONObject manifest = readManifest();
+
+                  String version = manifest.getString("version");
+
+                  if (!version.matches("[a-f0-9]{64}")) {
+                      throw new IOException(
+                          "Érvénytelen tartalomverzió."
+                      );
+                  }
+
+                  Map<String, ContentFile> files =
+                      parseFiles(manifest);
+
+                  File active = getActiveDirectory();
+
+                  // NINCS VÁLTOZÁS: NINCS UPDATING KÉPERNYŐ
+                  if (localContentMatches(files, active)) {
+                      return false;
+                  }
+
+                  long totalSize = 0;
+
+                  for (ContentFile file : files.values()) {
+                      totalSize += file.size;
+                  }
+
+                  if (!root.exists() && !root.mkdirs()) {
+                      throw new IOException(
+                          "Nem hozható létre a frissítési mappa."
+                      );
+                  }
+
+                  if (root.getUsableSpace() <
+                      totalSize + 5L * 1024L * 1024L) {
+
+                      throw new IOException(
+                          "Nincs elegendő tárhely."
+                      );
+                  }
+
+                  String uniqueName =
+                      version + "-" + UUID.randomUUID().toString();
+
+                  File staging = new File(
+                      root,
+                      "staging-" + uniqueName
+                  );
+
+                  File destination = new File(
+                      root,
+                      uniqueName
+                  );
+
+                  if (!staging.mkdirs()) {
+                      throw new IOException(
+                          "Nem hozható létre az ideiglenes mappa."
+                      );
+                  }
+
+                  boolean activated = false;
+                  long downloaded = 0;
+
+                  try {
+                      listener.onUpdateStarted();
+                      listener.onProgress(0);
+
+                      for (String name : CONTENT_FILES) {
+                          ContentFile expected = files.get(name);
+
+                          HttpURLConnection connection =
+                              openConnection(DOWNLOAD_URL + name);
+
+                          try {
+                              if (connection.getResponseCode() != 200) {
+                                  throw new IOException(
+                                      "Letöltési hiba: " + name
+                                  );
+                              }
+
+                              MessageDigest digest =
+                                  MessageDigest.getInstance("SHA-256");
+
+                              File target = new File(staging, name);
+
+                              long fileDownloaded = 0;
+
+                              try (
+                                  InputStream input =
+                                      connection.getInputStream();
+
+                                  FileOutputStream output =
+                                      new FileOutputStream(target)
+                              ) {
+                                  byte[] buffer = new byte[16384];
+                                  int count;
+
+                                  while (
+                                      (count = input.read(buffer)) != -1
+                                  ) {
+                                      fileDownloaded += count;
+
+                                      if (fileDownloaded > expected.size) {
+                                          throw new IOException(
+                                              "Hibás fájlméret: " + name
+                                          );
+                                      }
+
+                                      output.write(buffer, 0, count);
+                                      digest.update(buffer, 0, count);
+
+                                      downloaded += count;
+
+                                      int progress = (int) (
+                                          downloaded * 100L / totalSize
+                                      );
+
+                                      listener.onProgress(
+                                          Math.min(99, progress)
+                                      );
+                                  }
+
+                                  output.flush();
+                                  output.getFD().sync();
+                              }
+
+                              if (fileDownloaded != expected.size) {
+                                  throw new IOException(
+                                      "Hiányos fájl: " + name
+                                  );
+                              }
+
+                              String actualHash =
+                                  toHex(digest.digest());
+
+                              if (!expected.sha256.equals(actualHash)) {
+                                  throw new IOException(
+                                      "SHA-256 ellenőrzési hiba: " + name
+                                  );
+                              }
+
+                          } finally {
+                              connection.disconnect();
+                          }
+                      }
+
+                      // ELLENŐRZÉS: NEM VÁLTOZOTT-E A SZERVER
+                      // A LETÖLTÉS KÖZBEN
+                      JSONObject latestManifest = readManifest();
+
+                      if (!version.equals(
+                          latestManifest.getString("version")
+                      )) {
+                          throw new IOException(
+                              "A tartalom letöltés közben megváltozott."
+                          );
+                      }
+
+                      // MANIFEST MENTÉSE
+                      try (
+                          FileOutputStream output =
+                              new FileOutputStream(
+                                  new File(staging, "manifest.json")
+                              )
+                      ) {
+                          output.write(
+                              manifest.toString().getBytes("UTF-8")
+                          );
+
+                          output.flush();
+                          output.getFD().sync();
+                      }
+
+                      // CSAK A TELJES, ELLENŐRZÖTT FRISSÍTÉS AKTIVÁLHATÓ
+                      if (!staging.renameTo(destination)) {
+                          throw new IOException(
+                              "A frissítés aktiválása sikertelen."
+                          );
+                      }
+
+                      String previous = preferences.getString(
+                          "active_directory", ""
+                      );
+
+                      boolean saved = preferences.edit()
+                          .putString(
+                              "active_directory",
+                              uniqueName
+                          )
+                          .putString(
+                              "previous_directory",
+                              previous
+                          )
+                          .putString(
+                              "content_version",
+                              version
+                          )
+                          .commit();
+
+                      if (!saved) {
+                          throw new IOException(
+                              "Nem sikerült menteni a frissítést."
+                          );
+                      }
+
+                      activated = true;
+
+                      cleanupOldDirectories(
+                          uniqueName,
+                          previous
+                      );
+
+                      listener.onProgress(100);
+
+                      return true;
+
+                  } finally {
+                      deleteDirectory(staging);
+
+                      if (!activated) {
+                          deleteDirectory(destination);
+                      }
+                  }
+              }
+          }
+          EOF
+
+          # ANDROID ALKALMAZÁS
           cat > app/src/main/java/com/party/reszegkviz/MainActivity.java <<'EOF'
           package com.party.reszegkviz;
 
@@ -254,21 +892,33 @@ jobs:
           import java.io.BufferedReader;
           import java.io.InputStream;
           import java.io.InputStreamReader;
+          import java.io.File;
+          import java.io.FileInputStream;
           import java.net.HttpURLConnection;
           import java.net.URL;
+          import java.util.Collections;
 
           public class MainActivity extends Activity {
 
               private static final String VERSION_URL =
                   "https://legyen-on-is-reszeg.onrender.com/api/version";
 
+              private static final String GAME_URL =
+                  "https://appassets.androidplatform.net/assets/index.html";
+
               private ValueCallback<Uri[]> filePathCallback;
+
               private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
               private volatile boolean webViewReady = false;
+              private volatile boolean destroyed = false;
+
               private boolean checkingVersion = false;
+              private boolean checkingContent = false;
+              private boolean updatingContent = false;
               private boolean updateDialogShowing = false;
               private boolean gameLoading = false;
+              private boolean waitingForApkUpdate = false;
 
               private boolean splashLoadingComplete = false;
               private boolean splashFinishScheduled = false;
@@ -281,22 +931,37 @@ jobs:
               private final Handler handler =
                   new Handler(Looper.getMainLooper());
 
+              private FrameLayout rootLayout;
               private FrameLayout splashLayout;
               private SplashProgressView splashProgress;
               private TextView splashStatusView;
-              private String splashStatus = "Connecting to the server";
+
+              private String splashStatus =
+                  "Connecting to the server";
+
               private int splashDots = 0;
               private int splashProgressValue = 0;
+
               private WebView gameWebView;
+              private LiveUpdateManager liveUpdateManager;
+
+              private boolean activityClosed() {
+                  return destroyed || isFinishing();
+              }
 
               // ANIMÁLT HÁROM PONT
-              private final Runnable splashStatusRunnable = new Runnable() {
+              private final Runnable splashStatusRunnable =
+                  new Runnable() {
+
                   @Override
                   public void run() {
-                      if (splashStatusView != null) {
+                      if (splashStatusView != null &&
+                          !activityClosed()) {
+
                           splashDots = (splashDots % 3) + 1;
 
-                          StringBuilder dots = new StringBuilder();
+                          StringBuilder dots =
+                              new StringBuilder();
 
                           for (int i = 0; i < splashDots; i++) {
                               dots.append(".");
@@ -319,20 +984,26 @@ jobs:
                       splashStatusView.setText(status + "...");
                   }
 
-                  handler.removeCallbacks(splashStatusRunnable);
-                  handler.postDelayed(splashStatusRunnable, 450);
+                  handler.removeCallbacks(
+                      splashStatusRunnable
+                  );
+
+                  handler.postDelayed(
+                      splashStatusRunnable, 450
+                  );
               }
 
-              // BETÖLTÉSI ANIMÁCIÓ
-              // 0 -> 79: nagyon gyors
-              // 79 -> 96: gyors
-              // 96 -> 99: Render-várakozáskor lassú
-              // 99 -> 100: csak a játék betöltése után
+              // NORMÁL BETÖLTÉSI ANIMÁCIÓ
+              private final Runnable splashProgressRunnable =
+                  new Runnable() {
 
-              private final Runnable splashProgressRunnable = new Runnable() {
                   @Override
                   public void run() {
-                      if (splashProgress == null || isFinishing()) {
+                      if (
+                          splashProgress == null ||
+                          activityClosed() ||
+                          updatingContent
+                      ) {
                           return;
                       }
 
@@ -340,7 +1011,10 @@ jobs:
 
                       if (splashProgressValue < 79) {
                           updateSplashProgress(
-                              Math.min(79, splashProgressValue + 7)
+                              Math.min(
+                                  79,
+                                  splashProgressValue + 7
+                              )
                           );
 
                           delay = 12;
@@ -357,10 +1031,12 @@ jobs:
                               splashProgressValue + 1
                           );
 
-                          delay = checkingVersion ? 1200 : 350;
+                          delay =
+                              checkingVersion || checkingContent
+                              ? 1200
+                              : 350;
 
-                      } else if (splashLoadingComplete &&
-                                 splashProgressValue < 100) {
+                      } else if (splashLoadingComplete) {
 
                           updateSplashProgress(100);
 
@@ -368,8 +1044,9 @@ jobs:
                               splashFinishScheduled = true;
 
                               handler.postDelayed(() -> {
-                                  if (!isFinishing() &&
+                                  if (!activityClosed() &&
                                       gameWebView != null) {
+
                                       showGameWithTransition();
                                   }
                               }, 300);
@@ -385,22 +1062,105 @@ jobs:
                   }
               };
 
-              // FINOM ÁTMENET A BETÖLTŐKÉPERNYŐRŐL A JÁTÉKRA
-              private void showGameWithTransition() {
-                  if (isFinishing() ||
-                      gameWebView == null ||
-                      splashLayout == null) {
+              // LIVE UPDATE – VALÓDI LETÖLTÉSI SZÁZALÉK
+              private void beginLiveUpdate() {
+                  if (activityClosed()) return;
+
+                  updatingContent = true;
+
+                  handler.removeCallbacks(
+                      splashProgressRunnable
+                  );
+
+                  splashProgressValue = 0;
+
+                  if (splashProgress != null) {
+                      splashProgress.setProgress(0);
+                  }
+
+                  setSplashStatus("Updating");
+              }
+
+              private void setLiveUpdateProgress(int progress) {
+                  if (activityClosed() || !updatingContent) {
                       return;
                   }
+
+                  splashProgressValue =
+                      Math.max(0, Math.min(100, progress));
+
+                  if (splashProgress != null) {
+                      splashProgress.setProgress(
+                          splashProgressValue
+                      );
+                  }
+              }
+
+              private void finishLiveUpdate(
+                  boolean updated
+              ) {
+                  if (activityClosed()) return;
+
+                  checkingContent = false;
+
+                  if (updated && updatingContent) {
+                      setLiveUpdateProgress(100);
+
+                      handler.postDelayed(() -> {
+                          if (activityClosed()) return;
+
+                          updatingContent = false;
+
+                          setSplashStatus("Connecting");
+
+                          loadGame();
+
+                      }, 450);
+
+                  } else {
+                      updatingContent = false;
+
+                      setSplashStatus("Connecting");
+
+                      handler.removeCallbacks(
+                          splashProgressRunnable
+                      );
+
+                      handler.post(
+                          splashProgressRunnable
+                      );
+
+                      loadGame();
+                  }
+              }
+
+              // FINOM ÁTMENET A JÁTÉKRA
+              private void showGameWithTransition() {
+                  if (
+                      activityClosed() ||
+                      gameWebView == null ||
+                      splashLayout == null
+                  ) {
+                      return;
+                  }
+
+                  handler.removeCallbacks(
+                      splashStatusRunnable
+                  );
+
+                  handler.removeCallbacks(
+                      splashProgressRunnable
+                  );
 
                   gameWebView.setAlpha(0f);
                   gameWebView.setScaleX(0.985f);
                   gameWebView.setScaleY(0.985f);
 
-                  setContentView(gameWebView);
-                  enableFullscreen();
-
                   View splash = splashLayout;
+
+                  gameWebView.setVisibility(View.VISIBLE);
+
+                  enableFullscreen();
 
                   ObjectAnimator gameFade =
                       ObjectAnimator.ofFloat(
@@ -434,7 +1194,8 @@ jobs:
                           0f
                       );
 
-                  AnimatorSet transition = new AnimatorSet();
+                  AnimatorSet transition =
+                      new AnimatorSet();
 
                   transition.playTogether(
                       gameFade,
@@ -444,16 +1205,25 @@ jobs:
                   );
 
                   transition.setDuration(450);
+
                   transition.setInterpolator(
                       new DecelerateInterpolator()
                   );
 
                   transition.addListener(
                       new AnimatorListenerAdapter() {
+
                           @Override
-                          public void onAnimationEnd(Animator animation) {
-                              splash.setAlpha(1f);
+                          public void onAnimationEnd(
+                              Animator animation
+                          ) {
+                              if (rootLayout != null) {
+                                  rootLayout.removeView(splash);
+                              }
+
                               splashLayout = null;
+                              splashProgress = null;
+                              splashStatusView = null;
                           }
                       }
                   );
@@ -465,10 +1235,16 @@ jobs:
               private void enableFullscreen() {
                   Window window = getWindow();
 
-                  window.setStatusBarColor(Color.rgb(8, 13, 25));
-                  window.setNavigationBarColor(Color.rgb(8, 13, 25));
+                  window.setStatusBarColor(
+                      Color.rgb(8, 13, 25)
+                  );
+
+                  window.setNavigationBarColor(
+                      Color.rgb(8, 13, 25)
+                  );
 
                   if (android.os.Build.VERSION.SDK_INT >= 30) {
+
                       WindowInsetsController controller =
                           window.getInsetsController();
 
@@ -483,23 +1259,33 @@ jobs:
                               WindowInsets.Type.navigationBars()
                           );
                       }
+
                   } else {
-                      window.getDecorView().setSystemUiVisibility(
-                          View.SYSTEM_UI_FLAG_FULLSCREEN |
-                          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
-                          View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                      );
+                      window.getDecorView()
+                          .setSystemUiVisibility(
+                              View.SYSTEM_UI_FLAG_FULLSCREEN |
+                              View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                              View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                              View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                              View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                              View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                          );
                   }
               }
 
               @Override
-              protected void onCreate(Bundle savedInstanceState) {
+              protected void onCreate(
+                  Bundle savedInstanceState
+              ) {
                   SplashScreen.installSplashScreen(this);
 
                   super.onCreate(savedInstanceState);
+
+                  liveUpdateManager =
+                      new LiveUpdateManager(
+                          this,
+                          getInstalledVersionCode()
+                      );
 
                   enableFullscreen();
                   showSplashScreen();
@@ -507,7 +1293,19 @@ jobs:
               }
 
               @Override
-              public void onWindowFocusChanged(boolean hasFocus) {
+              protected void onResume() {
+                  super.onResume();
+
+                  if (waitingForApkUpdate) {
+                      waitingForApkUpdate = false;
+                      checkVersion();
+                  }
+              }
+
+              @Override
+              public void onWindowFocusChanged(
+                  boolean hasFocus
+              ) {
                   super.onWindowFocusChanged(hasFocus);
 
                   if (hasFocus) {
@@ -517,10 +1315,22 @@ jobs:
 
               @Override
               protected void onDestroy() {
+                  destroyed = true;
+
                   handler.removeCallbacksAndMessages(null);
+
+                  if (filePathCallback != null) {
+                      filePathCallback.onReceiveValue(null);
+                      filePathCallback = null;
+                  }
 
                   if (gameWebView != null) {
                       gameWebView.stopLoading();
+
+                      if (rootLayout != null) {
+                          rootLayout.removeView(gameWebView);
+                      }
+
                       gameWebView.destroy();
                       gameWebView = null;
                   }
@@ -530,6 +1340,12 @@ jobs:
 
               // AURORA GLASS BETÖLTŐKÉPERNYŐ
               private void showSplashScreen() {
+                  rootLayout = new FrameLayout(this);
+
+                  rootLayout.setBackgroundColor(
+                      Color.rgb(8, 13, 25)
+                  );
+
                   splashLayout = new FrameLayout(this);
 
                   splashLayout.setBackgroundResource(
@@ -538,8 +1354,14 @@ jobs:
 
                   // KÖZÉPEN KIZÁRÓLAG A PIROS POHÁR
                   ImageView cup = new ImageView(this);
-                  cup.setImageResource(R.drawable.splash_cup);
-                  cup.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+                  cup.setImageResource(
+                      R.drawable.splash_cup
+                  );
+
+                  cup.setScaleType(
+                      ImageView.ScaleType.FIT_CENTER
+                  );
 
                   FrameLayout.LayoutParams cupParams =
                       new FrameLayout.LayoutParams(
@@ -552,12 +1374,24 @@ jobs:
 
                   // BETÖLTÉSI ÁLLAPOT A CSÍK FELETT
                   splashStatusView = new TextView(this);
-                  splashStatusView.setTextColor(Color.rgb(226, 232, 240));
-                  splashStatusView.setTextSize(14);
-                  splashStatusView.setTypeface(
-                      Typeface.create("sans-serif-medium", Typeface.NORMAL)
+
+                  splashStatusView.setTextColor(
+                      Color.rgb(226, 232, 240)
                   );
-                  splashStatusView.setGravity(Gravity.CENTER);
+
+                  splashStatusView.setTextSize(14);
+
+                  splashStatusView.setTypeface(
+                      Typeface.create(
+                          "sans-serif-medium",
+                          Typeface.NORMAL
+                      )
+                  );
+
+                  splashStatusView.setGravity(
+                      Gravity.CENTER
+                  );
+
                   splashStatusView.setSingleLine(true);
 
                   FrameLayout.LayoutParams statusParams =
@@ -576,10 +1410,13 @@ jobs:
                       statusParams
                   );
 
-                  setSplashStatus("Connecting to the server");
+                  setSplashStatus(
+                      "Connecting to the server"
+                  );
 
                   // BETÖLTŐCSÍK
-                  splashProgress = new SplashProgressView(this);
+                  splashProgress =
+                      new SplashProgressView(this);
 
                   FrameLayout.LayoutParams progressParams =
                       new FrameLayout.LayoutParams(
@@ -597,18 +1434,31 @@ jobs:
                       progressParams
                   );
 
-                  setContentView(splashLayout);
+                  rootLayout.addView(
+                      splashLayout,
+                      new FrameLayout.LayoutParams(
+                          FrameLayout.LayoutParams.MATCH_PARENT,
+                          FrameLayout.LayoutParams.MATCH_PARENT
+                      )
+                  );
+
+                  setContentView(rootLayout);
+
                   enableFullscreen();
 
-                  // INDULÁS 0%-RÓL
                   splashProgressValue = 0;
                   splashLoadingComplete = false;
                   splashFinishScheduled = false;
 
                   updateSplashProgress(0);
 
-                  handler.removeCallbacks(splashProgressRunnable);
-                  handler.post(splashProgressRunnable);
+                  handler.removeCallbacks(
+                      splashProgressRunnable
+                  );
+
+                  handler.post(
+                      splashProgressRunnable
+                  );
               }
 
               private int dp(float value) {
@@ -618,14 +1468,18 @@ jobs:
                   );
               }
 
-              private void updateSplashProgress(int progress) {
+              private void updateSplashProgress(
+                  int progress
+              ) {
                   splashProgressValue = Math.max(
                       splashProgressValue,
                       Math.min(100, progress)
                   );
 
                   if (splashProgress != null) {
-                      splashProgress.setProgress(splashProgressValue);
+                      splashProgress.setProgress(
+                          splashProgressValue
+                      );
                   }
               }
 
@@ -635,15 +1489,23 @@ jobs:
                   private final Paint paint =
                       new Paint(Paint.ANTI_ALIAS_FLAG);
 
-                  private final RectF barRect = new RectF();
+                  private final RectF barRect =
+                      new RectF();
+
                   private int progress = 0;
 
-                  public SplashProgressView(Activity activity) {
+                  public SplashProgressView(
+                      Activity activity
+                  ) {
                       super(activity);
                   }
 
                   public void setProgress(int value) {
-                      progress = Math.max(0, Math.min(100, value));
+                      progress = Math.max(
+                          0,
+                          Math.min(100, value)
+                      );
+
                       invalidate();
                   }
 
@@ -655,7 +1517,9 @@ jobs:
                       float height = getHeight();
 
                       float barHeight = dp(17);
-                      float top = (height - barHeight) / 2f;
+
+                      float top =
+                          (height - barHeight) / 2f;
 
                       // HÁTTÉRCSÍK
                       barRect.set(
@@ -665,7 +1529,10 @@ jobs:
                           top + barHeight
                       );
 
-                      paint.setColor(Color.rgb(35, 43, 61));
+                      paint.setColor(
+                          Color.rgb(35, 43, 61)
+                      );
+
                       paint.setStyle(Paint.Style.FILL);
 
                       canvas.drawRoundRect(
@@ -687,7 +1554,9 @@ jobs:
                               top + barHeight
                           );
 
-                          paint.setColor(Color.rgb(220, 38, 38));
+                          paint.setColor(
+                              Color.rgb(220, 38, 38)
+                          );
 
                           canvas.drawRoundRect(
                               barRect,
@@ -699,21 +1568,27 @@ jobs:
 
                       // SZÁZALÉK A CSÍK KÖZEPÉN
                       paint.setColor(Color.WHITE);
+
                       paint.setTextSize(dp(12));
+
                       paint.setTypeface(
                           Typeface.create(
                               "sans-serif",
                               Typeface.BOLD
                           )
                       );
-                      paint.setTextAlign(Paint.Align.CENTER);
+
+                      paint.setTextAlign(
+                          Paint.Align.CENTER
+                      );
 
                       Paint.FontMetrics metrics =
                           paint.getFontMetrics();
 
                       float textY =
                           height / 2f -
-                          (metrics.ascent + metrics.descent) / 2f;
+                          (metrics.ascent +
+                           metrics.descent) / 2f;
 
                       canvas.drawText(
                           progress + "%",
@@ -727,8 +1602,12 @@ jobs:
               // TELEPÍTETT VERZIÓ LEKÉRÉSE
               private int getInstalledVersionCode() {
                   try {
-                      PackageInfo info = getPackageManager()
-                          .getPackageInfo(getPackageName(), 0);
+                      PackageInfo info =
+                          getPackageManager()
+                              .getPackageInfo(
+                                  getPackageName(),
+                                  0
+                              );
 
                       if (android.os.Build.VERSION.SDK_INT >= 28) {
                           return (int) info.getLongVersionCode();
@@ -745,32 +1624,35 @@ jobs:
               private boolean isInternetAvailable() {
                   try {
                       ConnectivityManager connectivityManager =
-                          (ConnectivityManager) getSystemService(
-                              CONNECTIVITY_SERVICE
-                          );
+                          (ConnectivityManager)
+                              getSystemService(
+                                  CONNECTIVITY_SERVICE
+                              );
 
                       if (connectivityManager == null) {
                           return false;
                       }
 
                       Network network =
-                          connectivityManager.getActiveNetwork();
+                          connectivityManager
+                              .getActiveNetwork();
 
                       if (network == null) {
                           return false;
                       }
 
                       NetworkCapabilities capabilities =
-                          connectivityManager.getNetworkCapabilities(
-                              network
-                          );
+                          connectivityManager
+                              .getNetworkCapabilities(network);
 
                       return capabilities != null &&
                           capabilities.hasCapability(
-                              NetworkCapabilities.NET_CAPABILITY_INTERNET
+                              NetworkCapabilities
+                                  .NET_CAPABILITY_INTERNET
                           ) &&
                           capabilities.hasCapability(
-                              NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                              NetworkCapabilities
+                                  .NET_CAPABILITY_VALIDATED
                           );
 
                   } catch (Exception e) {
@@ -778,28 +1660,40 @@ jobs:
                   }
               }
 
-              // SZERVERES VERZIÓELLENŐRZÉS
+              // SZERVERES APK VERZIÓELLENŐRZÉS
               private void checkVersion() {
-                  if (checkingVersion || isFinishing()) {
+                  if (
+                      checkingVersion ||
+                      checkingContent ||
+                      gameLoading ||
+                      activityClosed()
+                  ) {
                       return;
                   }
 
                   checkingVersion = true;
-                  setSplashStatus("Connecting to the server");
+
+                  setSplashStatus(
+                      "Connecting to the server"
+                  );
 
                   new Thread(() -> {
+
                       HttpURLConnection connection = null;
 
                       try {
                           URL url = new URL(VERSION_URL);
 
-                          connection = (HttpURLConnection)
-                              url.openConnection();
+                          connection =
+                              (HttpURLConnection)
+                                  url.openConnection();
 
                           connection.setRequestMethod("GET");
                           connection.setConnectTimeout(10000);
                           connection.setReadTimeout(10000);
                           connection.setUseCaches(false);
+                          connection.setInstanceFollowRedirects(false);
+
                           connection.setRequestProperty(
                               "Cache-Control", "no-cache"
                           );
@@ -813,29 +1707,44 @@ jobs:
                               );
                           }
 
-                          InputStream input =
-                              connection.getInputStream();
-
-                          BufferedReader reader =
-                              new BufferedReader(
-                                  new InputStreamReader(input, "UTF-8")
-                              );
-
                           StringBuilder response =
                               new StringBuilder();
 
-                          String line;
+                          try (
+                              InputStream input =
+                                  connection.getInputStream();
 
-                          while ((line = reader.readLine()) != null) {
-                              response.append(line);
+                              BufferedReader reader =
+                                  new BufferedReader(
+                                      new InputStreamReader(
+                                          input,
+                                          "UTF-8"
+                                      )
+                                  )
+                          ) {
+                              String line;
+
+                              while (
+                                  (line = reader.readLine()) != null
+                              ) {
+                                  response.append(line);
+
+                                  if (response.length() > 65536) {
+                                      throw new Exception(
+                                          "Túl nagy verzióválasz."
+                                      );
+                                  }
+                              }
                           }
 
-                          reader.close();
-
                           JSONObject json =
-                              new JSONObject(response.toString());
+                              new JSONObject(
+                                  response.toString()
+                              );
 
-                          if (!json.optBoolean("success", false)) {
+                          if (!json.optBoolean(
+                              "success", false
+                          )) {
                               throw new Exception(
                                   "Érvénytelen verzióadat."
                               );
@@ -845,13 +1754,19 @@ jobs:
                               json.getInt("versionCode");
 
                           latestVersionName =
-                              json.optString("versionName", "");
+                              json.optString(
+                                  "versionName", ""
+                              );
 
                           minimumVersionCode =
-                              json.getInt("minSupportedVersionCode");
+                              json.getInt(
+                                  "minSupportedVersionCode"
+                              );
 
                           downloadUrl =
-                              json.optString("downloadUrl", "");
+                              json.optString(
+                                  "downloadUrl", ""
+                              );
 
                           int installedVersion =
                               getInstalledVersionCode();
@@ -859,7 +1774,7 @@ jobs:
                           handler.post(() -> {
                               checkingVersion = false;
 
-                              if (isFinishing()) return;
+                              if (activityClosed()) return;
 
                               setSplashStatus("Connecting");
 
@@ -867,8 +1782,9 @@ jobs:
                                   minimumVersionCode) {
 
                                   showUpdateRequiredDialog();
+
                               } else {
-                                  loadGame();
+                                  checkLiveUpdate();
                               }
                           });
 
@@ -876,12 +1792,12 @@ jobs:
                           handler.post(() -> {
                               checkingVersion = false;
 
-                              if (!isFinishing()) {
-                                  if (isInternetAvailable()) {
-                                      loadGame();
-                                  } else {
-                                      showConnectionErrorDialog();
-                                  }
+                              if (activityClosed()) return;
+
+                              if (isInternetAvailable()) {
+                                  loadGame();
+                              } else {
+                                  showConnectionErrorDialog();
                               }
                           });
 
@@ -894,11 +1810,91 @@ jobs:
                   }).start();
               }
 
-              // KÖTELEZŐ FRISSÍTÉSI KÉPERNYŐ
-              private void showUpdateRequiredDialog() {
-                  webViewReady = true;
+              // LIVE UPDATE ELLENŐRZÉSE
+              private void checkLiveUpdate() {
+                  if (
+                      checkingContent ||
+                      gameLoading ||
+                      activityClosed()
+                  ) {
+                      return;
+                  }
 
-                  if (updateDialogShowing || isFinishing()) {
+                  checkingContent = true;
+
+                  new Thread(() -> {
+                      try {
+                          final int[] lastProgress = {-1};
+
+                          boolean updated =
+                              liveUpdateManager.checkForUpdate(
+                                  new LiveUpdateManager.Listener() {
+
+                                      @Override
+                                      public void onUpdateStarted() {
+                                          handler.post(() -> {
+                                              beginLiveUpdate();
+                                          });
+                                      }
+
+                                      @Override
+                                      public void onProgress(
+                                          int progress
+                                      ) {
+                                          if (lastProgress[0] ==
+                                              progress) {
+                                              return;
+                                          }
+
+                                          lastProgress[0] =
+                                              progress;
+
+                                          handler.post(() -> {
+                                              setLiveUpdateProgress(
+                                                  progress
+                                              );
+                                          });
+                                      }
+                                  }
+                              );
+
+                          handler.post(() -> {
+                              finishLiveUpdate(updated);
+                          });
+
+                      } catch (Exception e) {
+                          android.util.Log.w(
+                              "LiveUpdate",
+                              "A frissítés sikertelen. " +
+                              "Korábbi tartalom használata.",
+                              e
+                          );
+
+                          handler.post(() -> {
+                              if (activityClosed()) return;
+
+                              if (updatingContent) {
+                                  Toast.makeText(
+                                      this,
+                                      "A frissítés nem sikerült. " +
+                                      "A korábbi verzió indul.",
+                                      Toast.LENGTH_LONG
+                                  ).show();
+                              }
+
+                              finishLiveUpdate(false);
+                          });
+                      }
+
+                  }).start();
+              }
+
+              // KÖTELEZŐ APK FRISSÍTÉSI KÉPERNYŐ
+              private void showUpdateRequiredDialog() {
+                  if (
+                      updateDialogShowing ||
+                      activityClosed()
+                  ) {
                       return;
                   }
 
@@ -907,7 +1903,9 @@ jobs:
                   AlertDialog.Builder builder =
                       new AlertDialog.Builder(this);
 
-                  builder.setTitle("🍻 Frissítés szükséges!");
+                  builder.setTitle(
+                      "🍻 Frissítés szükséges!"
+                  );
 
                   builder.setMessage(
                       "A játék használatához frissítened kell az alkalmazást.\n\n" +
@@ -962,20 +1960,29 @@ jobs:
                           Uri.parse(downloadUrl)
                       );
 
+                      waitingForApkUpdate = true;
+
                       startActivity(intent);
 
                   } catch (Exception e) {
+                      waitingForApkUpdate = false;
+
                       Toast.makeText(
                           this,
                           "Nem sikerült megnyitni a letöltést.",
                           Toast.LENGTH_LONG
                       ).show();
+
+                      handler.postDelayed(
+                          () -> showUpdateRequiredDialog(),
+                          300
+                      );
                   }
               }
 
               // SÖTÉT, LEKEREKÍTETT KAPCSOLÓDÁSI HIBAABLAK
               private void showConnectionErrorDialog() {
-                  if (isFinishing()) return;
+                  if (activityClosed()) return;
 
                   AlertDialog dialog =
                       new AlertDialog.Builder(this)
@@ -986,15 +1993,18 @@ jobs:
                           )
                           .setPositiveButton(
                               "OFFLINE JÁTÉK",
-                              (dialogInterface, which) -> loadGame()
+                              (dialogInterface, which) ->
+                                  loadGame()
                           )
                           .setNeutralButton(
                               "ÚJRA",
-                              (dialogInterface, which) -> checkVersion()
+                              (dialogInterface, which) ->
+                                  checkVersion()
                           )
                           .setNegativeButton(
                               "KILÉPÉS",
-                              (dialogInterface, which) -> finish()
+                              (dialogInterface, which) ->
+                                  finish()
                           )
                           .setCancelable(false)
                           .create();
@@ -1002,50 +2012,65 @@ jobs:
                   dialog.setCanceledOnTouchOutside(false);
                   dialog.show();
 
-                  // SÖTÉT HÁTTÉR ÉS LEKEREKÍTETT SAROK
                   GradientDrawable background =
                       new GradientDrawable();
 
-                  background.setColor(Color.rgb(16, 32, 31));
+                  background.setColor(
+                      Color.rgb(16, 32, 31)
+                  );
+
                   background.setCornerRadius(dp(28));
 
                   if (dialog.getWindow() != null) {
-                      dialog.getWindow().setBackgroundDrawable(background);
+                      dialog.getWindow()
+                          .setBackgroundDrawable(background);
                   }
 
-                  // VILÁGOS SZÖVEG
-                  int titleId = getResources().getIdentifier(
-                      "alertTitle",
-                      "id",
-                      "android"
-                  );
+                  int titleId =
+                      getResources().getIdentifier(
+                          "alertTitle",
+                          "id",
+                          "android"
+                      );
 
                   TextView title = titleId != 0
                       ? dialog.findViewById(titleId)
                       : null;
 
                   TextView message =
-                      dialog.findViewById(android.R.id.message);
+                      dialog.findViewById(
+                          android.R.id.message
+                      );
 
                   if (title != null) {
-                      title.setTextColor(Color.rgb(240, 253, 250));
+                      title.setTextColor(
+                          Color.rgb(240, 253, 250)
+                      );
                   }
 
                   if (message != null) {
-                      message.setTextColor(Color.rgb(226, 245, 242));
+                      message.setTextColor(
+                          Color.rgb(226, 245, 242)
+                      );
                   }
 
-                  // TÜRKIZ GOMBOK
-                  int turquoise = Color.rgb(45, 212, 191);
+                  int turquoise =
+                      Color.rgb(45, 212, 191);
 
                   Button positive =
-                      dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                      dialog.getButton(
+                          AlertDialog.BUTTON_POSITIVE
+                      );
 
                   Button neutral =
-                      dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+                      dialog.getButton(
+                          AlertDialog.BUTTON_NEUTRAL
+                      );
 
                   Button negative =
-                      dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                      dialog.getButton(
+                          AlertDialog.BUTTON_NEGATIVE
+                      );
 
                   if (positive != null) {
                       positive.setTextColor(turquoise);
@@ -1060,27 +2085,119 @@ jobs:
                   }
               }
 
-              // JÁTÉK BETÖLTÉSE – HELYI ASSETS ÉS OFFLINE JSON
+              // JÁTÉK BETÖLTÉSE
+              // LIVE UPDATE TARTALOM VAGY EREDETI ASSETS
               private void loadGame() {
-                  if (isFinishing() || gameLoading) return;
+                  if (
+                      activityClosed() ||
+                      gameLoading
+                  ) {
+                      return;
+                  }
 
                   gameLoading = true;
 
+                  setSplashStatus("Connecting");
+
+                  // A HELYI TARTALOM ELLENŐRZÉSE
+                  // HÁTTÉRSZÁLON TÖRTÉNIK
+                  new Thread(() -> {
+                      File activeDirectory =
+                          liveUpdateManager
+                              .getActiveDirectory();
+
+                      handler.post(() -> {
+                          if (!activityClosed()) {
+                              createGameWebView(
+                                  activeDirectory
+                              );
+                          }
+                      });
+
+                  }).start();
+              }
+
+              private void createGameWebView(
+                  File activeDirectory
+              ) {
                   try {
                       gameWebView = new WebView(this);
 
-                      WebSettings settings = gameWebView.getSettings();
+                      WebSettings settings =
+                          gameWebView.getSettings();
 
                       settings.setJavaScriptEnabled(true);
                       settings.setDomStorageEnabled(true);
                       settings.setAllowFileAccess(true);
                       settings.setAllowContentAccess(true);
 
+                      WebViewAssetLoader.AssetsPathHandler
+                          bundledAssets =
+                              new WebViewAssetLoader
+                                  .AssetsPathHandler(this);
+
+                      // AZ EREDETI WEBVIEW URL MEGMARAD,
+                      // ÍGY A LOCALSTORAGE SEM VÁLTOZIK
                       WebViewAssetLoader assetLoader =
                           new WebViewAssetLoader.Builder()
                               .addPathHandler(
                                   "/assets/",
-                                  new WebViewAssetLoader.AssetsPathHandler(this)
+                                  path -> {
+
+                                      boolean allowed =
+                                          "index.html".equals(path) ||
+                                          "easy.json".equals(path) ||
+                                          "normal.json".equals(path) ||
+                                          "hard.json".equals(path);
+
+                                      if (allowed &&
+                                          activeDirectory != null) {
+
+                                          try {
+                                              File file = new File(
+                                                  activeDirectory,
+                                                  path
+                                              );
+
+                                              if (!file.isFile()) {
+                                                  throw new Exception(
+                                                      "Hiányzó fájl."
+                                                  );
+                                              }
+
+                                              String mimeType =
+                                                  path.endsWith(".html")
+                                                  ? "text/html"
+                                                  : "application/json";
+
+                                              return new WebResourceResponse(
+                                                  mimeType,
+                                                  "UTF-8",
+                                                  200,
+                                                  "OK",
+                                                  Collections.singletonMap(
+                                                      "Cache-Control",
+                                                      "no-store"
+                                                  ),
+                                                  new FileInputStream(file)
+                                              );
+
+                                          } catch (Exception e) {
+                                              return new WebResourceResponse(
+                                                  "text/plain",
+                                                  "UTF-8",
+                                                  500,
+                                                  "Content Error",
+                                                  Collections.emptyMap(),
+                                                  new java.io.ByteArrayInputStream(
+                                                      new byte[0]
+                                                  )
+                                              );
+                                          }
+                                      }
+
+                                      return bundledAssets.handle(path);
+                                  }
                               )
                               .build();
 
@@ -1088,13 +2205,16 @@ jobs:
                           new WebViewClientCompat() {
 
                               @Override
-                              public WebResourceResponse shouldInterceptRequest(
-                                  WebView view,
-                                  WebResourceRequest request
-                              ) {
-                                  return assetLoader.shouldInterceptRequest(
-                                      request.getUrl()
-                                  );
+                              public WebResourceResponse
+                                  shouldInterceptRequest(
+                                      WebView view,
+                                      WebResourceRequest request
+                                  ) {
+
+                                  return assetLoader
+                                      .shouldInterceptRequest(
+                                          request.getUrl()
+                                      );
                               }
 
                               @Override
@@ -1104,20 +2224,25 @@ jobs:
                               ) {
                                   super.onPageFinished(view, url);
 
-                                  if (webViewReady || isFinishing()) {
+                                  if (
+                                      webViewReady ||
+                                      activityClosed() ||
+                                      !GAME_URL.equals(url)
+                                  ) {
                                       return;
                                   }
 
-                                  // A JÁTÉK TÉNYLEGESEN BETÖLTÖTT
                                   webViewReady = true;
+
                                   splashLoadingComplete = true;
 
-                                  // A BETÖLTŐCSÍK EZUTÁN ÉRI EL A 100%-OT
                                   handler.removeCallbacks(
                                       splashProgressRunnable
                                   );
 
-                                  handler.post(splashProgressRunnable);
+                                  handler.post(
+                                      splashProgressRunnable
+                                  );
                               }
                           }
                       );
@@ -1130,9 +2255,8 @@ jobs:
                                   WebView view,
                                   int newProgress
                               ) {
-                                  // A BETÖLTÉSI SZÁZALÉKOT A SAJÁT
-                                  // ANIMÁCIÓ KEZELI.
-                                  // A 100%-OT AZ onPageFinished ÁLLÍTJA BE.
+                                  // A BETÖLTÉSI SZÁZALÉKOT
+                                  // A SAJÁT RENDSZER KEZELI.
                               }
 
                               @Override
@@ -1141,15 +2265,16 @@ jobs:
                                   ValueCallback<Uri[]> callback,
                                   FileChooserParams params
                               ) {
-
                                   if (filePathCallback != null) {
-                                      filePathCallback.onReceiveValue(null);
+                                      filePathCallback
+                                          .onReceiveValue(null);
                                   }
 
                                   filePathCallback = callback;
 
                                   try {
-                                      Intent intent = params.createIntent();
+                                      Intent intent =
+                                          params.createIntent();
 
                                       startActivityForResult(
                                           intent,
@@ -1157,8 +2282,11 @@ jobs:
                                       );
 
                                   } catch (Exception e) {
-                                      filePathCallback.onReceiveValue(null);
+                                      filePathCallback
+                                          .onReceiveValue(null);
+
                                       filePathCallback = null;
+
                                       return false;
                                   }
 
@@ -1167,18 +2295,54 @@ jobs:
                           }
                       );
 
-                      gameWebView.loadUrl(
-                          "https://appassets.androidplatform.net/assets/index.html"
+                      // WEBVIEW A SPLASH KÉPERNYŐ ALATT
+                      gameWebView.setAlpha(0f);
+
+                      rootLayout.addView(
+                          gameWebView,
+                          0,
+                          new FrameLayout.LayoutParams(
+                              FrameLayout.LayoutParams.MATCH_PARENT,
+                              FrameLayout.LayoutParams.MATCH_PARENT
+                          )
                       );
+
+                      // CSAK A WEBVIEW HTTP CACHE TÖRLÉSE.
+                      // LOCALSTORAGE ÉS LICENCADATOK MEGMARADNAK.
+                      gameWebView.clearCache(true);
+
+                      gameWebView.loadUrl(GAME_URL);
 
                   } catch (Exception e) {
                       gameLoading = false;
+
+                      if (gameWebView != null) {
+                          rootLayout.removeView(gameWebView);
+                          gameWebView.destroy();
+                          gameWebView = null;
+                      }
 
                       Toast.makeText(
                           this,
                           "A játék betöltése nem sikerült.",
                           Toast.LENGTH_LONG
                       ).show();
+
+                      new AlertDialog.Builder(this)
+                          .setTitle("Betöltési hiba")
+                          .setMessage(
+                              "Nem sikerült elindítani a játékot."
+                          )
+                          .setPositiveButton(
+                              "ÚJRA",
+                              (dialog, which) -> loadGame()
+                          )
+                          .setNegativeButton(
+                              "KILÉPÉS",
+                              (dialog, which) -> finish()
+                          )
+                          .setCancelable(false)
+                          .show();
                   }
               }
 
@@ -1189,15 +2353,25 @@ jobs:
                   Intent data
               ) {
                   super.onActivityResult(
-                      requestCode, resultCode, data
+                      requestCode,
+                      resultCode,
+                      data
                   );
 
-                  if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
-                      if (filePathCallback == null) return;
+                  if (
+                      requestCode ==
+                      FILE_CHOOSER_REQUEST_CODE
+                  ) {
+                      if (filePathCallback == null) {
+                          return;
+                      }
 
                       Uri[] results = null;
 
-                      if (resultCode == RESULT_OK && data != null) {
+                      if (
+                          resultCode == RESULT_OK &&
+                          data != null
+                      ) {
                           Uri uri = data.getData();
 
                           if (uri != null) {
@@ -1205,7 +2379,9 @@ jobs:
                           }
                       }
 
-                      filePathCallback.onReceiveValue(results);
+                      filePathCallback
+                          .onReceiveValue(results);
+
                       filePathCallback = null;
                   }
               }
