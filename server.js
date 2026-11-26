@@ -3,6 +3,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const crypto = require("crypto");
 const { Pool } = require("pg");
+const fs = require("fs");
+const path = require("path");
 
 // LICENCRENDSZER
 const {
@@ -63,6 +65,45 @@ const MIN_SUPPORTED_VERSION_CODE = Number(
   process.env.MIN_SUPPORTED_VERSION_CODE || 500
 );
 const APK_DOWNLOAD_URL = process.env.APK_DOWNLOAD_URL || "";
+
+// =====================================================
+// LIVE UPDATE – TARTALOMFRISSÍTÉSI BEÁLLÍTÁSOK
+// =====================================================
+
+const CONTENT_FILES = [
+  "index.html",
+  "easy.json",
+  "normal.json",
+  "hard.json"
+];
+
+// Automatikus tartalomverzió létrehozása
+function getContentManifest() {
+  const files = CONTENT_FILES.map(name => {
+    const content = fs.readFileSync(
+      path.join(__dirname, name)
+    );
+
+    return {
+      name,
+      size: content.length,
+      sha256: crypto
+        .createHash("sha256")
+        .update(content)
+        .digest("hex")
+    };
+  });
+
+  const version = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(files))
+    .digest("hex");
+
+  return {
+    version,
+    files
+  };
+}
 
 // Régi Multiplayer szobák
 const rooms = new Map();
@@ -298,6 +339,49 @@ app.get("/api/version", (req, res) => {
     minSupportedVersionCode: MIN_SUPPORTED_VERSION_CODE,
     downloadUrl: APK_DOWNLOAD_URL
   });
+});
+
+// =====================================================
+// LIVE UPDATE – AUTOMATIKUS TARTALOMVERZIÓ ELLENŐRZÉSE
+// =====================================================
+
+app.get("/api/content/version", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+
+  try {
+    const manifest = getContentManifest();
+
+    res.json({
+      success: true,
+      version: manifest.version,
+      files: manifest.files
+    });
+
+  } catch (error) {
+    console.error("Live Update verzióhiba:", error);
+
+    res.status(503).json({
+      success: false,
+      error: "Content unavailable"
+    });
+  }
+});
+
+// =====================================================
+// LIVE UPDATE – JÁTÉKFÁJLOK LETÖLTÉSE
+// =====================================================
+
+app.get("/api/content/download/:name", (req, res) => {
+  const name = req.params.name;
+
+  // Kizárólag az engedélyezett játékfájlok tölthetők le
+  if (!CONTENT_FILES.includes(name)) {
+    return res.sendStatus(404);
+  }
+
+  res.setHeader("Cache-Control", "no-store");
+
+  res.sendFile(path.join(__dirname, name));
 });
 
 // =====================================================
