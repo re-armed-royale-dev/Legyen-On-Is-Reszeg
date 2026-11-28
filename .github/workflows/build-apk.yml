@@ -50,6 +50,54 @@ jobs:
             --output app/src/main/assets/tailwindcss.js
           test -s app/src/main/assets/tailwindcss.js
 
+          # GOOGLE FONTS (INTER + SORA) HELYI CSOMAGOLÁSA
+          # A Google által visszaadott CSS-t és az összes WOFF2 betűfájlt
+          # beépítjük az APK-ba, így internet nélkül is ugyanazok a fontok lesznek.
+          python3 - <<'PYFONTS'
+          import os
+          import re
+          import urllib.request
+          from urllib.parse import urlparse
+
+          os.makedirs("app/src/main/assets/fonts", exist_ok=True)
+          css_url = (
+              "https://fonts.googleapis.com/css2?"
+              "family=Inter:wght@400;600;700;900&"
+              "family=Sora:wght@600;700;800&display=swap"
+          )
+          request = urllib.request.Request(
+              css_url,
+              headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/120.0.0.0 Safari/537.36"}
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              css = response.read().decode("utf-8")
+
+          urls = sorted(set(re.findall(
+              r"url\((https://fonts\.gstatic\.com/[^)]+)\)", css
+          )))
+          if not urls:
+              raise SystemExit("A Google Fonts CSS nem tartalmaz letölthető WOFF2 fájlokat.")
+
+          for url in urls:
+              filename = os.path.basename(urlparse(url).path)
+              if not filename.endswith(".woff2"):
+                  raise SystemExit("Ismeretlen Google Fonts fájl: " + filename)
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  data = response.read()
+              if not data:
+                  raise SystemExit("Üres betűtípusfájl: " + filename)
+              with open("app/src/main/assets/fonts/" + filename, "wb") as output:
+                  output.write(data)
+
+          with open("app/src/main/assets/fonts.css", "w", encoding="utf-8") as output:
+              output.write(css)
+          print("Google Fonts csomagolva:", len(urls), "WOFF2 fájl")
+          PYFONTS
+          test -s app/src/main/assets/fonts.css
+          test "$(find app/src/main/assets/fonts -name '*.woff2' | wc -l)" -gt 0
+
           # SAJÁT ALKALMAZÁS IKON
           cp icon-512.png app/src/main/res/mipmap-nodpi/ic_launcher.png
 
@@ -2243,6 +2291,79 @@ jobs:
                                           android.util.Log.e(
                                               "OfflineAssets",
                                               "A helyi Tailwind nem tölthető be.",
+                                              e
+                                          );
+                                          return new WebResourceResponse(
+                                              "text/plain",
+                                              "UTF-8",
+                                              new java.io.ByteArrayInputStream(
+                                                  new byte[0]
+                                              )
+                                          );
+                                      }
+                                  }
+
+                                  // GOOGLE FONTS CSS HELYI PÉLDÁNYA.
+                                  if (
+                                      "fonts.googleapis.com".equals(
+                                          request.getUrl().getHost()
+                                      )
+                                  ) {
+                                      try {
+                                          return new WebResourceResponse(
+                                              "text/css",
+                                              "UTF-8",
+                                              MainActivity.this
+                                                  .getAssets()
+                                                  .open("fonts.css")
+                                          );
+                                      } catch (Exception e) {
+                                          android.util.Log.e(
+                                              "OfflineAssets",
+                                              "A helyi betűtípus CSS nem tölthető be.",
+                                              e
+                                          );
+                                          return new WebResourceResponse(
+                                              "text/plain",
+                                              "UTF-8",
+                                              new java.io.ByteArrayInputStream(
+                                                  new byte[0]
+                                              )
+                                          );
+                                      }
+                                  }
+
+                                  // GOOGLE FONTS WOFF2 FÁJLOK HELYI BETÖLTÉSE.
+                                  if (
+                                      "fonts.gstatic.com".equals(
+                                          request.getUrl().getHost()
+                                      )
+                                  ) {
+                                      try {
+                                          String fontPath = request.getUrl().getPath();
+                                          String fontName = fontPath.substring(
+                                              fontPath.lastIndexOf('/') + 1
+                                          );
+                                          if (
+                                              fontName.isEmpty() ||
+                                              !fontName.endsWith(".woff2") ||
+                                              fontName.contains("..")
+                                          ) {
+                                              throw new java.io.IOException(
+                                                  "Érvénytelen betűtípusfájl."
+                                              );
+                                          }
+                                          return new WebResourceResponse(
+                                              "font/woff2",
+                                              null,
+                                              MainActivity.this
+                                                  .getAssets()
+                                                  .open("fonts/" + fontName)
+                                          );
+                                      } catch (Exception e) {
+                                          android.util.Log.e(
+                                              "OfflineAssets",
+                                              "Egy helyi WOFF2 betűtípus nem tölthető be.",
                                               e
                                           );
                                           return new WebResourceResponse(
