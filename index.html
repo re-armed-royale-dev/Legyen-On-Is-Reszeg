@@ -11,8 +11,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        display: ['Sora', 'Inter', 'sans-serif']
+                        sans: ['SupercellLocal', 'system-ui', 'sans-serif'],
+                        display: ['FortniteLocal', 'SupercellLocal', 'sans-serif']
                     },
                     colors: {
                         slate: {50:'#f4f3ff',100:'#ebe9fe',200:'#d9d6fb',300:'#bdb8f0',400:'#9490d1',500:'#6c68ab',600:'#4a468a',700:'#322e6b',800:'#211e50',900:'#14123a',950:'#0a0924'},
@@ -28,6 +28,22 @@
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
+
+        /* SAJÁT BETŰTÍPUSOK – GitHub Pages + Android APK, offline is */
+        @font-face {
+            font-family: 'FortniteLocal';
+            src: url('./fonts/fortnite.otf') format('opentype');
+            font-style: normal;
+            font-weight: 900;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'SupercellLocal';
+            src: url('./fonts/supercell-magic_0.ttf') format('truetype');
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+        }
         html, body {
             touch-action: pan-x pan-y;
             -ms-touch-action: pan-x pan-y;
@@ -875,6 +891,28 @@
         /* ULTRA: extra ragyogás */
         html[data-gfx="ultra"] .rgb-title { filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.55)); }
         html[data-gfx="ultra"] .all-in-btn::after { animation-duration: 1s; }
+
+        /* Alapértelmezett: kisebb, normál szövegek */
+        html body,
+        html body * {
+            font-family: 'SupercellLocal', system-ui, sans-serif !important;
+        }
+
+        /* Kiemelt, nagyobb címek és fő játékfeliratok */
+        html body h1,
+        html body h2,
+        html body h3,
+        html body #question-text,
+        html body .rgb-title,
+        html body #start-bottom-bar > button {
+            font-family: 'FortniteLocal', 'SupercellLocal', sans-serif !important;
+        }
+
+        /* A műszaki FPS-kijelző maradjon monospace */
+        html body #fps-counter {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+        }
+
     </style>
     <link rel="apple-touch-icon" href="./icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
