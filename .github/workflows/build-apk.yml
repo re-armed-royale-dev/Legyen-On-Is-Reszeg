@@ -43,6 +43,13 @@ jobs:
           cp normal.json app/src/main/assets/normal.json
           cp hard.json app/src/main/assets/hard.json
 
+          # TAILWIND CSS MOTOR HELYI CSOMAGOLÁSA
+          # Így internet nélkül is ugyanaz a felület és elrendezés jelenik meg.
+          curl --fail --location --retry 3 --retry-delay 2 \
+            https://cdn.tailwindcss.com \
+            --output app/src/main/assets/tailwindcss.js
+          test -s app/src/main/assets/tailwindcss.js
+
           # SAJÁT ALKALMAZÁS IKON
           cp icon-512.png app/src/main/res/mipmap-nodpi/ic_launcher.png
 
@@ -2214,6 +2221,39 @@ jobs:
                                       WebView view,
                                       WebResourceRequest request
                                   ) {
+
+                                  // A TAILWIND CDN HELYI PÉLDÁNYA.
+                                  // A HTML változatlanul a CDN URL-t használja,
+                                  // de az APK a beépített fájlt adja vissza,
+                                  // ezért offline módban sem esik szét a felület.
+                                  if (
+                                      "cdn.tailwindcss.com".equals(
+                                          request.getUrl().getHost()
+                                      )
+                                  ) {
+                                      try {
+                                          return new WebResourceResponse(
+                                              "application/javascript",
+                                              "UTF-8",
+                                              MainActivity.this
+                                                  .getAssets()
+                                                  .open("tailwindcss.js")
+                                          );
+                                      } catch (Exception e) {
+                                          android.util.Log.e(
+                                              "OfflineAssets",
+                                              "A helyi Tailwind nem tölthető be.",
+                                              e
+                                          );
+                                          return new WebResourceResponse(
+                                              "text/plain",
+                                              "UTF-8",
+                                              new java.io.ByteArrayInputStream(
+                                                  new byte[0]
+                                              )
+                                          );
+                                      }
+                                  }
 
                                   return assetLoader
                                       .shouldInterceptRequest(
