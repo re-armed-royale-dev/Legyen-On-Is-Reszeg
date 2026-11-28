@@ -9,6 +9,8 @@ on:
       - 'normal.json'
       - 'hard.json'
       - 'icon-512.png'
+      - 'fonts/fortnite.otf'
+      - 'fonts/supercell-magic_0.ttf'
       - '.github/workflows/build-apk.yml'
 
 jobs:
@@ -42,6 +44,13 @@ jobs:
           cp easy.json app/src/main/assets/easy.json
           cp normal.json app/src/main/assets/normal.json
           cp hard.json app/src/main/assets/hard.json
+
+          # SAJÁT BETŰTÍPUSOK – ugyanazok a fájlok, mint a GitHub Pagesen.
+          mkdir -p app/src/main/assets/fonts
+          test -s fonts/fortnite.otf
+          test -s fonts/supercell-magic_0.ttf
+          cp fonts/fortnite.otf app/src/main/assets/fonts/fortnite.otf
+          cp fonts/supercell-magic_0.ttf app/src/main/assets/fonts/supercell-magic_0.ttf
 
           # TAILWIND CSS MOTOR HELYI CSOMAGOLÁSA
           # Így internet nélkül is ugyanaz a felület és elrendezés jelenik meg.
